@@ -1,0 +1,46 @@
+#!/bin/sh
+
+LC_ALL=C
+export LC_ALL
+
+# Solaris (order of paths important for tr, echo, grep, sed to work)
+PATH="/usr/xpg4/bin:/usr/ucb:$PATH:/usr/local/bin:/usr/sfw/bin:/usr/ccs/bin"
+
+# Wrapper for old "which" binary that always exits with 0
+which_wrapper()
+{
+  if [ -z "$old_which" ]; then
+    if which /bin/N0N_Existent_File_38912112___ 2> /dev/null > /dev/null; then
+      old_which="true"
+    else
+      old_which="false"
+    fi
+  fi
+  if [ "$old_which" = "true" ]; then
+    retval=`which $* 2>/dev/null`
+    echo "$retval"
+    test -n "$retval" -a -x "$retval"
+    unset retval
+  else
+    which $* 2> /dev/null
+  fi
+}
+
+# Determine the OS
+OS=`uname -s | sed -e 's/GNU\/Linux/Linux/g' | tr [:upper:] [:lower:]`
+
+# Define defaults
+CC="gcc"
+LIBREADLINE="-lreadline"
+PKGCONFIG="`which_wrapper pkg-config`"
+LOG="configure.log"
+CNF=
+
+# Some OS's like Solaris/Darwin /bin/sh has a builtin echo that doesn't grok -n
+if [ "$OS" = "darwin" -o "$OS" = "sunos" ]; then
+  ECHO_N="/bin/echo -n"
+else
+  ECHO_N="echo -n"
+fi
+
+
