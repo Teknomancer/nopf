@@ -286,6 +286,7 @@ static void EvaluatorDestroyVariable(PVARIABLE pVariable)
             while ((pAtom = (PATOM)QueueRemove(pVariable->pvRPNQueue)) != NULL)
                 MemFree(pAtom);
         }
+        MemFree(pVariable->pvRPNQueue);
 
         if (pVariable->pszExpr)
             StrFree(pVariable->pszExpr);
@@ -1016,8 +1017,8 @@ static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
     {
         while ((pAtom = QueueRemove(pQueue)) != NULL)
             MemFree(pAtom);
+        MemFree(pQueue);
     }
-    MemFree(pQueue);
     pEval->pvRPNQueue = NULL;
 
     /*
@@ -1277,6 +1278,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                              * Heh, good thing we are not multi-threaded.
                              */
                             ListAdd(&g_VarList, pVariable);
+                            MemFree(pAtom);
                         }
                         else if (pVarAtom->u.pVariable->fCanReinit)
                         {
@@ -1320,6 +1322,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     {
                         MemFree(pAtom);
                         EvaluatorCleanUp(pEval, &Stack);
+                        EvaluatorDestroy(&SubExprEval);
                         return RERR_EXPRESSION_INVALID;
                     }
                 }
@@ -1413,7 +1416,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     }
 
                     Assert(!pAtom->pszCommandExpr);
-                    pAtom->pszCommandExpr = StrDup(pszRightExpr);
+                    pAtom->pszCommandExpr = pszRightExpr;
                     DEBUGPRINTF(("pszCommandExpr=%s\n", pAtom->pszCommandExpr));
                     if (!pAtom->pszCommandExpr)
                     {
@@ -1461,9 +1464,9 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 {
                     MemFree(pAtom);
                     EvaluatorCleanUp(pEval, &Stack);
+                    EvaluatorDestroy(&SubExprEval);
                     return RERR_EXPRESSION_INVALID;
                 }
-
                 EvaluatorDestroy(&SubExprEval);
             }
             else
@@ -1513,12 +1516,6 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
         QueueAdd(pQueue, pAtom);
     }
 
-    if (QueueSize(pQueue) == 0)
-    {
-        DEBUGPRINTF(("Error, no atoms detected!\n"));
-        return RERR_EXPRESSION_INVALID;
-    }
-
     /*
      * Clear old queue if any, and store the new one.
      */
@@ -1529,8 +1526,14 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
             MemFree(pAtom);
         MemFree(pPrevQueue);
     }
-
     pEval->pvRPNQueue = pQueue;
+
+    if (QueueSize(pQueue) == 0)
+    {
+        EvaluatorCleanUp(pEval, &Stack);
+        DEBUGPRINTF(("Error, no atoms detected!\n"));
+        return RERR_EXPRESSION_INVALID;
+    }
     return RINF_SUCCESS;
 }
 
@@ -2470,7 +2473,7 @@ int EvaluatorInitGlobals(void)
         if (RC_SUCCESS(rc))
         {
             StrCopy(pVar->szVariable, sizeof(pVar->szVariable), s_aVars[i].pszVarName);
-            pVar->pszExpr    = StrDup(s_aVars[i].pszExpr);
+            pVar->pszExpr = StrDup(s_aVars[i].pszExpr);
 
             /** @todo Transfer queue ownership to variable from SubExprEval. This is bad
              *        style, fix it later. */
