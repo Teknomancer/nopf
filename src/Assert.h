@@ -30,7 +30,7 @@
     do { \
         if (!(expr)) \
         { \
-            AssertMsg(#expr, __LINE__, __FILE__, __PRETTY_FUNCTION__); \
+            AssertMsg(#expr, __LINE__, __FILE__, __func__); \
             abort(); \
         } \
     } while (0)
@@ -42,7 +42,7 @@
     do { \
         if (!(expr)) \
         { \
-            AssertMsg(#expr, __LINE__, __FILE__, __PRETTY_FUNCTION__); \
+            AssertMsg(#expr, __LINE__, __FILE__, __func__); \
             return (rc); \
         } \
     } while (0)
@@ -51,7 +51,7 @@
     do { \
         if (!(expr)) \
         { \
-            AssertMsg(#expr, __LINE__, __FILE__, __PRETTY_FUNCTION__); \
+            AssertMsg(#expr, __LINE__, __FILE__, __func__); \
             return; \
         } \
     } while (0)
