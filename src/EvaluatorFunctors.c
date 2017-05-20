@@ -592,6 +592,20 @@ int FnMinuteToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
+int FnCelciusToFahrenheit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+{
+    apAtoms[0]->u.dValue *= (FLOAT)(9 / 5.0);
+    apAtoms[0]->u.dValue += 32;
+    return RINF_SUCCESS;
+}
+
+int FnFahrenheitToCelcius(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+{
+    apAtoms[0]->u.dValue -= 32;
+    apAtoms[0]->u.dValue /= (FLOAT)(9 / 5.0);
+    return RINF_SUCCESS;
+}
+
 int FnSetBit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /* We're fine shifting unsigned, well defined behaviour*/
@@ -725,13 +739,16 @@ FUNCTOR g_aFunctors[] =
     { "min2week",       FnMinuteToWeek,        true,     1,  1, "<num1>", "Minutes to weeks." },
     { "min2year",       FnMinuteToYear,        true,     1,  1, "<num1>", "Minutes to years." },
 
+    { "cel2frh",        FnCelciusToFahrenheit, false,    1,  1, "<num1>", "Celcius to fahrenheit." },
+    { "frh2cel",        FnFahrenheitToCelcius, false,    1,  1, "<num1>", "Fahrenheit to celcius." },
+
     /* VirtualBox style macros/functions. */
     { "RT_BIT",         FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0." },
     { "RT_BIT_32",      FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0. Same as RT_BIT." },
     { "RT_BIT_64",      FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0. Same as RT_BIT." },
     { "RT_ALIGN",       FnAlign,               true,     2,  2, "<val>, <align>", "Aligns <val> to boundary of <align>. <align> must be a power of 2." },
     { "RT_ALIGN_32",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." },
-    { "RT_ALIGN_64",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." },
+    { "RT_ALIGN_64",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." }
 };
 
 /** Total number of functors in the table. */

@@ -895,6 +895,13 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
         }
 
         /*
+         * Parse function.
+         */
+        pAtom = EvaluatorParseFunctor(pszExpr, ppszEnd, pPreviousAtom);
+        if (pAtom)
+            break;
+
+        /*
          * Parse number.
          */
         pAtom = EvaluatorParseNumber(pszExpr, ppszEnd);
@@ -905,13 +912,6 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
          * Parse operator.
          */
         pAtom = EvaluatorParseOperator(pszExpr, ppszEnd, pPreviousAtom);
-        if (pAtom)
-            break;
-
-        /*
-         * Parse function.
-         */
-        pAtom = EvaluatorParseFunctor(pszExpr, ppszEnd, pPreviousAtom);
         if (pAtom)
             break;
 
