@@ -902,6 +902,13 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
             break;
 
         /*
+         * Parse command.
+         */
+        pAtom = EvaluatorParseCommand(pEval, pszExpr, ppszEnd, pPreviousAtom, prc);
+        if (pAtom)
+            break;
+
+        /*
          * Parse number.
          */
         pAtom = EvaluatorParseNumber(pszExpr, ppszEnd);
@@ -912,13 +919,6 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
          * Parse operator.
          */
         pAtom = EvaluatorParseOperator(pszExpr, ppszEnd, pPreviousAtom);
-        if (pAtom)
-            break;
-
-        /*
-         * Parse command.
-         */
-        pAtom = EvaluatorParseCommand(pEval, pszExpr, ppszEnd, pPreviousAtom, prc);
         if (pAtom)
             break;
 
