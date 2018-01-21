@@ -54,7 +54,7 @@
  * @param pszLine       Pointer to the source string.
  * @param cWritten      Where to store the number of characters written.
  */
-static inline int StrAddLine(char **pszDst, size_t cbDst, char *pszLine, int32_t *cWritten)
+static inline int StrAddLine(char **pszDst, size_t cbDst, char *pszLine, uint32_t *cWritten)
 {
     int cFmt = StrNPrintf(*pszDst, cbDst - *cWritten, "  %s\n", pszLine);
     *cWritten += cFmt;
@@ -249,7 +249,7 @@ char *StrFormatRegDesc32(PCREGDESC32 pReg)
     }
 
     char *pszTmp  = pszBuf;
-    int  cWritten = 0;  /* StrNPrintf(pszTmp, cbBuf, "%s\n", pReg->szDesc); */
+    unsigned cWritten = 0;  /* StrNPrintf(pszTmp, cbBuf, "%s\n", pReg->szDesc); */
     if (cWritten < cbBuf)
     {
         pszTmp += cWritten;
@@ -345,7 +345,7 @@ int FnCr0(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
         FLOAT dValue = pAtom->u.dValue;
 
         FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
+        if (!CanCastTo(dAbsResult, (FLOAT)MAX_U64INTEGER))
             return RERR_INVALID_COMMAND_PARAMETER;
 
         U64INTEGER uValue = (U64INTEGER)dAbsResult;

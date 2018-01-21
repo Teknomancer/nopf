@@ -35,7 +35,7 @@ bool StackIsEmpty(PSTACK pStack)
     return pStack->pTop ? false : true;
 }
 
-inline int StackPush(PSTACK pStack, void *pvData)
+int StackPush(PSTACK pStack, void *pvData)
 {
     PSTACKITEM pNode = MemAlloc(sizeof(STACKITEM));
     if (pNode)
@@ -59,7 +59,7 @@ inline int StackPush(PSTACK pStack, void *pvData)
         return RERR_NO_MEMORY;
 }
 
-inline void *StackPeek(PSTACK pStack)
+void *StackPeek(PSTACK pStack)
 {
     if (!StackIsEmpty(pStack))
     {
@@ -70,7 +70,7 @@ inline void *StackPeek(PSTACK pStack)
     return NULL;
 }
 
-inline void *StackPop(PSTACK pStack)
+void *StackPop(PSTACK pStack)
 {
     if (   pStack
         && !StackIsEmpty(pStack))

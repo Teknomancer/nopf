@@ -90,7 +90,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr);
 int EvaluatorEvaluate(PEVALUATOR pEval);
 
 
-const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, int iStart, int *piEnd);
+const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, unsigned iStart, unsigned *piEnd);
 unsigned EvaluatorFunctorCount(void);
 int EvaluatorFunctorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp);
 unsigned EvaluatorOperatorCount(void);

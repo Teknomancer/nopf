@@ -24,7 +24,9 @@
 #define STRING_OPS_H___
 
 #include <string.h>
+#ifndef _WIN32
 #include <strings.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -46,7 +48,11 @@
 #define MemSet              memset
 #define StrCmp              strcmp
 #define StrNCmp             strncmp
+#ifdef _WIN32
+#define StrNCaseCmp         _strnicmp
+#else
 #define StrNCaseCmp         strncasecmp
+#endif
 #define StrNPrintf          snprintf
 #define StrCat              strcat
 #define StrNCat             strncat
@@ -70,7 +76,7 @@ char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, b
 #define FSTR_VALUE_SIGNED               0x10
 #define FSTR_VALUE_32_BIT               0x20
 
-int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, int iWidth, unsigned int fFlags);
+int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags);
 
 #endif /* STRING_OPS_H___ */
 

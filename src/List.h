@@ -20,8 +20,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef LIST_H___
-#define LIST_H___
+#ifndef NOPFLIST_H___
+#define NOPFLIST_H___
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -53,5 +53,5 @@ void *ListRemoveItemAt(PLIST pList, uint32_t uIndex);
 void *ListItemAt(PLIST pList, uint32_t uIndex);
 void ListAppend(PLIST pList, PLIST pSrcList);
 
-#endif /* LIST_H___ */
+#endif /* NOPFLIST_H___ */
 

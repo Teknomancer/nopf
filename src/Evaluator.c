@@ -1605,7 +1605,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pOperator->fUIntParams
-                    && !CanCastAtom(apAtoms[i], MIN_INTEGER, MAX_UINTEGER))
+                    && !CanCastAtom(apAtoms[i], (FLOAT)MIN_INTEGER, (FLOAT)MAX_UINTEGER))
                 {
                     /*
                      * Bleh, operator cannot handle this big a number. Exit, stage whatever.
@@ -1689,7 +1689,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pFunctor->fUIntParams
-                    && !CanCastAtom(papAtoms[i], MIN_INTEGER, MAX_UINTEGER))
+                    && !CanCastAtom(papAtoms[i], (FLOAT)MIN_INTEGER, (FLOAT)MAX_UINTEGER))
                 {
                     /*
                      * Bleh, functor cannot handle this big a number. 0wT.
@@ -1715,7 +1715,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 
             if (pResultantAtom)
             {
-                for (int k = 1; k < cParams; k++)
+                for (uint32_t k = 1; k < cParams; k++)
                     MemFree(papAtoms[k]);
 
                 MemFree(papAtoms);
@@ -2194,8 +2194,8 @@ int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     if (NumberIsNegative(apAtoms[0]))
     {
-        if (   !CanCastAtom(apAtoms[0], MIN_INTEGER, MAX_INTEGER)
-            || !CanCastAtom(apAtoms[1], MIN_INTEGER, MAX_INTEGER))
+        if (   !CanCastAtom(apAtoms[0], (FLOAT)MIN_INTEGER, (FLOAT)MAX_INTEGER)
+            || !CanCastAtom(apAtoms[1], (FLOAT)MIN_INTEGER, (FLOAT)MAX_INTEGER))
         {
             return RERR_UNDEFINED_BEHAVIOUR;
         }
@@ -2296,12 +2296,12 @@ int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
  * @param   cchCommand      Number of characters in command to search. Usually this
  *                          is the string length since @a pszCommand itself is partial.
  * @param   iStart          Starting index to search from.
- * @param   piEnd            Where to store the last index from the search.
+ * @param   piEnd           Where to store the last index from the search.
  * @returns Pointer to the full command
  */
-const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, int iStart, int *piEnd)
+const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, unsigned iStart, unsigned *piEnd)
 {
-    for (int i = iStart; i < g_cFunctors; i++)
+    for (unsigned i = iStart; i < g_cFunctors; i++)
     {
         PCFUNCTOR pFunctor = &g_aFunctors[i];
         if (!pFunctor)

@@ -32,8 +32,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#ifndef _WIN32
 #include <readline/readline.h>
 #include <readline/history.h>
+#endif
 
 static bool g_fxTermColors = false;
 
@@ -51,8 +53,12 @@ void ErrorPrintf(int rc, char *pszError, ...)
     PCRCSTATUSMSG pStatusMsg = StatusMsgForRC(rc);
     if (pStatusMsg)
     {
+#ifndef _WIN32
         fprintf(stderr, "%sError!%s %s rc=%s%s%s (%d)\n\n", TCOLOR_BOLD_RED, TCOLOR_RESET, pszBuf,
                     TCOLOR_RED, pStatusMsg->pszName, TCOLOR_RESET, rc);
+#else
+        fprintf(stderr, "Error! %s rc=%s (%d)\n\n", pszBuf, pStatusMsg->pszName, rc);
+#endif
     }
     else
         fprintf(stderr, "Extreme error! Missing pStatusMsg!\n");
@@ -71,11 +77,16 @@ void ColorPrintf(char *pszColorCode, char *pszMsg, ...)
     bool fNewLine;
     char *pszBuf = StrStripLF(szBuf, &fNewLine);
 
+#ifndef _WIN32
     fprintf(stdout, "%s%s%s%s",
             g_fxTermColors ? pszColorCode : "",
             pszBuf,
             TCOLOR_RESET,
             fNewLine ? "\n" : "");
+#else
+    fprintf(stdout, "%s%s",
+        pszBuf, fNewLine ? "\n" : "");
+#endif
 }
 
 
@@ -124,6 +135,7 @@ static char *TextLineGenerator(const char *pszText, int fState)
 }
 
 
+#ifndef _WIN32
 #if RL_READLINE_VERSION >= 0x0603
 static char **TextLineCompletor(const char *pszText, int iStart, int iEnd)
 #else
@@ -155,10 +167,12 @@ static char **TextLineCompletor(char *pszText, int iStart, int iEnd)
 
     return ppszMatches;
 }
+#endif
 
 
 int TextLineLibraryInit(const char *pszRCFileName)
 {
+#ifndef _WIN32
     if (pszRCFileName)
     {
         /* Allow conditional parsing of the ~/.nopf file. */
@@ -178,10 +192,11 @@ int TextLineLibraryInit(const char *pszRCFileName)
     }
 
     /* We'd like to hook into completion first. */
-#if RL_READLINE_VERSION >= 0x0603
+# if RL_READLINE_VERSION >= 0x0603
     rl_attempted_completion_function = TextLineCompletor;
-#else
+# else
     rl_attempted_completion_function = (CPPFunction *)TextLineCompletor;
+# endif
 #endif
     return RINF_SUCCESS;
 }
@@ -197,6 +212,7 @@ int TextLineRead(PTEXTLINE pLine, char *pszPrompt)
     /*
      * Read a line of input and add it to the history if required.
      */
+#ifndef _WIN32
     char *pszTmp = readline(pszPrompt);
     if (!pszTmp)
         return RERR_NO_DATA;
@@ -212,6 +228,20 @@ int TextLineRead(PTEXTLINE pLine, char *pszPrompt)
         pLine->pszData = pszStripped;
         return RINF_SUCCESS;
     }
+#else
+    char szTmp[1024];
+    fprintf(stdout, "> ");
+    fgets(&szTmp[0], sizeof(szTmp), stdin);
+
+    char *pszLine = StrDup(szTmp);
+    char *pszStripped = StrStrip(pszLine);
+    if (pszStripped && *pszStripped)
+    {
+        pLine->pszRaw = pszLine;
+        pLine->pszData = pszStripped;
+        return RINF_SUCCESS;
+    }
+#endif
 
     return RERR_NO_DATA;
 }

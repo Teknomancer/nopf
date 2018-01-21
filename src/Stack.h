@@ -20,8 +20,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STACK_H___
-#define STACK_H___
+#ifndef NOPFSTACK_H___
+#define NOPFSTACK_H___
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -65,5 +65,5 @@ void *StackPop(PSTACK pStack);
 void *StackPeek(PSTACK pStack);
 
 
-#endif /* STACK_H___ */
+#endif /* NOPFSTACK_H___ */
 

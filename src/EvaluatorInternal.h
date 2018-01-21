@@ -152,7 +152,7 @@ typedef struct OPERATOR
     /** Operator associativity. */
     OPERATORDIR     Direction;
     /** Number of parameters to the operator, valid values: (0-2). */
-    int             cParams;
+    uint8_t         cParams;
     /** Whether the parameters must all fit into UINTEGER */
     bool            fUIntParams;
     /** Name of the Operator as seen in the expression. */
@@ -189,9 +189,9 @@ typedef struct FUNCTOR
     /** Whether the parameters must all fit into UINTEGER */
     bool            fUIntParams;
     /** Minimum parameters accepted by @a pfnFunctor. */
-    int             cMinParams;
+    uint32_t        cMinParams;
     /** Maximum paramaters accepted by @a pfnFunctor. */
-    int             cMaxParams;
+    uint32_t        cMaxParams;
     /** Short description of the Functor, NULL if already described. */
     const char     *pszSyntax;
     /** Long description of the Functor, NULL if already described. */

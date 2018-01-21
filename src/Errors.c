@@ -38,7 +38,9 @@ const RCSTATUSMSG g_UnknownMsg =
 
 const RCSTATUSMSG g_aStatusMsgs[] =
 {
+#ifndef _WIN32
 #include "GenErrorData.h"
+#endif
     { NULL, 0 }
 };
 
