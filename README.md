@@ -1,4 +1,4 @@
-# README #
+# nopf #
 
 nopf (Numbers, OPerators, Functions) is an interactive command-line expression evaluator.
 
@@ -17,4 +17,6 @@ It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte con
 * Dependencies
  On Linux, Solaris, OS X depends on libreadline.
  Windows SDK and C++ command-line support while installing Visual Studio.
+ 
+ Visit the nopf homepage (http://sites.google.com/site/appnopf/) for more information.
  
