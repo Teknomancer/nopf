@@ -20,8 +20,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QUEUE_H___
-#define QUEUE_H___
+#ifndef NOPFQUEUE_H___
+#define NOPFQUEUE_H___
 
 #include <stdbool.h>
 #include <inttypes.h>
@@ -52,5 +52,5 @@ void *QueuePeekHead(PQUEUE pQueue);
 void *QueuePeekTail(PQUEUE pQueue);
 void *QueueItemAt(PQUEUE pQueue, uint32_t uIndex);
 
-#endif /* QUEUE_H___ */
+#endif /* NOPFQUEUE_H___ */
 

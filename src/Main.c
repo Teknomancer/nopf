@@ -55,7 +55,7 @@
 static char *ValueAsBinary(FLOAT dValue, bool fNegative, size_t *pcDigits)
 {
     FLOAT dAbsResult = FABSFLOAT(dValue);
-    if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
+    if (!CanCastTo(dAbsResult, (FLOAT)MAX_U64INTEGER))
         return NULL;
 
     U64INTEGER uValue = (U64INTEGER)dAbsResult;
@@ -102,8 +102,8 @@ static void PrintResult(PCSETTINGS pSettings, FLOAT dResult)
     StrNPrintf(szDst32, sizeof(szDst32), STR_OVERFLOW STR_OVERFLOW);
     StrNPrintf(szDstNat, sizeof(szDstNat), STR_OVERFLOW);
 
-    bool fCastToU64 = CanCastTo(dResult, MAX_U64INTEGER);
-    bool fCastToU32 = CanCastTo(dResult, MAX_U32INTEGER);
+    bool fCastToU64 = CanCastTo(dResult, (FLOAT)MAX_U64INTEGER);
+    bool fCastToU32 = CanCastTo(dResult, (FLOAT)MAX_U32INTEGER);
 
     /*
      * Output in various radices.

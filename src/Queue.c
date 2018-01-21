@@ -24,7 +24,7 @@
 #include "Errors.h"
 #include "StringOps.h"
 
-inline void QueueInit(PQUEUE pQueue)
+void QueueInit(PQUEUE pQueue)
 {
     pQueue->pTail = NULL;
     pQueue->pHead = NULL;
@@ -41,7 +41,7 @@ inline bool QueueIsEmpty(PQUEUE pQueue)
     return pQueue->pHead ? false : true;
 }
 
-inline int QueueAdd(PQUEUE pQueue, void *pvData)
+int QueueAdd(PQUEUE pQueue, void *pvData)
 {
     PQUEUEITEM pNode = MemAlloc(sizeof(QUEUEITEM));
     if (pNode)
@@ -66,7 +66,7 @@ inline int QueueAdd(PQUEUE pQueue, void *pvData)
         return RERR_NO_MEMORY;
 }
 
-inline void *QueueRemove(PQUEUE pQueue)
+void *QueueRemove(PQUEUE pQueue)
 {
     if (!QueueIsEmpty(pQueue))
     {
@@ -81,21 +81,21 @@ inline void *QueueRemove(PQUEUE pQueue)
     return NULL;
 }
 	
-inline void *QueuePeekHead(PQUEUE pQueue)
+void *QueuePeekHead(PQUEUE pQueue)
 {
     if (pQueue->pHead)
         return pQueue->pHead->pvData;
     return NULL;
 }
 
-inline void *QueuePeekTail(PQUEUE pQueue)
+void *QueuePeekTail(PQUEUE pQueue)
 {
     if (pQueue->pTail)
         return pQueue->pTail->pvData;
     return NULL;
 }
 
-inline void *QueueItemAt(PQUEUE pQueue, uint32_t uIndex)
+void *QueueItemAt(PQUEUE pQueue, uint32_t uIndex)
 {
     if (uIndex >= pQueue->cItems)
         return NULL;
