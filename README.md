@@ -1,12 +1,10 @@
-nopf
-====
+# nopf #
 
 nopf (Numbers, OPerators, Functions) is an interactive command-line expression evaluator.
 
 It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
 
-Compiling the source code
--------------------------
+## Compiling the source code ##
 
 ### Linux/Solaris/OS X ###
 Run `make` on the directory with the makefile.
