@@ -4,15 +4,15 @@ nopf (Numbers, OPerators, Functions) is an interactive command-line expression e
 
 It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
 
-## Compiling sources ##
+## Compiling the source code ##
 
-### Linux/Solaris/OS X build instructions ###
-Build using the provided makefile.
+### Linux/Solaris/OS X ###
+Run make on the directory with the makefile.
 
 ### Linux Dependencies ###
-Requires libreadline (e.g., on Ubuntu sudo apt-get install libreadline-dev)
+* libreadline (e.g., on Ubuntu sudo apt-get install libreadline-dev)
 
-### Windows build instructions ###
+### Windows ###
 Create a Visual Studio project and add the source file under src/ folder
 
 ### Windows dependencies ###
@@ -20,11 +20,11 @@ Create a Visual Studio project and add the source file under src/ folder
 * C++ command-line support while installing Visual Studio.
 
 ### Configurations ###
-* Debug and release builds can be built using makefile switch BUILD_TYPE=debug or BUILD_TYPE=release added to the make command line.
-* On Windows use the Visual Studio configuration to toggle debug or release builds.
+* Debug and release builds can be built using makefile switch BUILD_TYPE=debug or BUILD_TYPE=release passed to make on the command line.
+* On Windows use the Visual Studio debug/release project configuration
 
 ## Binaries ##
-* Only a binary for Windows is provided in the Downloads section (works on 64-bit or 32-bit Windows 10).
+* Only a binary for Windows is provided in the Downloads section (works on 64-bit or 32-bit Windows 10). For other OSes compile it from the source code.
 
 ## More information ##
 Visit the nopf homepage http://sites.google.com/site/appnopf/
