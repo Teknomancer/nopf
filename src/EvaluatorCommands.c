@@ -107,7 +107,7 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
         return NULL;
     }
 
-    int  cWritten = StrNPrintf(pszTmp, cbBuf, "%s\n", pszBinary);
+    size_t cWritten = StrNPrintf(pszTmp, cbBuf, "%s\n", pszBinary);
     StrFree(pszBinary);
     if (cWritten >= cbBuf - 1)
     {
@@ -197,8 +197,8 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
         if (fFoundBit)
         {
             char szBitDesc[sizeof("-- ")+ sizeof(pReg->paRegBitDesc->szName)+ sizeof(" (  )")+ sizeof(" *")+ 2];
-            StrNPrintf(szBitDesc, sizeof(szBitDesc), "-- %s (%2d) %c", pReg->paRegBitDesc[iFoundBit].szName, iFoundBit,
-                       (uReg & R_BIT(iFoundBit)) ? '*' : ' ');
+            StrNPrintf(szBitDesc, sizeof(szBitDesc), "%c%c %s (%2d) %c", R_HORZCHAR, R_HORZCHAR, pReg->paRegBitDesc[iFoundBit].szName,
+                iFoundBit, (uReg & R_BIT(iFoundBit)) ? '*' : ' ');
             StrNCat(szLine, szBitDesc, StrLen(szBitDesc));
         }
 
