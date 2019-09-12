@@ -74,7 +74,7 @@
  */
 typedef enum ATOMTYPE
 {
-    enmAtomEmpty = 0x10,
+    enmAtomEmpty = 1,
     enmAtomNumber,
     enmAtomOperator,
     enmAtomFunctor,
