@@ -1,4 +1,3 @@
-/* $Id: EvaluatorFunctors.c 190 2013-12-28 07:50:58Z marshan $ */
 /** @file
  * Evaluator Functors.
  */
