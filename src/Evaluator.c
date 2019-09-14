@@ -1114,11 +1114,11 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     QueueAdd(pQueue, pStackAtom);
                 }
 
+                /*
+                 * If no matching open parenthesis for close parenthesis found, bail.
+                 */
                 if (pStackAtom == NULL)
                 {
-                    /*
-                     * No matching open parenthesis for close parenthesis found.
-                     */
                      DEBUGPRINTF(("Missing open paranthesis\n"));
                      MemFree(pAtom);
                      EvaluatorCleanUp(pEval, &Stack);
@@ -1126,7 +1126,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 }
 
                 /*
-                 * This means "pStackAtom" is a left parenthesis, double check, then zap it.
+                 * This means "pStackAtom" is an open parenthesis, verify and discard.
                  */
                 Assert(AtomIsOpenParenthesis(pStackAtom));
                 StackPop(&Stack);
