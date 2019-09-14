@@ -1,4 +1,3 @@
-/* $Id: Errors.h 192 2014-05-14 06:52:35Z marshan $ */
 /** @file
  * Error codes and routines header.
  */

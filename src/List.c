@@ -1,4 +1,3 @@
-/* $Id: List.c 191 2013-12-28 07:58:34Z marshan $ */
 /** @file
  * Generic double linked list, implementation.
  */

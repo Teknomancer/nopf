@@ -1,4 +1,3 @@
-/* $Id: GenericDefs.h 201 2014-05-17 17:47:00Z marshan $ */
 /** @file
  * Generic helper macros and routines header.
  */

@@ -1,4 +1,3 @@
-/* $Id: Assert.h 189 2013-12-26 14:41:41Z marshan $ */
 /** @file
  * Generic Assert routines header.
  */

@@ -1,4 +1,3 @@
-/* $Id: InputOutput.h 179 2012-04-27 16:09:26Z marshan $ */
 /** @file
  * Input/Output routines header.
  */

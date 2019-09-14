@@ -1,4 +1,3 @@
-/* $Id: StringOps.h 204 2014-05-18 08:04:20Z marshan $ */
 /** @file
  * String operations header.
  */

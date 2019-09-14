@@ -1,4 +1,3 @@
-/* $Id: Evaluator.h 206 2014-05-18 08:39:16Z marshan $ */
 /** @file
  * Expression evaluator, hopefully should be fairly generic header.
  */
