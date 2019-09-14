@@ -1,4 +1,3 @@
-/* $Id: StringOps.c 206 2014-05-18 08:39:16Z marshan $ */
 /** @file
  * String routines.
  */
