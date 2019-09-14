@@ -1128,12 +1128,10 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 /*
                  * This means "pStackAtom" is a left parenthesis, double check, then zap it.
                  */
-                if (AtomIsOpenParenthesis(pStackAtom))
-                {
-                    StackPop(&Stack);
-                    MemFree(pStackAtom);
-                    pStackAtom = NULL;
-                }
+                Assert(AtomIsOpenParenthesis(pStackAtom));
+                StackPop(&Stack);
+                MemFree(pStackAtom);
+                pStackAtom = NULL;
 
                 /*
                  * If the left parenthesis is preceeded by a functor, pop it to the Queue incrementing number
