@@ -5,7 +5,7 @@ nopf (Numbers, OPerators, Functions) is an interactive, command-line expression 
 It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
 
 ## Compiling on GNU/Linux, Solaris, MacOS
-Invoke `make` on the directory with the Makefile.
+Execute `make` on the directory with Makefile.
 
 #### Dependencies
 `libreadline` (e.g., on Debian/Ubuntu apt-based distros `sudo apt-get install libreadline-dev`)
@@ -14,11 +14,11 @@ Invoke `make` on the directory with the Makefile.
 * Debug and release builds can be built using makefile switch `BUILD_TYPE=debug` or `BUILD_TYPE=release` passed to make on the command line.
 
 ## Compiling on Windows
-Setup environment variables before starting a build session using:
-> `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
+Setup environment variables before starting a build session using:  
+`%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
 
-After the environment is suitable, execute:
-> `nmake /F Win_Makefile all`
+After the environment is suitable, execute:  
+`nmake /F Win_Makefile all`
 
 #### Dependencies
 * Appropriate Windows SDK
