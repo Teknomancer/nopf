@@ -99,7 +99,7 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
     memset(pszBuf, 0, cbBuf);
 
     char *pszTmp   = pszBuf;
-    size_t cDigits = 0;
+    uint32_t cDigits = 0;
     char *pszBinary = StrValue32AsBinary(uReg, false, false, true, &cDigits);
     if (!pszBinary)
     {
@@ -107,7 +107,7 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
         return NULL;
     }
 
-    size_t cWritten = StrNPrintf(pszTmp, cbBuf, "%s\n", pszBinary);
+    uint32_t cWritten = StrNPrintf(pszTmp, cbBuf, "%s\n", pszBinary);
     StrFree(pszBinary);
     if (cWritten >= cbBuf - 1)
     {
