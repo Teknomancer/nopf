@@ -1,4 +1,3 @@
-/* $Id: Magics.h 168 2011-10-12 17:24:32Z marshan $ */
 /** @file
  * Magics header
  */

@@ -1,4 +1,3 @@
-/* $Id: EvaluatorCommands.h 196 2014-05-17 05:58:21Z marshan $ */
 /** @file
  * Evaluator Commands, header.
  */

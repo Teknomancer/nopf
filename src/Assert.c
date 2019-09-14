@@ -1,4 +1,3 @@
-/* $Id: Assert.c 192 2014-05-14 06:52:35Z marshan $ */
 /** @file
  * Generic Assert routines.
  */

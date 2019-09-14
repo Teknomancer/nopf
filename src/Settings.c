@@ -1,4 +1,3 @@
-/* $Id: Settings.c 181 2012-04-28 14:54:11Z marshan $ */
 /** @file
  * Program settings, command line options etc.
  */

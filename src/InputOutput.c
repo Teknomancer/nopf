@@ -1,4 +1,3 @@
-/* $Id: InputOutput.c 192 2014-05-14 06:52:35Z marshan $ */
 /** @file
  * Input/Output routines.
  */

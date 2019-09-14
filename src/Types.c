@@ -1,4 +1,3 @@
-/* $Id: Types.c 192 2014-05-14 06:52:35Z marshan $ */
 /** @file
  * Internal types.
  */
