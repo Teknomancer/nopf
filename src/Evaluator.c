@@ -1093,6 +1093,15 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
             PCOPERATOR pOperator = pAtom->u.pOperator;
             if (OperatorIsOpenParenthesis(pOperator))
             {
+                if (   pPreviousAtom
+                    && !AtomIsFunctor(pPreviousAtom))
+                {
+                    DEBUGPRINTF(("Paranthesis begins when previous atom is not a functor!\n"));
+                    MemFree(pAtom);
+                    EvaluatorCleanUp(pEval, &Stack);
+                    return RERR_EXPRESSION_INVALID;
+                }
+
                 /*
                  * Open parenthesis.
                  */
