@@ -14,10 +14,10 @@ Execute `make` on the directory with Makefile.
 * Debug and release builds can be built using makefile switch `BUILD_TYPE=debug` or `BUILD_TYPE=release` passed to make on the command line.
 
 ## Compiling on Windows
-Setup environment variables before starting a build session using:  
+Setup the required environment by executing:  
 `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
 
-After the environment is suitable, execute:  
+Once environment is setup, build by executing:  
 `nmake /F Win_Makefile all`
 
 #### Dependencies
