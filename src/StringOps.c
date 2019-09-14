@@ -45,7 +45,7 @@ typedef const UINTEGER64 *PCUINTEGER64;
  * @param   cb          Number of bytes to allocate.
  * @returns Pointer to the allocated, zerod memory, or NULL if no memory available.
  */
-void *MemAllocZ(size_t cb)
+void *MemAllocZ(uint32_t cb)
 {
     void *pv = MemAlloc(cb);
     if (pv)
@@ -62,9 +62,9 @@ void *MemAllocZ(size_t cb)
  * @param   pszSrc      Pointer to the source string.
  * @result  Appropriate status code.
  */
-int StrCopy(char *pszDst, size_t cbDst, const char *pszSrc)
+int StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc)
 {
-    size_t cchSrc = StrLen(pszSrc);
+    uint32_t const cchSrc = StrLen(pszSrc);
     if (cchSrc < cbDst)
     {
         memcpy(pszDst, pszSrc, cchSrc + 1);
@@ -80,7 +80,7 @@ int StrCopy(char *pszDst, size_t cbDst, const char *pszSrc)
 }
 
 
-char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, size_t *pcDigits)
+char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits)
 {
     char *pszBuf = StrAlloc(65 + 20);    /* UINT64_MAX = 64 chars */
     if (!pszBuf)
