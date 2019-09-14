@@ -13,11 +13,16 @@ Run `make` on the directory with the makefile.
 * `libreadline` (e.g., on Debian/Ubuntu apt-based distros `sudo apt-get install libreadline-dev`)
 
 ### Windows ###
-Create a Visual Studio project and add all source and header files under the `src` directory.
+* To setup the environment before starting a build, execute:
+  `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
+* To build nopf, execute:
+  `nmake /F Win_Makefile all`
 
 ### Windows dependencies ###
 * Appropriate Windows SDK
-* C++ command-line support while installing Visual Studio.
+* Build Tools for Visual Studio 2019:
+  See: https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019
+  See: https://docs.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=vs-2019
 
 ### Configurations ###
 * Debug and release builds can be built using makefile switch `BUILD_TYPE=debug` or `BUILD_TYPE=release` passed to make on the command line.
