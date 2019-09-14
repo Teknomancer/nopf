@@ -1501,25 +1501,22 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
     }
 
     /*
-     * If there any atoms we must pop them onto the queue, but
-     * an open parenthesis on the stop of stack means we've got
-     * unbalanced parenthesis, just get 0wt.
-     */
-    pAtom = StackPeek(&Stack);
-    if (   pAtom
-        && AtomIsOpenParenthesis(pAtom))
-    {
-        DEBUGPRINTF(("Unbalanced paranthesis\n"));
-        StackPop(&Stack);
-        MemFree(pAtom);
-        return RERR_PARENTHESIS_UNBALANCED;
-    }
-
-    /*
      * Pop remainder operators/functions to the queue.
      */
     while ((pAtom = StackPop(&Stack)) != NULL)
     {
+        /*
+         * An open parenthesis on the stop of stack means we've got
+         * unbalanced parenthesis, just get 0wt.
+         */
+        if (   StackSize(&Stack) == 0
+            && AtomIsOpenParenthesis(pAtom))
+        {
+            DEBUGPRINTF(("Unbalanced paranthesis\n"));
+            MemFree(pAtom);
+            return RERR_PARENTHESIS_UNBALANCED;
+        }
+
         DEBUGPRINTF(("Popping stack and adding to queue\n"));
         QueueAdd(pQueue, pAtom);
     }
