@@ -8,7 +8,7 @@ It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte con
 Execute `make` on the directory with Makefile.
 
 #### Dependencies
-`libreadline` (e.g., on Debian/Ubuntu apt-based distros `sudo apt-get install libreadline-dev`)
+* `libreadline` (e.g., on Debian/Ubuntu apt-based distros `sudo apt-get install libreadline-dev`)
 
 #### Build configurations
 * Debug and release builds can be built using makefile switch `BUILD_TYPE=debug` or `BUILD_TYPE=release` passed to make on the command line.
