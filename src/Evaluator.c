@@ -1598,6 +1598,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
              * just push the first parameter as the result.
              */
             PATOM apAtoms[MAX_OPERATOR_PARAMETERS];
+            memset(apAtoms, 0, sizeof(apAtoms));
             Assert(pOperator->cParams <= MAX_OPERATOR_PARAMETERS);
             int rc = RINF_SUCCESS;
             PATOM pResultantAtom = NULL;
