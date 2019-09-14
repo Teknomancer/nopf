@@ -1115,7 +1115,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                  */
                 DEBUGPRINTF(("Parenthesis end '%s'\n", pAtom->u.pOperator->pszOperator));
                 PATOM pStackAtom = NULL;
-                while ((pStackAtom = StackPeek(&Stack)) != NULL
+                while ((   pStackAtom = StackPeek(&Stack)) != NULL
                         && !AtomIsOpenParenthesis(pStackAtom))
                 {
                     DEBUGPRINTF(("Popping '%s' to queue\n", pStackAtom->u.pOperator->pszOperator));
