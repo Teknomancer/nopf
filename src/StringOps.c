@@ -79,6 +79,17 @@ int StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc)
 }
 
 
+/**
+ * Convert a 32-bit number to its binary form returned in a string.
+ *
+ * @returns The number converted to binary.
+ * @param   uValue          The number to convert to binary.
+ * @param   fNegative       Whether it's a negative number or not.
+ * @param   fDoubleSpace    Whether an extra space per binary digit is required.
+ * @param   fFullLength     Whether padding to the full 32-bit length is required.
+ * @param   pcDigits        Where to store the number of binary digits (including
+ *                          padding if specified in @a fFullLength).
+ */
 char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits)
 {
     char *pszBuf = StrAlloc(65 + 20);    /* UINT64_MAX = 64 chars */
@@ -195,6 +206,7 @@ char *StrStripLF(char *pszBuf, bool *pfStripped)
     return pszBuf;
 }
 
+
 /**
  * Convert a FLOAT into string equivalent in the specified radix.
  *
@@ -211,9 +223,8 @@ int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, un
 {
     AssertReturn(pszDst, RERR_INVALID_PARAMETER);
     AssertReturn(cbDst, RERR_INVALID_PARAMETER);
-//    const char *pszStart = pszDst;
 
-    /* move this to header */
+    /* Move this to header */
     if (fFlags & FSTR_ZERO_PAD_SPLIT_EIGHTS)
         fFlags |= FSTR_ZERO_PAD;
 
@@ -427,9 +438,9 @@ int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, un
     } while (u64Value);
 
     *pszDst = '\0';
-//    DEBUGPRINTF(("'%s'\n", pszStart));
     return rc;
 }
+
 
 /*
  * StrFormats to support:
@@ -442,7 +453,5 @@ int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, un
  * Unsigned (32):   
  *
  * Unsigned:
- *
  */
- 
  
