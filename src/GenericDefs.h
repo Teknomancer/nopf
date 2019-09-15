@@ -26,7 +26,7 @@
  * Returns the number of elements in an array.
  *
  * @param   aArray      An array.
- * @returns The number of elements in an array object.
+ * @return  The number of elements in an array object.
  */
 #define R_ARRAY_ELEMENTS(aArray)                     ( sizeof(aArray) / sizeof((aArray)[0]) )
 
@@ -35,7 +35,7 @@
  *
  * @param   a           First object or POD type.
  * @param   b           Second object or POD type.
- * @returns The greater of the two objects.
+ * @return  The greater of the two objects.
  */
 #define R_MAX(a,b)                                   ((a) >= (b) ? (a) : (b))
 
@@ -44,7 +44,7 @@
  *
  * @param   a           First object or POD type.
  * @param   b           Second object or POD type.
- * @returns The lesser of the two objects.
+ * @return  The lesser of the two objects.
  */
 #define R_MIN(a,b)                                   ((a) <= (b) ? (a) : (b))
 

@@ -47,11 +47,11 @@
  *
  * The destination string points to the end of the added string!!!
  *
- * @returns Status code on the result of the string addition.
- * @param pszDst        Pointer to the destination string.
- * @param cbDst         Size of the destination string.
- * @param pszLine       Pointer to the source string.
- * @param cWritten      Where to store the number of characters written.
+ * @return  Status code on the result of the string addition.
+ * @param   pszDst      Pointer to the destination string.
+ * @param   cbDst       Size of the destination string.
+ * @param   pszLine     Pointer to the source string.
+ * @param   cWritten    Where to store the number of characters written.
  */
 static inline int StrAddLine(char **pszDst, size_t cbDst, char *pszLine, uint32_t *cWritten)
 {
@@ -73,10 +73,10 @@ static inline int StrAddLine(char **pszDst, size_t cbDst, char *pszLine, uint32_
 /**
  * Formats a 32-bit registers given its value.
  *
- * @returns An allocated string with the formatted output. The caller must free
- *        it with StrFree().
- * @param uReg      The 32-bit value of the register.
- * @param pReg      Pointer to the register descriptor.
+ * @return  An allocated string with the formatted output. The caller must free it
+ *          with StrFree().
+ * @param   uReg    The 32-bit value of the register.
+ * @param   pReg    Pointer to the register descriptor.
  */
 char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
 {
@@ -216,9 +216,9 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
 /**
  * Displays the bit layout of a 32-bit register.
  *
- * @returns An allocated string with the layout, needs to be freed by caller
- *        with StrFree().
- * @param pReg      Pointer to the 32-bit register descriptor.
+ * @return  An allocated string with the layout, needs to be freed by caller
+ *          with StrFree().
+ * @param   pReg    Pointer to the 32-bit register descriptor.
  */
 char *StrFormatRegDesc32(PCREGDESC32 pReg)
 {

@@ -47,8 +47,8 @@ const RCSTATUSMSG g_aStatusMsgs[] =
 /**
  * Finds the status message object for an error code.
  *
- * @param   rc          The error code to find.
- * @returns Pointer to the matching Status Message object.
+ * @return  Pointer to the matching Status Message object.
+ * @param   rc  The error code to find.
  */
 PCRCSTATUSMSG StatusMsgForRC(int rc)
 {

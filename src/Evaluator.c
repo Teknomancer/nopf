@@ -253,8 +253,8 @@ static void EvaluatorInvertAtomArray(PATOM apAtoms[], uint32_t cAtoms)
 /**
  * Searches for a variable and returns a Variable Atom if found.
  *
- * @param   pszVariable             Name of the variable to find.
- * @returns Pointer to an allocated Variable Atom or NULL if @a pszVariable could not be found.
+ * @return  Pointer to an allocated Variable Atom or NULL if @a pszVariable could not be found.
+ * @param   pszVariable     Name of the variable to find.
  */
 static PVARIABLE EvaluatorFindVariable(const char *pszVariable, PLIST pVarList)
 {
@@ -273,7 +273,7 @@ static PVARIABLE EvaluatorFindVariable(const char *pszVariable, PLIST pVarList)
 /**
  * Destroys a variable.
  *
- * @param   pVariable               Pointer to the Variable to destroy.
+ * @param   pVariable   The Variable to destroy.
  */
 static void EvaluatorDestroyVariable(PVARIABLE pVariable)
 {
@@ -341,7 +341,7 @@ void EvaluatorPrintVarList(PLIST pList)
  *
  * @param   pszExpr                 The whitespace skipped expression to parse.
  * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @returns Pointer to an allocated Number Atom or NULL if @a pszExpr was not a number.
+ * @return  Pointer to an allocated Number Atom or NULL if @a pszExpr was not a number.
  */
 static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 {
@@ -646,8 +646,9 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
  *
  * @param   pszExpr                 The whitespace skipped expression to parse.
  * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           Pointer to the previously passed Atom in @a pszExpr if any, can be NULL.
- * @returns Pointer to an allocated Operator Atom or NULL if @a pszExpr was not an operator.
+ * @param   pPreviousAtom           The previously passed Atom in @a pszExpr if any,
+ *                                  can be NULL.
+ * @return  Pointer to an allocated Operator Atom or NULL if @a pszExpr was not an operator.
  */
 static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
@@ -700,8 +701,9 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
  *
  * @param   pszExpr                 The whitespace skipped expression to parse.
  * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           Pointer to the previously passed Atom in @a pszExpr if any, can be NULL.
- * @returns Pointer to an allocated Functor Atom or NULL if @ pszExpr was not a functor.
+ * @param   pPreviousAtom           The previously passed Atom in @a pszExpr if any,
+ *                                  can be NULL.
+ * @return  Pointer to an allocated Functor Atom or NULL if @ pszExpr was not a functor.
  */
 static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
@@ -738,12 +740,14 @@ static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PC
 /**
  * Parses a variable and returns a Variable Atom.
  *
- * @param   pEval                   Pointer to the Evaluator object.
- * @param   pszExpr                 The whitespace skipped expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           Pointer to the previously passed Atom in @pszExpr if any, can be NULL.
- * @param   prc                     Where to store the status code while identifying the variable.
- * @returns Pointer to an allocated Variable Atom or NULL if @a pszExpr was not a variable.
+ * @return  Pointer to an allocated Variable Atom or NULL if @a pszExpr was not a
+ *          variable.
+ * @param   pEval           The Evaluator object.
+ * @param   pszExpr         The whitespace skipped expression to parse.
+ * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
+ * @param   pPreviousAtom   The previously passed Atom in if any, can be NULL.
+ * @param   prc             Where to store the status code while identifying the
+ *                          variable.
  */
 static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
@@ -813,13 +817,15 @@ static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const
 /**
  * Parses a command and returns a Command Atom.
  *
- * @param   pEval                   Pointer to the Evaluator object.
- * @param   pszExpr                 The whitespace skipped expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           Pointer to the previously passed Atom in @pszExpr if any, can be NULL.
- * @param   prc                     Where to store the status code while identifying the variable.
- * @returns Pointer to an allocated Command Atom or NULL if @a
- *        pszExpr was not a command.
+ * @return  Pointer to an allocated Command Atom or NULL if @a pszExpr was not a
+ *          command.
+ * @param   pEval           The Evaluator object.
+ * @param   pszExpr         The whitespace skipped expression to parse.
+ * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
+ * @param   pPreviousAtom   The previously passed Atom in @pszExpr if any, can be
+ *                          NULL.
+ * @param   prc             Where to store the status code while identifying the
+ *                          variable.
  */
 static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
@@ -871,12 +877,13 @@ static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const 
 /**
  * Parses an Atom.
  *
- * @param   pEval                   Pointer to the Evaluator object.
- * @param   pszExpr                 The expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           Pointer to the previously passed Atom in @a pszExpr if any, can be NULL.
- * @param   prc                     Where to store the status code during parsing.
- * @returns Pointer to an allocated Atom or NULL if @a pszExpr has run out of identifying atoms.
+ * @return  Pointer to an allocated Atom or NULL if @a pszExpr has run out of identifying atoms.
+ * @param   pEval           The Evaluator object.
+ * @param   pszExpr         The expression to parse.
+ * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
+ * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ *                          NULL.
+ * @param   prc             Where to store the status code during parsing.
  */
 static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
@@ -987,7 +994,7 @@ static int AscendingFunctorSortCompare(const void *pvFunctor1, const void *pvFun
  * Internal, essential Evaluator initialization. The other one does a lot of
  * extra work like global initializations. This is the real deal.
  *
- * @param   pEval                   Pointer to the Evaluator object, cannot be NULL.
+ * @param   pEval                   The Evaluator object, cannot be NULL.
  */
 static void EvaluatorInitInternal(PEVALUATOR pEval)
 {
@@ -1003,7 +1010,7 @@ static void EvaluatorInitInternal(PEVALUATOR pEval)
  * Cleans up an Evaluator object half-way through parsing or evaluation.
  * Used whenever a fatal error occurs and processing of expression must not continue.
  *
- * @param   pEval                   Pointer to an Evaluator object, cannot be NULL.
+ * @param   pEval                   The Evaluator object, cannot be NULL.
  * @param   pStack                  Pointer to any Stack to empty, can be NULL.
  */
 static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
@@ -1042,8 +1049,8 @@ static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
  * The @a pEval object is internally updated with the intermediate representation
  * which will be used in the next pass, which is evaluation.
  *
- * @param   pEval               Pointer to the Evaluator object.
- * @returns Status code on result of the parsing pass.
+ * @return  Status code on result of the parsing pass.
+ * @param   pEval   The Evaluator object.
  */
 int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
 {
@@ -1537,8 +1544,8 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
  * reverse polish notation evaluation but modified to support variables, variable
  * parameters to functions and more.
  *
- * @param   pEval               Pointer to the Evaluator object.
- * @returns Status code on the result of the evaluation.
+ * @return  Status code on the result of the evaluation.
+ * @param   pEval   The Evaluator object.
  */
 int EvaluatorEvaluate(PEVALUATOR pEval)
 {
@@ -1934,7 +1941,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 /**
  * Destroys the Evaluator object.
  *
- * @param   pEval                   Pointer to an Evaluator object, cannot be NULL.
+ * @param   pEval   The Evaluator object, cannot be NULL.
  */
 void EvaluatorDestroy(PEVALUATOR pEval)
 {
@@ -1949,10 +1956,10 @@ void EvaluatorDestroy(PEVALUATOR pEval)
 /**
  * Initializes the Evaluator object.
  *
- * @param   pEval                   Pointer to an Evaluator object, cannot be NULL.
- * @param   pszError                Where to write a descriptive error if one should occur while initializing.
- * @param   cbError                 Size of the @pszError buffer including NULL terminator.
- * @returns Status code of initialization.
+ * @return  Status code of initialization.
+ * @param   pEval       The Evaluator object, cannot be NULL.
+ * @param   pszError    Where to write a descriptive error if one should occur while initializing.
+ * @param   cbError     Size of the @pszError buffer including NULL terminator.
  */
 int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
 {
@@ -2287,12 +2294,12 @@ int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
  * it may find variables? Probably but that's after I implemented proper
  * variable support.
  *
- * @param   pszCommand      Partial command to search for.
- * @param   cchCommand      Number of characters in command to search. Usually this
- *                          is the string length since @a pszCommand itself is partial.
- * @param   iStart          Starting index to search from.
- * @param   piEnd           Where to store the last index from the search.
- * @returns Pointer to the full command
+ * @return  Pointer to the full command
+ * @param   pszCommand  Partial command to search for.
+ * @param   cchCommand  Number of characters in command to search. Usually this is
+ *                      the string length since @a pszCommand itself is partial.
+ * @param   iStart      Starting index to search from.
+ * @param   piEnd       Where to store the last index from the search.
  */
 const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, unsigned iStart, unsigned *piEnd)
 {
@@ -2314,11 +2321,11 @@ const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, unsi
 /**
  * Returns the syntax and description of a functor.
  *
- * @param   uIndex          The index of the requested functor.
- * @param   ppszName        Where to store the name of the functor, caller frees with StrFree()
- * @param   ppszSyntax      Where to store the syntax for the functor, caller frees with StrFree()
- * @param   ppszHelp        Where to store the description for the functor, caller frees with StreFree()
- * @returns RINF_SUCCESS on success, othwerise appropriate status code.
+ * @return  RINF_SUCCESS on success, othwerise appropriate status code.
+ * @param   uIndex      The index of the requested functor.
+ * @param   ppszName    Where to store the name of the functor, caller frees with StrFree()
+ * @param   ppszSyntax  Where to store the syntax for the functor, caller frees with StrFree()
+ * @param   ppszHelp    Where to store the description for the functor, caller frees with StreFree()
  */
 int EvaluatorFunctorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp)
 {
@@ -2335,7 +2342,7 @@ int EvaluatorFunctorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, ch
 /**
  * Returns the total number of functors.
  *
- * @returns The total number of functors.
+ * @return  The total number of functors.
  */
 unsigned EvaluatorFunctorCount(void)
 {
@@ -2346,7 +2353,7 @@ unsigned EvaluatorFunctorCount(void)
 /**
  * Returns the total number of commands.
  *
- * @returns The total number of commands.
+ * @return  The total number of commands.
  */
 unsigned EvaluatorCommandCount(void)
 {
@@ -2357,11 +2364,14 @@ unsigned EvaluatorCommandCount(void)
 /**
  * Returns the syntax and description of an operator.
  *
+ * @return  RINF_SUCCESS on success, othwerise appropriate status code.
  * @param   uIndex          The index of the requested operator.
- * @param   ppszName        Where to store the name of the operator, caller frees with StrFree()
- * @param   ppszSyntax      Where to store the syntax for the operator, caller frees with StrFree()
- * @param   ppszHelp        Where to store the description for the operator, caller frees with StreFree()
- * @returns RINF_SUCCESS on success, othwerise appropriate status code.
+ * @param   ppszName        Where to store the name of the operator, caller frees
+ *                          with StrFree().
+ * @param   ppszSyntax      Where to store the syntax for the operator, caller frees
+ *                          with StrFree().
+ * @param   ppszHelp        Where to store the description for the operator, caller
+ *                          frees with StreFree().
  */
 int EvaluatorOperatorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp)
 {
@@ -2379,10 +2389,12 @@ int EvaluatorOperatorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, c
 /**
  * Finds a variable for the given index.
  *
- * @param   uIndex          The index of the requested variable.
- * @param   ppszName        Where to store the name of the variable, caller frees with StrFree()
- * @param   ppszExpr        Where to store the expression assigned to the variable, caller frees with StrFree()
- * @returns RINF_SUCCESS on success, otherwise appropriate status code.
+ * @return  RINF_SUCCESS on success, otherwise appropriate status code.
+ * @param   uIndex      The index of the requested variable.
+ * @param   ppszName    Where to store the name of the variable, caller frees with
+ *                      StrFree().
+ * @param   ppszExpr    Where to store the expression assigned to the variable,
+ *                      caller frees with StrFree().
  */
 int EvaluatorVariableValue(unsigned uIndex, char **ppszName, char **ppszExpr)
 {
@@ -2399,7 +2411,7 @@ int EvaluatorVariableValue(unsigned uIndex, char **ppszName, char **ppszExpr)
 /**
  * Returns the total number of operators.
  *
- * @returns The total number of operators.
+ * @return  The total number of operators.
  */
 unsigned EvaluatorOperatorCount(void)
 {
@@ -2410,7 +2422,7 @@ unsigned EvaluatorOperatorCount(void)
 /**
  * Initializes the globals.
  *
- * @returns RINF_SUCCESS on success, otherwise an appropriate status code.
+ * @return  RINF_SUCCESS on success, otherwise an appropriate status code.
  */
 int EvaluatorInitGlobals(void)
 {

@@ -41,8 +41,8 @@ typedef const UINTEGER64 *PCUINTEGER64;
 /**
  * Allocates memory and zeros before returning.
  *
- * @param   cb          Number of bytes to allocate.
- * @returns Pointer to the allocated, zerod memory, or NULL if no memory available.
+ * @return  Pointer to the allocated, zerod memory, or NULL if no memory available.
+ * @param   cb  Number of bytes to allocate.
  */
 void *MemAllocZ(uint32_t cb)
 {
@@ -56,10 +56,10 @@ void *MemAllocZ(uint32_t cb)
 /**
  * Safe copy a string.
  *
- * @param   pszDst      Pointer to the destination string.
- * @param   cbDst       Size of the destination string including NULL terminator.
- * @param   pszSrc      Pointer to the source string.
- * @result  Appropriate status code.
+ * @return  RINF_SUCCESS on success or appropriate status code.
+ * @param   pszDst  Pointer to the destination string.
+ * @param   cbDst   Size of the destination string including NULL terminator.
+ * @param   pszSrc  Pointer to the source string.
  */
 int StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc)
 {
@@ -82,7 +82,7 @@ int StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc)
 /**
  * Convert a 32-bit number to its binary form returned in a string.
  *
- * @returns The number converted to binary.
+ * @return  The number converted to binary.
  * @param   uValue          The number to convert to binary.
  * @param   fNegative       Whether it's a negative number or not.
  * @param   fDoubleSpace    Whether an extra space per binary digit is required.
@@ -146,8 +146,8 @@ char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, b
 /**
  * Duplicate a string.
  *
- * @param   pszSrc      Pointer to the source string to duplicate.
- * @returns A newly allocated, NULL terminated string copy, or NULL if no memory.
+ * @return  A newly allocated, NULL terminated string copy, or NULL if no memory.
+ * @param   pszSrc  Pointer to the source string to duplicate.
  */
 char *StrDup(const char *pszSrc)
 {
@@ -163,8 +163,8 @@ char *StrDup(const char *pszSrc)
 /**
  * Strip a string of leading and trailing white spaces.
  *
- * @param   pszBuf    The string to be stripped.
- * @returns Pointer to stripped string.
+ * @return  Pointer to stripped string.
+ * @param   pszBuf  The string to be stripped.
  */
 char *StrStrip(char *pszBuf)
 {
@@ -184,9 +184,9 @@ char *StrStrip(char *pszBuf)
 /**
  * Strip a string of trailing new line (\n)
  *
- * @param   pszBuf          The string to be stripped.
- * @param   pfStripped      Where to store if the line was stripped or not, can be NULL.
- * @returns Pointer to stripped string.
+ * @return  Pointer to stripped string.
+ * @param   pszBuf      The string to be stripped.
+ * @param   pfStripped  Where to store if the line was stripped or not, can be NULL.
  */
 char *StrStripLF(char *pszBuf, bool *pfStripped)
 {
@@ -210,14 +210,13 @@ char *StrStripLF(char *pszBuf, bool *pfStripped)
 /**
  * Convert a FLOAT into string equivalent in the specified radix.
  *
- * @param   pszDst          Pointer to the destination string.
- * @param   cbDst           Size of the destination string including NULL terminator.
- * @param   dValue          The value to convert.
- * @param   uiRadix         Which base should be used during conversion.
- * @param   iWidth          What width to format to.
- * @param   fFlags          Formatting flags (see header).
- *
- * @results Appropriate status code, RERR_NOT_SUPPORTED is returned for unsupported radices.
+ * @return  Appropriate status code, RERR_NOT_SUPPORTED for unsupported radices.
+ * @param   pszDst      Pointer to the destination string.
+ * @param   cbDst       Size of the destination string including NULL terminator.
+ * @param   dValue      The value to convert.
+ * @param   uiRadix     Which base should be used during conversion.
+ * @param   iWidth      What width to format to.
+ * @param   fFlags      Formatting flags (see header).
  */
 int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags)
 {
