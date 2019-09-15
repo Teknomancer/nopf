@@ -27,7 +27,7 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 * Build Tools for Visual Studio 2019, see [Building on command-line](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019) and [NMake reference](https://docs.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=vs-2019)
 
 #### Build configurations
-* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line. If no `BUILD_TYPE` is specified, a release build is created by default.
+* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line.
 
 ## Binaries
 Download Windows binary [here](https://sites.google.com/site/appnopf/downloads).
