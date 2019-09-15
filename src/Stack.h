@@ -63,6 +63,5 @@ int StackPush(PSTACK pStack, void *pvData);
 void *StackPop(PSTACK pStack);
 void *StackPeek(PSTACK pStack);
 
-
 #endif /* NOPFSTACK_H___ */
 
