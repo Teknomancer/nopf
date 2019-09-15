@@ -11,21 +11,23 @@ Execute `make` on the directory with Makefile.
 * `libreadline` (e.g., on Debian/Ubuntu apt-based distros `sudo apt-get install libreadline-dev`)
 
 #### Build configurations
-* Debug and release builds can be built using makefile switch `BUILD_TYPE=debug` or `BUILD_TYPE=release` passed to make on the command line.
+* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `make` on the command line.
 
 ## Compiling on Windows
 Setup the required environment by executing:  
 `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
 
-Once environment is setup, build by executing:  
-`nmake /F Win_Makefile all`
+Once environment is setup, create a release build by executing:  
+`nmake.exe /F Makefile.msc all`
+
+Note: The `all` switch in the above commands does a full-rebuild everytime (clean + build). For incremental builds, skip `all`.
 
 #### Dependencies
 * Appropriate Windows SDK
 * Build Tools for Visual Studio 2019, see [Building on command-line](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019) and [NMake reference](https://docs.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=vs-2019)
 
 #### Build configurations
-* Debug and release builds switches are not yet finished in `Win_Makefile`.
+* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line. If no `BUILD_TYPE` is specified, a release build is created by default.
 
 ## Binaries
 * Only a binary for Windows is provided in the source for now.
