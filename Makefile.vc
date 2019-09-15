@@ -17,7 +17,7 @@ LINKFLAGS =
 !else if "$(BUILD_TYPE)" == "debug"
 DIR_BIN = bin.debug
 DIR_OBJ = obj.debug
-CFLAGS = /Zi /D_DEBUG
+CFLAGS = /Zi /D_DEBUG /Fd$(DIR_OBJ)/
 LINKFLAGS = /DEBUG:FASTLINK
 !else
 ! error "BUILD_TYPE must be 'release' or 'debug'"
