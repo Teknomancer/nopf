@@ -92,3 +92,4 @@ bool DefinitelyLessThan(FLOAT a, FLOAT b);
 bool CanCastTo(FLOAT dValue, FLOAT dMaxValueForDst);
 
 #endif /* TYPES_H___ */
+
