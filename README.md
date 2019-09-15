@@ -1,8 +1,8 @@
 # nopf
 
-nopf (Numbers, OPerators, Functions) is an interactive, command-line expression evaluator.
+nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line expression evaluator/calculator.
 
-It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
+It has some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
 
 ## Compiling on GNU/Linux, Solaris, MacOS
 Execute `make` on the directory with Makefile.
