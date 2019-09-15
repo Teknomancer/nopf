@@ -23,17 +23,36 @@
 #include "Errors.h"
 #include "StringOps.h"
 
+/**
+ * Initializes a stack object.
+ *
+ * @param   pStack  The stack.
+ */
 void StackInit(PSTACK pStack)
 {
     pStack->pTop = NULL;
     pStack->cItems = 0;
 }
 
+/**
+ * Checks if the stack is empty.
+ *
+ * @return  @c true if empty, @c false otherwise.
+ * @param   pStack  The stack.
+ */
 bool StackIsEmpty(PSTACK pStack)
 {
     return pStack->pTop ? false : true;
 }
 
+
+/**
+ * Pushes an item on top of the stack.
+ *
+ * @return  RINF_SUCCESS on success, otherwise an appropriate status code.
+ * @param   pStack  The stack.
+ * @param   pvData  The item to push.
+ */
 int StackPush(PSTACK pStack, void *pvData)
 {
     PSTACKITEM pNode = MemAlloc(sizeof(STACKITEM));
@@ -58,6 +77,13 @@ int StackPush(PSTACK pStack, void *pvData)
         return RERR_NO_MEMORY;
 }
 
+
+/**
+ * Returns the item on top of the stack without popping it.
+ *
+ * @return  NULL if stack is empty, otherwise the item on top of the stack.
+ * @param   pStack  The stack.
+ */
 void *StackPeek(PSTACK pStack)
 {
     if (!StackIsEmpty(pStack))
@@ -69,6 +95,13 @@ void *StackPeek(PSTACK pStack)
     return NULL;
 }
 
+
+/**
+ * Pops the item on top of the stack and returns it.
+ *
+ * @return  NULL if stack is empty, otherwise the item on top of the stack.
+ * @param   pStack  The stack.
+ */
 void *StackPop(PSTACK pStack)
 {
     if (   pStack
@@ -86,6 +119,13 @@ void *StackPop(PSTACK pStack)
     return NULL;
 }
 
+
+/**
+ * Returns the number of items in the stack.
+ *
+ * @return  The number of items in the stack.
+ * @param   pStack  The stack.
+ */
 uint32_t StackSize(PSTACK pStack)
 {
     return pStack->cItems;

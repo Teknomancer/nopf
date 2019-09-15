@@ -40,9 +40,9 @@ SETTINGS const g_FactorySettings =
 /**
  * Creates a new settings blob, cloning @a pSource.
  *
- * @returns RC status code.
- * @param   ppSettings          Where to store the new settings blob.
- * @param   pFrom               The settings to clone.
+ * @return  Status code.
+ * @param   ppSettings  Where to store the new settings blob.
+ * @param   pFrom       The settings to clone.
  */
 int SettingsCreate(PSETTINGS *ppSettings, PCSETTINGS pSource)
 {
@@ -76,7 +76,7 @@ int SettingsCreate(PSETTINGS *ppSettings, PCSETTINGS pSource)
 /**
  * Destroys a settings structure.
  *
- * @param   pSettings           The settgins structure to destroy.
+ * @param   pSettings   The settgins structure to destroy.
  */
 void SettingsDestroy(PSETTINGS pSettings)
 {
