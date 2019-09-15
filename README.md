@@ -1,8 +1,8 @@
 # nopf
 
-nopf (Numbers, OPerators, Functions) is an interactive, command-line expression evaluator.
+nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line expression evaluator/calculator.
 
-It include some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
+It has some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
 
 ## Compiling on GNU/Linux, Solaris, MacOS
 Execute `make` on the directory with Makefile.
@@ -27,10 +27,10 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 * Build Tools for Visual Studio 2019, see [Building on command-line](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=vs-2019) and [NMake reference](https://docs.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=vs-2019)
 
 #### Build configurations
-* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line. If no `BUILD_TYPE` is specified, a release build is created by default.
+* Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line.
 
 ## Binaries
-* Only a binary for Windows is provided in the source for now.
+Download Windows binary [here](https://sites.google.com/site/appnopf/downloads).
 
 ## More information
 Visit the nopf homepage at http://sites.google.com/site/appnopf/
