@@ -18,7 +18,7 @@ Setup the required environment by executing:
 `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
 
 Once environment is setup, create a release build by executing:  
-`nmake.exe /F Makefile.msc all`
+`nmake.exe /F Makefile.vc all`
 
 Note: The `all` switch in the above commands does a full-rebuild everytime (clean + build). For incremental builds, skip `all`.
 
