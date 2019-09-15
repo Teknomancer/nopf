@@ -2,35 +2,62 @@
 # Windows NMAKE makefile for nopf
 #
 
+#
 # Defines files and directory names
+#
 EXECUTABLE_NAME = nopf.exe
 DIR_SRC = src
-DIR_BIN = bin
-DIR_OBJ = obj
+BUILD_TYPE = release
 
+!if "$(BUILD_TYPE)" == "release"
+DIR_BIN = bin.release
+DIR_OBJ = obj.release
+CFLAGS = /O2 /Ot
+LINKFLAGS =
+!else if "$(BUILD_TYPE)" == "debug"
+DIR_BIN = bin.debug
+DIR_OBJ = obj.debug
+CFLAGS = /Zi /D_DEBUG
+LINKFLAGS = /DEBUG:FASTLINK
+!else
+! error "BUILD_TYPE must be 'release' or 'debug'"
+!endif
+
+#
 # Transform source to object files
+#
 {$(DIR_SRC)}.c{$(DIR_OBJ)}.obj:
- @echo Compiling...
- $(CC) /c /Fo$(DIR_OBJ)\ $<
+ @echo Compiling release build...
+ $(CC) $(CFLAGS) /c /Fo$(DIR_OBJ)\ $<
 
+#
 # Transform object files to executable
+#
 $(EXECUTABLE_NAME) : $(DIR_OBJ)\*.obj
- @echo Linking...
- link /out:$(DIR_BIN)\$(EXECUTABLE_NAME) $(DIR_OBJ)\*.obj
+ @echo Linking release build...
+ link $(LINKFLAGS) /out:$(DIR_BIN)\$(EXECUTABLE_NAME) $(DIR_OBJ)\*.obj
 
-# Build application
+#
+# Build release application
+#
 nopf: $(EXECUTABLE_NAME)
 
+#
 # Create output directories
+#
 create_dirs:
  @if not exist $(DIR_OBJ) mkdir $(DIR_OBJ)
  @if not exist $(DIR_BIN) mkdir $(DIR_BIN)
 
+#
 # Delete output directories
+#
 clean:
  @if exist $(DIR_OBJ) rmdir /Q /S $(DIR_OBJ)
  @if exist $(DIR_BIN) rmdir /Q /S $(DIR_BIN)
 
+#
 # Target 'all' for a full rebuild 
+#
 all: clean create_dirs nopf
 
