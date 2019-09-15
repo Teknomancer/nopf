@@ -30,7 +30,7 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 * Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line. If no `BUILD_TYPE` is specified, a release build is created by default.
 
 ## Binaries
-Download Windows binary [here](https://sites.google.com/site/appnopf/downloads)
+Download Windows binary [here](https://sites.google.com/site/appnopf/downloads).
 
 ## More information
 Visit the nopf homepage at http://sites.google.com/site/appnopf/
