@@ -1,0 +1,5 @@
+_bin.release/*
+_deps.release/*
+_gen.release/*
+_objs.release/*
+
