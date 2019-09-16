@@ -2301,9 +2301,9 @@ int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
  * @param   iStart      Starting index to search from.
  * @param   piEnd       Where to store the last index from the search.
  */
-const char *EvaluatorFindFunctor(const char *pszCommand, size_t cchCommand, unsigned iStart, unsigned *piEnd)
+const char *EvaluatorFindFunctor(const char *pszCommand, uint32_t cchCommand, uint32_t iStart, uint32_t *piEnd)
 {
-    for (unsigned i = iStart; i < g_cFunctors; i++)
+    for (uint32_t i = iStart; i < g_cFunctors; i++)
     {
         PCFUNCTOR pFunctor = &g_aFunctors[i];
         if (!pFunctor)

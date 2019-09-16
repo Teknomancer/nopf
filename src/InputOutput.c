@@ -107,8 +107,8 @@ void DebugPrintf(char *pszMsg, ...)
 
 static char *TextLineGenerator(const char *pszText, int fState)
 {
-    static int s_iCommandIndex = 0;
-    static int s_cchCommand = 0;
+    static uint32_t s_iCommandIndex = 0;
+    static uint32_t s_cchCommand    = 0;
 
     /*
      * Only if this is a new word, initialize the data and length.
@@ -119,11 +119,11 @@ static char *TextLineGenerator(const char *pszText, int fState)
     if (!fState)
     {
         s_iCommandIndex = 0;
-        s_cchCommand = StrLen(pszText);
+        s_cchCommand    = StrLen(pszText);
     }
 
     /* Return the next name which partially matches from the command list. */
-    int iEnd = 0;
+    uint32_t iEnd = 0;
     const char *pszCommand = EvaluatorFindFunctor(pszText, s_cchCommand, s_iCommandIndex, &iEnd);
     s_iCommandIndex = iEnd;
     if (pszCommand)
