@@ -751,5 +751,5 @@ FUNCTOR g_aFunctors[] =
 };
 
 /** Total number of functors in the table. */
-const unsigned g_cFunctors = R_ARRAY_ELEMENTS(g_aFunctors);
+const uint32_t g_cFunctors = R_ARRAY_ELEMENTS(g_aFunctors);
 
