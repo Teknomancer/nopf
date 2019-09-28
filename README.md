@@ -33,4 +33,4 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 Download Windows binary [here](https://sites.google.com/site/appnopf/downloads).
 
 ## More information
-Visit the nopf homepage at http://sites.google.com/site/appnopf/
+Visit the nopf homepage at https://sites.google.com/site/appnopf/
