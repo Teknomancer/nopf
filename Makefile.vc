@@ -10,13 +10,13 @@ DIR_SRC = src
 BUILD_TYPE = release
 
 !if "$(BUILD_TYPE)" == "release"
-DIR_BIN = bin.release
-DIR_OBJ = obj.release
+DIR_BIN = _bin.release
+DIR_OBJ = _obj.release
 CFLAGS = /O2 /Ot
 LINKFLAGS =
 !else if "$(BUILD_TYPE)" == "debug"
-DIR_BIN = bin.debug
-DIR_OBJ = obj.debug
+DIR_BIN = _bin.debug
+DIR_OBJ = _obj.debug
 CFLAGS = /Zi /D_DEBUG /Fd$(DIR_OBJ)/
 LINKFLAGS = /DEBUG:FASTLINK
 !else
