@@ -1,5 +1,16 @@
+# nopf output folders
 _bin.release/*
-_deps.release/*
+_dep.release/*
 _gen.release/*
-_objs.release/*
+_obj.release/*
+_bin.debug/*
+_dep.debug/*
+_gen.debug/*
+_obj.debug/*
+
+# visual slickedit project files
+nopf.vpj
+nopf.vpw
+nopf.vpwhist
+nopf.vtg
 
