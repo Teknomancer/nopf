@@ -61,5 +61,20 @@
  */
 #define R_BIT(a)                                     (1U << (a))
 
+/** @def R_GCC_VERSION
+ * Gets the GCC compiler version. */
+#if defined(__GNUC__)
+# define R_GCC_VERSION                               (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+#endif
+
+/** @def R_FALLTHRU.
+ * Flags fall-through in case switch to the compiler (usually to avoid warnings
+ * when explicit fall-through is enforced). */
+#if defined(__GNUC__) && R_GCC_VERSION >= 70000     /* GCC 7.0.0+ */
+# define R_FALLTHRU()                               __attribute__((fallthrough))
+#else
+# define R_FALLTHRU()                               do { } while (0)
+#endif
+
 #endif /* GENERICS_H___ */
 

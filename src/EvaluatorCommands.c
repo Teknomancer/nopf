@@ -341,13 +341,7 @@ int FnCr0(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 
     if (pAtom)
     {
-        FLOAT dValue = pAtom->u.dValue;
-
-        FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, (FLOAT)MAX_U64INTEGER))
-            return RERR_INVALID_COMMAND_PARAMETER;
-
-        U64INTEGER uValue = (U64INTEGER)dAbsResult;
+        UINTEGER const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr0Desc);
     }
     else
@@ -406,13 +400,7 @@ int FnCr4(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 
     if (pAtom)
     {
-        FLOAT dValue = pAtom->u.dValue;
-
-        FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
-            return RERR_INVALID_COMMAND_PARAMETER;
-
-        U64INTEGER uValue = (U64INTEGER)dAbsResult;
+        UINTEGER const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr4Desc);
     }
     else
@@ -471,13 +459,7 @@ int FnEflags(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 
     if (pAtom)
     {
-        FLOAT dValue = pAtom->u.dValue;
-
-        FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
-            return RERR_INVALID_COMMAND_PARAMETER;
-
-        U64INTEGER uValue = (U64INTEGER)dAbsResult;
+        UINTEGER const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EflagsDesc);
     }
     else
@@ -536,13 +518,7 @@ int FnEfer(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 
     if (pAtom)
     {
-        FLOAT dValue = pAtom->u.dValue;
-
-        FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
-            return RERR_INVALID_COMMAND_PARAMETER;
-
-        U64INTEGER uValue = (U64INTEGER)dAbsResult;
+        UINTEGER const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EferDesc);
     }
     else
@@ -622,13 +598,7 @@ int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 
     if (pAtom)
     {
-        FLOAT dValue = pAtom->u.dValue;
-
-        FLOAT dAbsResult = FABSFLOAT(dValue);
-        if (!CanCastTo(dAbsResult, MAX_U64INTEGER))
-            return RERR_INVALID_COMMAND_PARAMETER;
-
-        U64INTEGER uValue = (U64INTEGER)dAbsResult;
+        UINTEGER const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &CSAttrDesc);
     }
     else
