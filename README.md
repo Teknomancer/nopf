@@ -14,7 +14,7 @@ Execute `make` on the directory with Makefile.
 * Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `make` on the command line.
 
 ## Compiling on Windows
-Setup the required environment by executing:  
+Setup the required environment by executing (for 32-bit host, use `vcvars32.bat` in the command below):  
 `%comspec% /k "<path-to-Visual-Studio>\VC\Auxiliary\Build\vcvars64.bat"`
 
 Once environment is setup, create a release build by executing:  
