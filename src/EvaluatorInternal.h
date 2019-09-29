@@ -68,6 +68,19 @@
 /** 1 Nano */
 #define _1NANO                      1000000000LL
 
+
+/** NUMBER: A number. */
+typedef struct NUMBER
+{
+    UINTEGER    uValue;
+    FLOAT       dValue;
+} NUMBER;
+/** Pointer to an Number object. */
+typedef NUMBER *PNUMBER;
+/** Pointer to a const Number object. */
+typedef const NUMBER *PCNUMBER;
+
+
 /**
  * ATOMTYPE: The type of Atom.
  */
@@ -102,9 +115,8 @@ typedef struct ATOM
     /** The data union. */
     union
     {
-        /** Value of the number for a Number Atom. */
-        /* If this needs to change, don't forget VARBUCKET */
-        FLOAT                    dValue;
+        /** The NUMBER for a Number Atom. */
+        struct NUMBER            Number;
         /** Pointer to the OPERATOR for an Operator Atom. */
         struct OPERATOR const   *pOperator;
         /** Pointer to the FUNCTOR for a Functor Atom. */
@@ -121,7 +133,6 @@ typedef ATOM *PATOM;
 typedef const ATOM *PCATOM;
 
 
-
 /** An Operator function. */
 typedef int FNOPERATOR(PEVALUATOR pEval, PATOM apAtoms[]);
 /** Pointer to an Operator function. */
@@ -133,7 +144,7 @@ typedef FNOPERATOR *PFNOPERATOR;
  */
 typedef enum OPERATORDIR
 {
-    enmDirNone = 0x30,
+    enmDirNone = 1,
     enmDirLeft,
     enmDirRight
 } OPERATORDIR;
@@ -167,8 +178,6 @@ typedef struct OPERATOR
 typedef OPERATOR *POPERATOR;
 /** Pointer to a const Operator object. */
 typedef const OPERATOR *PCOPERATOR;
-
-
 
 
 /** A Functor function. */
@@ -220,7 +229,6 @@ typedef struct VARIABLE
 typedef VARIABLE *PVARIABLE;
 /** Pointer to a const Varbucket object. */
 typedef const VARIABLE *PCVARIABLE;
-
 
 
 /** A Command function. */

@@ -51,7 +51,9 @@ typedef struct EVALRESULT
     char            szCommand[MAX_COMMAND_NAME_LENGTH];
     /** Output of the command if it's a command. */
     char            szCommandResult[MAX_COMMAND_RESULT_LENGTH];
-    /** Value of the parse/evaluation phase. */
+    /** Integer value of the parse/evaluation phase. */
+    UINTEGER        uValue;
+    /** Float value of the parse/evaluation phase. */
     FLOAT           dValue;
     /** Index into the original expression if an error occurred. */
     int             ErrorIndex;

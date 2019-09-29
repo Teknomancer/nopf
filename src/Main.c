@@ -51,14 +51,11 @@
 #define CMD_VARS                    "vars"
 
 
-static char *ValueAsBinary(FLOAT dValue, bool fNegative, size_t *pcDigits)
+static char *GetValueAsBinaryString(UINTEGER uValue, size_t *pcDigits)
 {
-    FLOAT dAbsResult = FABSFLOAT(dValue);
-    if (!CanCastTo(dAbsResult, (FLOAT)MAX_U64INTEGER))
-        return NULL;
-
-    U64INTEGER uValue = (U64INTEGER)dAbsResult;
-    char *pszBuf = StrAlloc(65 + 20);    /* UINT64_MAX = 1111111111111111111111111111111111111111111111111111111111111111 = 64 chars */
+    char *pszBuf = StrAlloc(  sizeof("1111111111111111111111111111111111111111111111111111111111111111")
+                            + 15 /* 1 space between each 4 bits, so for 64-bits => 16 spaces. */
+                            + 1  /* 1 for negative space or dash */);
     if (!pszBuf)
         return NULL;
 
@@ -70,14 +67,14 @@ static char *ValueAsBinary(FLOAT dValue, bool fNegative, size_t *pcDigits)
         pszBuf[i++] = '0' + (uValue % 2);
         uValue /= 2;
         ++c;
-        if (c % 4 == 0)
+        if (   c % 4 == 0
+            && uValue > 0)
             pszBuf[i++] = ' ';
     } while (uValue > 0);
 
     if (*pcDigits)
-        *pcDigits = c - 1;
+        *pcDigits = c;
 
-    pszBuf[i++] = fNegative ? '-' : ' ';
     pszBuf[i++] = '\0';
 
     size_t cBuf = i - 1; /* StrLen(pszBuf); */
@@ -90,100 +87,106 @@ static char *ValueAsBinary(FLOAT dValue, bool fNegative, size_t *pcDigits)
     return pszBuf;
 }
 
-static void PrintResult(PCSETTINGS pSettings, FLOAT dResult)
+
+static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
 {
-    bool fNegative = DefinitelyLessThan(dResult, (FLOAT)0);
-    FLOAT dAbsResult = FABSFLOAT(dResult);
-    char szDstNat[512];
-    char szDst32[sizeof(STR_OVERFLOW) * 3];
-    char szDst64[sizeof(STR_OVERFLOW) * 3];
-    StrNPrintf(szDst64, sizeof(szDst64), STR_OVERFLOW STR_OVERFLOW);
-    StrNPrintf(szDst32, sizeof(szDst32), STR_OVERFLOW STR_OVERFLOW);
-    StrNPrintf(szDstNat, sizeof(szDstNat), STR_OVERFLOW);
-
-    bool fCastToU64 = CanCastTo(dResult, (FLOAT)MAX_U64INTEGER);
-    bool fCastToU32 = CanCastTo(dResult, (FLOAT)MAX_U32INTEGER);
-
     /*
-     * Output in various radices.
+     * Length required for formatting output.
+     *
+     * ---------------------------------------------------------
+     *  Radix                  Number  Digits    Prefix   Total
+     * ---------------------------------------------------------
+     * UINT32_MAX:
+     *    Dec              4294967295      10                10
+     *    Oct             37777777777      11        0       12
+     *    Hex                ffffffff       8       0x       10
+     * --------------------------------------------------------
+     * Maximum                                               12
+     *
+     * UINT64_MAX:
+     *    Dec    18446744073709551615      20                20
+     *    Oct  1777777777777777777777      22        0       23
+     *    Hex        ffffffffffffffff      16       0x       18
+     * --------------------------------------------------------
+     * Maximum                                               23
      */
+    int const      cIndent0 = 1;       /* Indent for 1st column. */
+    int const      cIndent1 = 2;       /* Indent for 2nd column. */
+    int const      cIndent2 = 2;       /* Indent for 3rd column. */
+
+    FLOAT const    dResult = pEval->Result.dValue;
+    UINTEGER const uResult = pEval->Result.uValue;
     if (pSettings->fOutputBaseBool)
     {
-        if (fCastToU32 && !fNegative)
-        {
-            if (EssentiallyEqual(dResult, 1.0))
-                StrNPrintf(szDstNat, sizeof(szDstNat), "%11s", "true");
-            else if (EssentiallyEqual(dResult, 0.0))
-                StrNPrintf(szDstNat, sizeof(szDstNat), "%11s", "false");
-            else
-                StrNPrintf(szDstNat, sizeof(szDstNat), "%11s", "NAB");
-        }
-        else
-            StrNPrintf(szDstNat, sizeof(szDstNat), "%11s", "NAB");
+        bool const fResult = !!uResult;
+
+        char szDstBool[sizeof("false")];
+        StrNPrintf(szDstBool, sizeof(szDstBool), "%s", fResult ? "true" : "false");
 
         ColorPrintf(PREFIX_COLOR, "Bool:");
-        ColorPrintf(PARAM_COLOR, "  %s (N)\n", szDstNat);
+        ColorPrintf(PARAM_COLOR,  "%*s%12s (N)\n", cIndent0, "", szDstBool);
     }
 
     if (pSettings->fOutputBaseDec)
     {
-        if (fCastToU64) /* UINT64_MAX = 18446744073709551615 = 20 chars*/
-            StrNPrintf(szDst64, sizeof(szDst64), "%20" FMTU64INTEGER_NAT, (U64INTEGER)dResult);
+        char szDst32[sizeof("4294967295")];
+        StrNPrintf(szDst32, sizeof(szDst32), "%" FMTU32INTEGER_NAT, (U32INTEGER)uResult);
 
-        if (fCastToU32) /* UINT32_MAX = 4294967295 = 10 chars */
-            StrNPrintf(szDst32, sizeof(szDst32), "%10" FMTU32INTEGER_NAT, (U32INTEGER)dResult);
+        char szDst64[sizeof("18446744073709551615")];
+        StrNPrintf(szDst64, sizeof(szDst64), "%" FMTU64INTEGER_NAT, uResult);
 
-        if (fNegative)
-            StrNPrintf(szDstNat, sizeof(szDstNat), "-%" FMTFLOAT, dAbsResult);
-        else
-            StrNPrintf(szDstNat, sizeof(szDstNat), " %" FMTFLOAT, dResult);
+        char szDstFloat[128];
+        StrNPrintf(szDstFloat, sizeof(szDstFloat), "%" FMTFLOAT, dResult);
 
         ColorPrintf(PREFIX_COLOR, "Dec :");
-        ColorPrintf(PARAM_COLOR,  "   %.10s (U32)  %.20s (U64)  %s (N)\n", szDst32, szDst64, szDstNat);
+        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+                    cIndent0, "", szDst32,
+                    cIndent1, "", szDst64,
+                    cIndent2, "", szDstFloat);
     }
 
     if (pSettings->fOutputBaseHex)
     {
-        if (fCastToU64) /* UINT64_MAX = fffffffffffffffff = 16 chars */
-        {
-            StrNPrintf(szDst64, sizeof(szDst64), "%016" FMTU64INTEGER_HEX, (U64INTEGER)dResult);
-            if (fNegative)
-                StrNPrintf(szDstNat, sizeof(szDstNat), "-0x%0" FMTU64INTEGER_HEX, (U64INTEGER)dAbsResult);
-            else
-                StrNPrintf(szDstNat, sizeof(szDstNat), " 0x%0" FMTU64INTEGER_HEX, (U64INTEGER)dResult);
-        }
+        char szDst32[sizeof("ffffffff") + sizeof("0x")];
+        StrNPrintf(szDst32, sizeof(szDst32), "0x%08" FMTU32INTEGER_HEX, (U32INTEGER)uResult);
 
-        if (fCastToU32) /* UINT32_MAX = ffffffff = 8 chars */
-            StrNPrintf(szDst32, sizeof(szDst32), "%08" FMTU32INTEGER_HEX, (U32INTEGER)dResult);
+        char szDst64[sizeof("ffffffffffffffff") + sizeof("0x")];
+        StrNPrintf(szDst64, sizeof(szDst64), "0x%016" FMTU64INTEGER_HEX, uResult);
+
+        char szDstNat[sizeof("ffffffffffffffff") + sizeof("0x")];
+        StrNPrintf(szDstNat, sizeof(szDstNat), "0x%" FMTU64INTEGER_HEX, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Hex :");
-        ColorPrintf(PARAM_COLOR,  "   0x%.8s (U32)    0x%.16s (U64)  %s (N)\n", szDst32, szDst64, szDstNat);
+        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+                    cIndent0, "", szDst32,
+                    cIndent1, "", szDst64,
+                    cIndent2, "", szDstNat);
     }
 
     if (pSettings->fOutputBaseOct)
     {
-        if (fCastToU64)
-        {
-            StrNPrintf(szDst64, sizeof(szDst64), "%018" FMTU64INTEGER_OCT, (U64INTEGER)dResult);
-            if (fNegative)
-                StrNPrintf(szDstNat, sizeof(szDstNat), "-0%0" FMTU64INTEGER_OCT, (U64INTEGER)dAbsResult);
-            else
-                StrNPrintf(szDstNat, sizeof(szDstNat), " 0%0" FMTU64INTEGER_OCT, (U64INTEGER)dResult);
-        }
+        char szDst32[sizeof("37777777777") + sizeof("0")];
+        StrNPrintf(szDst32, sizeof(szDst32), "0%08" FMTU32INTEGER_OCT, (U32INTEGER)uResult);
 
-        if (fCastToU32) /* UINT32_MAX = 37777777777 = 11 chars */
-            StrNPrintf(szDst32, sizeof(szDst32), "%011" FMTU32INTEGER_OCT, (U32INTEGER)dResult);
+        char szDst64[sizeof("1777777777777777777777") + sizeof("0")];
+        StrNPrintf(szDst64, sizeof(szDst64), "0%016" FMTU64INTEGER_OCT, uResult);
+
+        char szDstNat[sizeof("1777777777777777777777") + sizeof("0")];
+        StrNPrintf(szDstNat, sizeof(szDstNat), "0%" FMTU64INTEGER_OCT, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Oct :");
-        ColorPrintf(PARAM_COLOR, " 0%.11s (U32)   0%.18s (U64)  %s (N)\n", szDst32, szDst64, szDstNat);
+        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+                    cIndent0, "", szDst32,
+                    cIndent1, "", szDst64,
+                    cIndent2, "", szDstNat);
     }
 
     if (pSettings->fOutputBaseBin)
     {
         size_t cDigits = 1;
-        char *pszBin = ValueAsBinary(dResult, fNegative, &cDigits);
+        char *pszBin = GetValueAsBinaryString(uResult, &cDigits);
         ColorPrintf(PREFIX_COLOR, "Bin :");
-        ColorPrintf(PARAM_COLOR, " %s (%d)\n", pszBin ? pszBin : " NA", cDigits);
+        ColorPrintf(PARAM_COLOR, "%*s%s (%u)\n", cIndent0, "", pszBin ? pszBin : " N/A", (unsigned)cDigits);
         if (pszBin)
             StrFree(pszBin);
     }
@@ -198,9 +201,11 @@ static void PrintHelp(PSETTINGS pSettings)
 
 #define INDENT_SPACES   ""
 
-    ColorPrintf(TCOLOR_BOLD_GREEN, "%s (c) 2012, Ramshankar (aka Teknomancer)\n", APP_EXECNAME);
-    Printf("%s is a command-line expression evaluator that started as a bored weekend project.\n", APP_EXECNAME);
-    Printf("Feel free to send me any feedback at <v.ramshankar(at)gmail.com>.\n\n");
+    ColorPrintf(TCOLOR_BOLD_GREEN, "%s (c) 2012 Ramshankar (aka Teknomancer)\n", APP_EXECNAME);
+    Printf("Compiled: %s\n", __TIMESTAMP__);
+    Printf("  %s is a command-line expression evaluator that started as sunny day project.\n", APP_EXECNAME);
+    Printf("  %s is free software, published under the GNU Public License (GPLv3).\n", APP_EXECNAME);
+    Printf("  For feedback and patches, e-mail:  <v.ramshankar(at)gmail.com>.\n\n");
 
     Printf(INDENT_SPACES "Operators:\n");
 
@@ -223,6 +228,7 @@ static void PrintHelp(PSETTINGS pSettings)
         StrFree(pszDesc);
     }
 
+    Printf("\n");
     Printf(INDENT_SPACES "Functions:\n");
 
     /*
@@ -262,24 +268,45 @@ static void PrintHelp(PSETTINGS pSettings)
         StrFree(pszDesc);
     }
 
-    Printf("\tLegend:\n");
-    ColorPrintf(PREFIX_COLOR, "\t <numX> ");
-    Printf("A floating point number.\n");
-    Printf("\t\tAny functor/operator taking <numX> will treat it as floating point.\n");
+    const char * const pszIndent = " ";
+    const int          cIndent   = -10;
+    /* Legend. */
+    Printf("\n");
+    {
+        Printf("Legend:\n");
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<numx>");
+        Printf("A number (internally represented as both integer and floating point).\n");
+        Printf("%s%*sAny functor/operator taking <numX> will compute both integer and float.\n", pszIndent, cIndent, "");
+        Printf("%s%*sSome functors/operators make compute float and cast to integer.\n", pszIndent, cIndent, "");
 
-    ColorPrintf(PREFIX_COLOR, "\t <intX> ");
-    Printf("An integer.\n");
-    Printf("\t\tAny functor/operator taking <intX> indicates it will treat it as integer.\n");
-    Printf("\t\tSince all <numX> are float, the functor/operator will cast it to integer.\n");
-    Printf("\t\tIf <numX> cannot be represented as an integer, it will result in an overflow.\n");
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<intX>");
+        Printf("An integer.\n");
+        Printf("%s%*sAny functor/operator taking <intX> will compute integer and cast to float.\n", pszIndent, cIndent, "");
 
-    ColorPrintf(PREFIX_COLOR, "\t <cond> ");
-    Printf("A condition or truth value.\n");
-    Printf("\t\tA logical condition, with \"true\" being 0 and \"false\" being non-zero.\n");
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<cond>");
+        Printf("A condition or truth value.\n", pszIndent, cIndent, "");
+        Printf("%s%*sA logical condition, with \"true\" being 0 and \"false\" being non-zero.\n", pszIndent, cIndent, "");
 
-    ColorPrintf(PREFIX_COLOR, "\t <expr> ");
-    Printf("An expression such as \"5 + 4 * 3.6\" or \"42/sum(1024,128,512)\"\n");
-    Printf("\t\tExpressions always result in a <numX>\n");
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<expr>");
+        Printf("An expression such as \"5 + 4 * 3.6\" or \"42 / sum(1024,128,512)\"\n");
+        Printf("%s%*sExpressions always result in a <numX>\n", pszIndent, cIndent, "");
+    }
+
+    /* Number prefixes. */
+    Printf("\n");
+    {
+        Printf("Number prefixes:\n");
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "[n|N]");
+        Printf("Binary (e.g. \"n111\" is 7).\n");
+
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "[0]");
+        Printf("Octal (e.g. \"033\" is 27).\n");
+
+        ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "[0x|0X]");
+        Printf("Hexadecimal (e.g. \"b111\" is 45329).\n");
+    }
+
+    Printf("\n");
 
 #undef INDENT_SPACES
 }
@@ -312,15 +339,17 @@ static void PrintVars(PSETTINGS pSettings)
             break;
         }
     }
+
+    Printf("\n");
 }
 
 
-static void PrintVarAssigned(PSETTINGS pSettings, PEVALUATOR pEval)
+static void PrintVarAssigned(PSETTINGS pSettings, PCEVALUATOR pEval)
 {
     ColorPrintf(PARAM_COLOR, "  Stored variable '%s'\n", pEval->Result.szVariable);
 }
 
-static void PrintCommandEvaluated(PSETTINGS pSettings, PEVALUATOR pEval)
+static void PrintCommandEvaluated(PSETTINGS pSettings, PCEVALUATOR pEval)
 {
     ColorPrintf(PREFIX_COLOR, "%s:\n", pEval->Result.szCommand);
     ColorPrintf(PARAM_COLOR, "%s\n",   pEval->Result.szCommandResult);
@@ -350,7 +379,7 @@ static int ProcessExpression(PSETTINGS pSettings, PEVALUATOR pEval, const char *
         else if (pEval->Result.fCommandEvaluated)
             PrintCommandEvaluated(pSettings, pEval);
         else
-            PrintResult(pSettings, pEval->Result.dValue);
+            PrintResult(pSettings, pEval);
     }
     else
     {

@@ -129,7 +129,7 @@ PFUNCTOR g_paSortedFunctors = NULL;
 *******************************************************************************/
 static inline bool CanCastAtom(PCATOM pAtom, FLOAT MinValue, FLOAT MaxValue)
 {
-    return (DefinitelyLessThan(pAtom->u.dValue, MaxValue) && DefinitelyGreaterThan(pAtom->u.dValue, MinValue));
+    return (DefinitelyLessThan(pAtom->u.Number.dValue, MaxValue) && DefinitelyGreaterThan(pAtom->u.Number.dValue, MinValue));
 }
 
 static inline void AtomInit(PATOM pAtom)
@@ -189,7 +189,7 @@ static inline bool OperatorIsAssignment(PCOPERATOR pOperator)
 
 static inline bool NumberIsNegative(PATOM pAtom)
 {
-    return DefinitelyLessThan(pAtom->u.dValue, (FLOAT)0);
+    return DefinitelyLessThan(pAtom->u.Number.dValue, (FLOAT)0);
 }
 
 static inline bool AtomIsCloseParenthesis(PCATOM pAtom)
@@ -253,7 +253,8 @@ static void EvaluatorInvertAtomArray(PATOM apAtoms[], uint32_t cAtoms)
 /**
  * Searches for a variable and returns a Variable Atom if found.
  *
- * @return  Pointer to an allocated Variable Atom or NULL if @a pszVariable could not be found.
+ * @return  Pointer to an allocated Variable Atom or NULL if @a pszVariable could
+ *          not be found.
  * @param   pszVariable     Name of the variable to find.
  */
 static PVARIABLE EvaluatorFindVariable(const char *pszVariable, PLIST pVarList)
@@ -339,143 +340,201 @@ void EvaluatorPrintVarList(PLIST pList)
 /**
  * Parses a number and returns a Numeric Atom.
  *
- * @param   pszExpr                 The whitespace skipped expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @return  Pointer to an allocated Number Atom or NULL if @a pszExpr was not a number.
+ * @return  Pointer to an allocated Number Atom or NULL if @a pszExpr is not a
+ *          number.
+ * @param   pszExpr     The whitespace skipped expression to parse.
+ * @param   ppszEnd     Where to store till what point in pszExpr was scanned.
  */
 static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 {
-    char szNum[2048];
-    int i = 0;
+    /*
+     * UINT64_MAX is the maximum supported type which is:
+     *   In binary     :  1111111111111111111111111111111111111111111111111111111111111111 (64 digits)
+     *   In octal      :  1777777777777777777777                                           (22 digits)
+     *   In decimal    :  18446744073709551615                                             (20 digits)
+     *   In hexadecimal:  ffffffffffffffff                                                 (16 digits)
+     *
+     * We allow inputing numbers in binary, so the maximum digits we need to allow is 64.
+     */
+    char szNum[64];
+    int  iRadix = 0;
+    int  iNum   = 0;
+    bool fDecPt = false;
+
+    DEBUGPRINTF(("Parse number\n"));
+
     const char *pszStart = pszExpr;
-    int iRadix = 0;
-
-    /*
-     * Binary prefix.
-     */
-    if (*pszExpr == 'b' || *pszExpr == 'B')
+    while (pszExpr)
     {
-        ++pszExpr;
-        while (*pszExpr)
-        {
-            if (*pszExpr == '1' || *pszExpr == '0')
-                szNum[i++] = *pszExpr;
-            else if (!isspace(*pszExpr))
-                break;
+        bool fStopNumParse = false;
 
+        /*
+         * Skip whitespace.
+         */
+        if (isspace(*pszExpr))
+        {
             pszExpr++;
-            if (i >= sizeof(szNum) - 1)
-                break;
+            continue;
         }
-        iRadix = 2;
-    }
-    else if (*pszExpr == '0')
-    {
-        /*
-         * Octal prefix.
-         */
-        ++pszExpr;
-        while (*pszExpr)
-        {
-            if (*pszExpr >= '0' && *pszExpr < '8')
-                szNum[i++] = *pszExpr;
-            else if (!isspace(*pszExpr))
-                break;
-
-            pszExpr++;
-            if (i >= sizeof(szNum) - 1)
-                break;
-        }
-        iRadix = 8;
 
         /*
-         * Hexadecimal prefix.
+         * If the number buffer is full, stop.
          */
-        if (   i == 0
-            && (*pszExpr == 'x' || *pszExpr == 'X'))
-        {
-            ++pszExpr;
-            while (*pszExpr)
-            {
-                if (   isdigit(*pszExpr)
-                    || (*pszExpr >= 'a' && *pszExpr <= 'f')
-                    || (*pszExpr >= 'A' && *pszExpr <= 'F'))
-                {
-                    szNum[i++] = *pszExpr;
-                }
-                else if (!isspace(*pszExpr))
-                    break;
-
-                pszExpr++;
-                if (i >= sizeof(szNum) - 1)
-                    break;
-            }
-            iRadix = 16;
-        }
-    }
-
-    /*
-     * If nothing has been accumulated in our 'szNum' array, we've not
-     * got any recognized numeric under whatever radices we've checked.
-     * Reset pointer to the original & try parsing without any prefix.
-     */
-    if (i == 0)
-    {
-        pszExpr = pszStart;
-        iRadix = 0;
+        if (iNum == sizeof(szNum))
+            break;
 
         /*
-         * Hexadecimal sans prefix, or Decimal.
+         * Parse explicit prefixes.
          */
-        while (*pszExpr)
+        if (   iNum == 0
+            || (   iNum == 1
+                && iRadix == 8))
         {
-            if (isdigit(*pszExpr))
+            switch (*pszExpr)
             {
-                szNum[i++] = *pszExpr;
-            }
-            else if (*pszExpr == '.')
-            {
-                if (iRadix == 0)    /* eg:  ".5" */
+                /* Binary. */
+                case 'n':
+                case 'N':
                 {
-                    szNum[i++] = *pszExpr;
-                    iRadix = 10;
+                    iRadix = 2;
+                    ++pszExpr;
+                    continue;
                 }
-                else                /* eg: "fa.5" or "10.5.5" */
+
+                /* Octal. */
+                case '0':
                 {
-                    iRadix = -1;
-                    break;
+                    iRadix = 8;
+                    szNum[iNum++] = *pszExpr++;
+                    continue;
                 }
-            }
-            else if (   (*pszExpr >= 'A' && *pszExpr <= 'F')
-                     || (*pszExpr >= 'a' && *pszExpr <= 'f'))
-            {
-                if (iRadix != 10)   /* eg: "af" or "53a"  */
+
+                /* Hexadecimal. */
+                case 'x':
+                case 'X':
+                {
                     iRadix = 16;
-                else                /* eg: ".af" */
-                {
-                    iRadix = -1;
-                    break;
+                    ++pszExpr;
+                    continue;
                 }
-                szNum[i++] = *pszExpr;
             }
-            else if (!isspace(*pszExpr))
-                break;
-
-            pszExpr++;
-            if (i >= sizeof(szNum) - 1)
-                break;
         }
 
-        if (i > 0 && iRadix == 0)
-            iRadix = 10;
+        /*
+         * Parse number (and decipher a prefix).
+         */
+        switch (*pszExpr)
+        {
+            case '.':
+            {
+                if (fDecPt)             /* If decimal point has already been used once in this number (e.g.: "10.5.5") */
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+
+                if (iRadix == 0)        /* If no prefix has been specified thus far, use implicit decimal prefix (for float). */
+                {
+                    iRadix = 10;
+                    szNum[iNum++] = *pszExpr++;
+                    fDecPt = true;
+                    continue;
+                }
+
+                if (iRadix != 10)       /* Using decimal point after for a non-decimal number (e.g.: "0xffec.5"). */
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+            }
+
+            case 'f': case 'F':
+            case 'e': case 'E':
+            case 'd': case 'D':
+            case 'c': case 'C':
+            case 'b': case 'B':
+            case 'a': case 'A':
+            {
+                if (iRadix == 0)        /* If no prefix has been specified, try implicit hexadecimal prefix. */
+                    iRadix = 16;
+                else if (iRadix != 16)  /* Using non-hexadecimal digits after specifying a hexadecimal prefix. */
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+                R_FALLTHRU();
+            }
+            case '9':
+            case '8':
+            {
+                if (iRadix == 8)        /* Using non-octal digits after specifying an octal prefix. */
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+                R_FALLTHRU();
+            }
+            case '7': case '6':
+            case '5': case '4':
+            case '3': case '2':
+            {
+                if (iRadix == 2)        /* Using non-binary digits after specifying a binary prefix. */
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+                R_FALLTHRU();
+            }
+            case '0':
+            case '1':
+            {
+                szNum[iNum++] = *pszExpr++;
+                continue;
+            }
+
+            /*
+             * All other characters that are not part of a number.
+             */
+            default:
+            {
+                /*
+                 * If we have an unrecognized character with -NO- numeric digits parsed so far
+                 * (with or without a prefix), it cannot be a number, (e.g.: "ULL").
+                 */
+                if (iNum == 0)
+                {
+                    pszExpr = pszStart;
+                    return NULL;
+                }
+
+                /*
+                 * If we have an unrecognized character -WITH- numeric digits parsed so far
+                 * (with or without a prefix), it -might- be a number (e.g.: "32UL"). Stop
+                 * parsing the number in this loop, but proceed with overall parsing.
+                 */
+                fStopNumParse = true;
+                break;
+            }
+        }
+
+        /*
+         * Check if we need to stop parsing the number and bail from this loop.
+         */
+        if (fStopNumParse)
+        {
+            Assert(iNum > 0);
+            if (iRadix == 0)    /* If we have not determined a prefix thus far, it implies a decimal prefix. */
+                iRadix = 10;
+            break;
+        }
     }
 
-    if (   i == 0
-        || iRadix == 0)
+    if (iRadix == 0)
     {
         pszExpr = pszStart;
         return NULL;
     }
+    Assert(iNum > 0);
 
     /*
      * Handle suffixes, order of array is important (longest to shortest).
@@ -505,150 +564,62 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     /*
      * We've got a number. Terminate our string buffer, and convert it.
      */
-    szNum[i] = '\0';
+    szNum[iNum] = '\0';
     char *pszEndTmp = NULL;
-    FLOAT dValue = 0;
-    errno = 0;
-    if (iRadix != 10)
-        dValue = (FLOAT)strtoull(szNum, &pszEndTmp, iRadix);
-    else
-        dValue = (FLOAT)strtold(szNum, &pszEndTmp);
 
-    /*
-     * An error while converting the number.
-     */
+    errno = 0;
+    UINTEGER const uValue = strtoull(szNum, &pszEndTmp, iRadix);
     if (errno)
     {
         DEBUGPRINTF(("Error while string to unsigned conversion of %s\n", szNum));
         return NULL;
     }
 
+    /*
+     * Covert the number as a float value as well.
+     */
+    FLOAT dValue = strtold(szNum, &pszEndTmp);
+    if (iRadix == 10 || iRadix == 0)
+    {
+        dValue = strtold(szNum, &pszEndTmp);
+        if (errno)
+        {
+            DEBUGPRINTF(("Error while string to unsigned conversion of %s\n", szNum));
+            return NULL;
+        }
+    }
+    else
+        dValue = uValue;
+
+    /*
+     * Create a new Number Atom and store the numeric values.
+     */
     PATOM pAtom = MemAlloc(sizeof(ATOM));
     if (!pAtom)
         return NULL;
     pAtom->Type = enmAtomNumber;
-    pAtom->u.dValue = dValue;
+    pAtom->u.Number.uValue = uValue;
+    pAtom->u.Number.dValue = dValue;
     *ppszEnd = pszExpr;
+
+    DEBUGPRINTF(("Parsed number (U=%" FMTUINTEGER_NAT " (%" FMTU64INTEGER_HEX ") F=%" FMTFLOAT ")\n", uValue, uValue, dValue));
+
+    /*
+     * Return the allocated Atom.
+     */
     return pAtom;
-
-#if 0
-    const char *pszStart = pszExpr;
-
-    /*
-     * Binary prefix.
-     */
-    if (*pszExpr == 'b' || *pszExpr == 'B')
-    {
-        ++pszExpr;
-        pszStart = pszExpr;
-        while (*pszExpr == '0' || *pszExpr == '1')
-            pszExpr++;
-
-        if (pszExpr - pszStart > 0)
-        {
-            /* Sigh, constness, gotta love it. */
-            char *pszEnd = NULL;
-            FLOAT dValue = (FLOAT)strtoul(pszStart, &pszEnd, 2);
-            *ppszEnd = pszEnd;
-            PATOM pAtom = MemAlloc(sizeof(ATOM));
-            if (!pAtom)
-                return NULL;
-            pAtom->Type = enmAtomNumber;
-            pAtom->u.dValue = dValue;
-            return pAtom;
-        }
-        pszExpr = pszStart - 1;
-    }
-    else if (*pszExpr == '0')
-    {
-        /*
-         * Octal prefix.
-         */
-        ++pszExpr;
-        pszStart = pszExpr;
-        while (*pszExpr >= '0' && *pszExpr < '8')
-            ++pszExpr;
-
-        if (pszExpr - pszStart > 0)
-        {
-            PATOM pAtom = MemAlloc(sizeof(ATOM));
-            if (!pAtom)
-                return NULL;
-            char *pszEnd = NULL;
-            FLOAT dValue = (FLOAT)strtoul(pszStart, &pszEnd, 8);
-            *ppszEnd = pszEnd;
-            pAtom->Type = enmAtomNumber;
-            pAtom->u.dValue = dValue;
-            return pAtom;
-        }
-        pszExpr = pszStart - 1;
-    }
-
-    /*
-     * Hexadecimal.
-     */
-    if (isdigit(*pszExpr))
-    {
-        ++pszExpr;
-        if (*pszExpr == 'x' || *pszExpr == 'X')
-        {
-            pszStart = pszExpr;
-            pszExpr++;
-            while (   (*pszExpr >= '0' && *pszExpr <= 'F')
-                   || (*pszExpr >= 'a' && *pszExpr <= 'f'))
-            {
-                ++pszExpr;
-            }
-
-            if (pszExpr - pszStart > 1)
-            {
-                PATOM pAtom = MemAlloc(sizeof(ATOM));
-                if (!pAtom)
-                    return NULL;
-                char *pszEnd = NULL;
-                ++pszStart;
-                FLOAT dValue = (FLOAT)strtoull(pszStart, &pszEnd, 16);
-                *ppszEnd = pszEnd;
-                pAtom->Type = enmAtomNumber;
-                pAtom->u.dValue = dValue;
-                return pAtom;
-            }
-            pszExpr = pszStart - 1;
-        }
-        else
-            --pszExpr;
-    }
-
-    /*
-     * Decimal.
-     */
-    if (isdigit(*pszExpr) || *pszExpr == '.')
-    {
-        PATOM pAtom = MemAlloc(sizeof(ATOM));
-        if (!pAtom)
-            return NULL;
-        char *pszEnd = NULL;
-        /* I don't remember why I chose to use strtold instead of strtod, there was some issue on Darwin? Anyway.*/
-        FLOAT dValue = (FLOAT)strtold(pszExpr, &pszEnd);
-        *ppszEnd = pszEnd;
-        pAtom->Type = enmAtomNumber;
-        pAtom->u.dValue = dValue;
-        DEBUGPRINTF(("decimal\n"));
-        return pAtom;
-    }
-    return NULL;
-#endif
 }
 
 
 /**
  * Parses an operator and returns an Operator Atom.
  *
- * @param   pszExpr                 The whitespace skipped expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           The previously passed Atom in @a pszExpr if any,
- *                                  can be NULL.
- * @return  Pointer to an allocated Operator Atom or NULL if @a pszExpr was not an operator.
+ * @return  Pointer to an allocated Operator Atom or NULL if @a pszExpr was not an
+ *          operator.
+ * @param   pszExpr         The whitespace skipped expression to parse.
+ * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
+ * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ *                          NULL.
  */
 static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
@@ -699,11 +670,12 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
 /**
  * Parses a functor and returns a Functor Atom.
  *
- * @param   pszExpr                 The whitespace skipped expression to parse.
- * @param   ppszEnd                 Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom           The previously passed Atom in @a pszExpr if any,
- *                                  can be NULL.
- * @return  Pointer to an allocated Functor Atom or NULL if @ pszExpr was not a functor.
+ * @return  Pointer to an allocated Functor Atom or NULL if @a pszExpr was not a
+ *          functor.
+ * @param   pszExpr         The whitespace skipped expression to parse.
+ * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
+ * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ *                          NULL.
  */
 static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
@@ -752,30 +724,24 @@ static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PC
 static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
     /*
-     * A variable is a stream of contiguous alpha numerics, i.e. only [_][a-z][0-9], nothing else.
+     * A variable is a stream of one or more contiguous alpha numerics i.e. only "_[a-z][0-9]".
      */
     DEBUGPRINTF(("Parse variable\n"));
-    char szBuf[MAX_VARIABLE_NAME_LENGTH];
+    char     szBuf[MAX_VARIABLE_NAME_LENGTH];
     unsigned i = 0;
-    bool fValid = true;
-    for (i = 0; *pszExpr != '\0' && i < MAX_VARIABLE_NAME_LENGTH; i++)
+    bool     fValid = false;
+    while (pszExpr)
     {
-        if (i == 0 && (!isalpha(*pszExpr) && *pszExpr != '_'))
+        if (   *pszExpr == '_'
+            || isalnum(*pszExpr))
         {
-            fValid = false;
-            break;
+            fValid = true;
+            szBuf[i++] = *pszExpr++;
+            if (i == MAX_VARIABLE_NAME_LENGTH - 1)
+                break;
         }
-
-        if (isalnum(*pszExpr) || *pszExpr == '_')
-            szBuf[i] = *pszExpr;
         else
-        {
-            if (i == 0)
-                fValid = false;
             break;
-        }
-
-        pszExpr++;
     }
     szBuf[i] = '\0';
     *ppszEnd = pszExpr;
@@ -877,7 +843,8 @@ static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const 
 /**
  * Parses an Atom.
  *
- * @return  Pointer to an allocated Atom or NULL if @a pszExpr has run out of identifying atoms.
+ * @return  Pointer to an allocated Atom or NULL if @a pszExpr has run out of
+ *          identifying atoms.
  * @param   pEval           The Evaluator object.
  * @param   pszExpr         The expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
@@ -994,7 +961,7 @@ static int AscendingFunctorSortCompare(const void *pvFunctor1, const void *pvFun
  * Internal, essential Evaluator initialization. The other one does a lot of
  * extra work like global initializations. This is the real deal.
  *
- * @param   pEval                   The Evaluator object, cannot be NULL.
+ * @param   pEval   The Evaluator object, cannot be NULL.
  */
 static void EvaluatorInitInternal(PEVALUATOR pEval)
 {
@@ -1010,8 +977,8 @@ static void EvaluatorInitInternal(PEVALUATOR pEval)
  * Cleans up an Evaluator object half-way through parsing or evaluation.
  * Used whenever a fatal error occurs and processing of expression must not continue.
  *
- * @param   pEval                   The Evaluator object, cannot be NULL.
- * @param   pStack                  Pointer to any Stack to empty, can be NULL.
+ * @param   pEval   The Evaluator object, cannot be NULL.
+ * @param   pStack  Pointer to any Stack to empty, can be NULL.
  */
 static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
 {
@@ -1092,7 +1059,8 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
 
         if (pAtom->Type == enmAtomNumber)
         {
-            DEBUGPRINTF(("Adding number %" FMTFLOAT " to queue\n", pAtom->u.dValue));
+            DEBUGPRINTF(("Adding number (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ") to queue\n", pAtom->u.Number.uValue,
+                         pAtom->u.Number.dValue));
             QueueAdd(pQueue, pAtom);
         }
         else if (pAtom->Type == enmAtomOperator)
@@ -1453,7 +1421,8 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                             return RERR_NO_MEMORY;
                         }
                         pParamAtom->Type = enmAtomNumber;
-                        pParamAtom->u.dValue = SubExprEval.Result.dValue;
+                        pParamAtom->u.Number.uValue = SubExprEval.Result.uValue;
+                        pParamAtom->u.Number.dValue = SubExprEval.Result.dValue;
                         pAtom->pvCommandParamAtom = pParamAtom;
                     }
                     else
@@ -1568,7 +1537,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
     {
         if (pAtom->Type == enmAtomNumber)
         {
-            DEBUGPRINTF(("Number: %" FMTFLOAT " ", pAtom->u.dValue));
+            DEBUGPRINTF(("Number: (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ") ", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
             StackPush(&Stack, pAtom);
         }
         else if (pAtom->Type == enmAtomOperator)
@@ -1863,7 +1832,8 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                      */
                     DEBUGPRINTF(("Variable '%s' is %" FMTFLOAT "\n", pAtom->u.pVariable->szVariable, VarEval.Result.dValue));
                     pAtom->Type = enmAtomNumber;
-                    pAtom->u.dValue = VarEval.Result.dValue;
+                    pAtom->u.Number.uValue = VarEval.Result.uValue;
+                    pAtom->u.Number.dValue = VarEval.Result.dValue;
 
                     /*
                      * Remove the variable from the dependency list.
@@ -1917,9 +1887,10 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
     if (StackSize(&Stack) == 1)
     {
         pAtom = StackPop(&Stack);
-        DEBUGPRINTF(("Result = %" FMTFLOAT "\n", pAtom->u.dValue));
+        DEBUGPRINTF(("Result: (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
         pEval->Result.ErrorIndex = -1;
-        pEval->Result.dValue = pAtom->u.dValue;
+        pEval->Result.uValue = pAtom->u.Number.uValue;
+        pEval->Result.dValue = pAtom->u.Number.dValue;
         MemFree(pAtom);
         return RINF_SUCCESS;
     }
@@ -1928,7 +1899,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 
     while ((pAtom = StackPop(&Stack)) != NULL)
     {
-        DEBUGPRINTF(("PATOM free %" FMTFLOAT "\n", pAtom->u.dValue));
+        DEBUGPRINTF(("PATOM free (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
         MemFree(pAtom);
     }
 
@@ -2134,112 +2105,117 @@ int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
 
 int OpAdd(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = apAtoms[0]->u.dValue + apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue + apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue + apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpSubtract(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = apAtoms[0]->u.dValue - apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue - apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue - apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpNegate(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = -apAtoms[0]->u.dValue;
+    apAtoms[0]->u.Number.uValue = -apAtoms[0]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = -apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpMultiply(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = apAtoms[0]->u.dValue * apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue * apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue * apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpDivide(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = apAtoms[0]->u.dValue / apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue / apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue / apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpIncrement(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    ++apAtoms[0]->u.dValue;
+    ++apAtoms[0]->u.Number.uValue;
+    ++apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpDecrement(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    --apAtoms[0]->u.dValue;
+    --apAtoms[0]->u.Number.uValue;
+    --apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
 int OpShiftLeft(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue << (UINTEGER)apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue << apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpShiftRight(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue >> (UINTEGER)apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue >> apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpBitNegate(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = ~(UINTEGER)apAtoms[0]->u.dValue;
+    apAtoms[0]->u.Number.uValue = ~apAtoms[0]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    if (NumberIsNegative(apAtoms[0]))
-    {
-        if (   !CanCastAtom(apAtoms[0], (FLOAT)MIN_INTEGER, (FLOAT)MAX_INTEGER)
-            || !CanCastAtom(apAtoms[1], (FLOAT)MIN_INTEGER, (FLOAT)MAX_INTEGER))
-        {
-            return RERR_UNDEFINED_BEHAVIOUR;
-        }
-        apAtoms[0]->u.dValue = (INTEGER)apAtoms[0]->u.dValue % (INTEGER)apAtoms[1]->u.dValue;
-    }
-    else
-        apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue % (UINTEGER)apAtoms[1]->u.dValue;
-
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue % apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpLessThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (FLOAT)DefinitelyLessThan(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
+    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue < apAtoms[1]->u.Number.uValue);
+    apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
 int OpGreaterThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (FLOAT)DefinitelyGreaterThan(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
+    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue > apAtoms[1]->u.Number.uValue);
+    apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
 int OpEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (FLOAT)EssentiallyEqual(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
+    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue == apAtoms[1]->u.Number.uValue);
+    apAtoms[0]->u.Number.dValue = (FLOAT)EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
 int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    bool fLessThan = DefinitelyLessThan(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
-    bool fEqualTo = EssentiallyEqual(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
-    apAtoms[0]->u.dValue = (FLOAT)(fLessThan || fEqualTo);
+    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue <= apAtoms[1]->u.Number.uValue);
+    bool const fLessThan = DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    bool const fEqualTo  = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = (FLOAT)(fLessThan || fEqualTo);
     return RINF_SUCCESS;
 }
 
 int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    bool fGreaterThan = DefinitelyGreaterThan(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
-    bool fEqualTo = EssentiallyEqual(apAtoms[0]->u.dValue, apAtoms[1]->u.dValue);
-    apAtoms[0]->u.dValue = (FLOAT)(fGreaterThan || fEqualTo);
+    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue >= apAtoms[1]->u.Number.uValue);
+    bool const fGreaterThan = DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    bool const fEqualTo = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = (FLOAT)(fGreaterThan || fEqualTo);
     return RINF_SUCCESS;
 }
 
@@ -2247,43 +2223,52 @@ int OpNotEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     int rc = OpEqualTo(pEval, apAtoms);
     if (RC_SUCCESS(rc))
-        apAtoms[0]->u.dValue = !((int)apAtoms[0]->u.dValue);
+    {
+        apAtoms[0]->u.Number.uValue = !apAtoms[0]->u.Number.uValue;
+        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    }
     return RINF_SUCCESS;
 }
 
 int OpLogicalNot(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = !(UINTEGER)apAtoms[0]->u.dValue;
+    apAtoms[0]->u.Number.uValue = !apAtoms[0]->u.Number.dValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpBitwiseAnd(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue & (UINTEGER)apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue & apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpBitwiseXor(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue ^ (UINTEGER)apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue ^ apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpBitwiseOr(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (UINTEGER)apAtoms[0]->u.dValue | (UINTEGER)apAtoms[1]->u.dValue;
+    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue | apAtoms[1]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpLogicalAnd(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (FLOAT)((UINTEGER)apAtoms[0]->u.dValue && (UINTEGER)apAtoms[1]->u.dValue ? true : false);
+    apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue && apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
 {
-    apAtoms[0]->u.dValue = (FLOAT)((UINTEGER)apAtoms[0]->u.dValue || (UINTEGER)apAtoms[1]->u.dValue ? true : false);
+    apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue || apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
