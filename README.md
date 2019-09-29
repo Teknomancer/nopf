@@ -20,7 +20,7 @@ Setup the required environment by executing (for 32-bit host, use `vcvars32.bat`
 Once environment is setup, create a release build by executing:  
 `nmake.exe /F Makefile.vc all`
 
-NOTE: The `all` switch in the above commands does a full-rebuild everytime (clean + build). For incremental builds, you may skip `all`.
+Note: The `all` switch in the above commands does a full-rebuild everytime (clean + build). For incremental builds, you may skip `all`.
 
 #### Dependencies
 * Appropriate Windows SDK
