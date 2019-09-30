@@ -44,7 +44,7 @@ Group0_SRC = \
 	Queue.c \
 	List.c \
 	Evaluator.c \
-	EvaluatorFunctors.c \
+	EvaluatorFunctions.c \
 	EvaluatorCommands.c \
 	StringOps.c \
 	Types.c

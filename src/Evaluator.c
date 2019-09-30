@@ -23,7 +23,7 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include "EvaluatorInternal.h"
-#include "EvaluatorFunctors.h"
+#include "EvaluatorFunctions.h"
 #include "EvaluatorCommands.h"
 #include "Stack.h"
 #include "Queue.h"
@@ -120,8 +120,8 @@ const unsigned g_cOperators = R_ARRAY_ELEMENTS(g_aOperators);
 /** Global list of Variables. */
 static LIST g_VarList;
 
-/** Alphabetically sorted array of Functors */
-PFUNCTOR g_paSortedFunctors = NULL;
+/** Alphabetically sorted array of Functions */
+PFUNCTION g_paSortedFunctions = NULL;
 
 
 /*******************************************************************************
@@ -143,11 +143,11 @@ static PATOM AtomDup(PCATOM pSrcAtom)
     PATOM pDstAtom = MemAlloc(sizeof(ATOM));
     if (pDstAtom)
     {
-        pDstAtom->Type           = pSrcAtom->Type;
-        pDstAtom->Position       = pSrcAtom->Position;
-        pDstAtom->cFunctorParams = pSrcAtom->cFunctorParams;
+        pDstAtom->Type            = pSrcAtom->Type;
+        pDstAtom->Position        = pSrcAtom->Position;
+        pDstAtom->cFunctionParams = pSrcAtom->cFunctionParams;
         StrCopy(pDstAtom->szVariable, sizeof(pDstAtom->szVariable), pSrcAtom->szVariable);
-        pDstAtom->u              = pSrcAtom->u; /* yeah implicit memcpy */
+        pDstAtom->u               = pSrcAtom->u; /* yeah implicit memcpy */
     }
     return pDstAtom;
 }
@@ -157,9 +157,9 @@ static inline bool AtomIsOperator(PCATOM pAtom)
     return (pAtom && pAtom->Type == enmAtomOperator);
 }
 
-static inline bool AtomIsFunctor(PCATOM pAtom)
+static inline bool AtomIsFunction(PCATOM pAtom)
 {
-    return (pAtom && pAtom->Type == enmAtomFunctor);
+    return (pAtom && pAtom->Type == enmAtomFunction);
 }
 
 static inline bool AtomIsVariable(PCATOM pAtom)
@@ -668,26 +668,26 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
 
 
 /**
- * Parses a functor and returns a Functor Atom.
+ * Parses a Function and returns a Function Atom.
  *
- * @return  Pointer to an allocated Functor Atom or NULL if @a pszExpr was not a
- *          functor.
+ * @return  Pointer to an allocated Function Atom or NULL if @a pszExpr was not a
+ *          function.
  * @param   pszExpr         The whitespace skipped expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
  * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
  *                          NULL.
  */
-static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
+static PATOM EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
-    for (unsigned i = 0; i < g_cFunctors; i++)
+    for (unsigned i = 0; i < g_cFunctions; i++)
     {
-        size_t cbFunctor = StrLen(g_aFunctors[i].pszFunctor);
-        if (!StrNCmp(g_aFunctors[i].pszFunctor, pszExpr, cbFunctor))
+        size_t cbFunction = StrLen(g_aFunctions[i].pszFunction);
+        if (!StrNCmp(g_aFunctions[i].pszFunction, pszExpr, cbFunction))
         {
             /*
              * Skip over whitespaces till we encounter an open parenthesis.
              */
-            pszExpr += cbFunctor;
+            pszExpr += cbFunction;
             while (isspace(*pszExpr))
                 pszExpr++;
 
@@ -697,9 +697,9 @@ static PATOM EvaluatorParseFunctor(const char *pszExpr, const char **ppszEnd, PC
                 PATOM pAtom = MemAlloc(sizeof(ATOM));
                 if (!pAtom)
                     return NULL;
-                pAtom->Type = enmAtomFunctor;
-                pAtom->u.pFunctor = &g_aFunctors[i];
-                pAtom->cFunctorParams = 0;
+                pAtom->Type = enmAtomFunction;
+                pAtom->u.pFunction = &g_aFunctions[i];
+                pAtom->cFunctionParams = 0;
                 *ppszEnd = pszExpr;
                 return pAtom;
             }
@@ -870,7 +870,7 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
         /*
          * Parse function.
          */
-        pAtom = EvaluatorParseFunctor(pszExpr, ppszEnd, pPreviousAtom);
+        pAtom = EvaluatorParseFunction(pszExpr, ppszEnd, pPreviousAtom);
         if (pAtom)
             break;
 
@@ -924,31 +924,31 @@ static int OperatorSortCompare(const void *pvOperator1, const void *pvOperator2)
 }
 
 
-static int FunctorSortCompare(const void *pvFunctor1, const void *pvFunctor2)
+static int FunctionSortCompare(const void *pvFunction1, const void *pvFunction2)
 {
-    PCFUNCTOR pFunctor1 = (PCFUNCTOR)pvFunctor1;
-    PCFUNCTOR pFunctor2 = (PCFUNCTOR)pvFunctor2;
-    const char *pszFunctor1 = pFunctor1->pszFunctor;
-    const char *pszFunctor2 = pFunctor2->pszFunctor;
-    return -StrNCmp(pszFunctor1, pszFunctor2, R_MAX(StrLen(pszFunctor1), StrLen(pszFunctor2)));
+    PCFUNCTION pFunction1 = (PCFUNCTION)pvFunction1;
+    PCFUNCTION pFunction2 = (PCFUNCTION)pvFunction2;
+    const char *pszFunction1 = pFunction1->pszFunction;
+    const char *pszFunction2 = pFunction2->pszFunction;
+    return -StrNCmp(pszFunction1, pszFunction2, R_MAX(StrLen(pszFunction1), StrLen(pszFunction2)));
 }
 
 
-static int AscendingFunctorSortCompare(const void *pvFunctor1, const void *pvFunctor2)
+static int AscendingFunctionSortCompare(const void *pvFunction1, const void *pvFunction2)
 {
-    PCFUNCTOR pFunctor1 = (PCFUNCTOR)pvFunctor1;
-    PCFUNCTOR pFunctor2 = (PCFUNCTOR)pvFunctor2;
-    const char *pszFunctor1 = pFunctor1->pszFunctor;
-    const char *pszFunctor2 = pFunctor2->pszFunctor;
+    PCFUNCTION pFunction1 = (PCFUNCTION)pvFunction1;
+    PCFUNCTION pFunction2 = (PCFUNCTION)pvFunction2;
+    const char *pszFunction1 = pFunction1->pszFunction;
+    const char *pszFunction2 = pFunction2->pszFunction;
 
     /*
      * For commands (i.e. no syntax description) we always sort them last.
-     * For functors (i.e. with syntax description) we sort alphabetically.
+     * For functions (i.e. with syntax description) we sort alphabetically.
      */
-    bool fIsCommand1 = !StrCmp(pFunctor1->pszSyntax, "");
-    bool fIsCommand2 = !StrCmp(pFunctor2->pszSyntax, "");
+    bool fIsCommand1 = !StrCmp(pFunction1->pszSyntax, "");
+    bool fIsCommand2 = !StrCmp(pFunction2->pszSyntax, "");
     if (fIsCommand1 == fIsCommand2)
-        return StrCmp(pszFunctor1, pszFunctor2);
+        return StrCmp(pszFunction1, pszFunction2);
 
     if (fIsCommand1)
         return 1;
@@ -1109,43 +1109,43 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 pStackAtom = NULL;
 
                 /*
-                 * If the left parenthesis is preceeded by a functor, pop it to the Queue incrementing number
-                 * of parameters the functor already has.
+                 * If the left parenthesis is preceeded by a function, pop it to the Queue incrementing number
+                 * of parameters the function already has.
                  */
                 pStackAtom = StackPeek(&Stack);
                 if (   pStackAtom
-                    && AtomIsFunctor(pStackAtom))
+                    && AtomIsFunction(pStackAtom))
                 {
-                    DEBUGPRINTF(("Popping functor '%s' to queue\n", pStackAtom->u.pFunctor->pszFunctor));
+                    DEBUGPRINTF(("Popping function '%s' to queue\n", pStackAtom->u.pFunction->pszFunction));
                     StackPop(&Stack);
                     QueueAdd(pQueue, pStackAtom);
 
-                    ++pStackAtom->cFunctorParams;
-                    if (pStackAtom->cFunctorParams > MAX_FUNCTOR_PARAMETERS)
+                    ++pStackAtom->cFunctionParams;
+                    if (pStackAtom->cFunctionParams > MAX_FUNCTION_PARAMETERS)
                     {
-                        DEBUGPRINTF(("Error! too many parameters to functor '%s'\n", pStackAtom->u.pFunctor->pszFunctor));
+                        DEBUGPRINTF(("Error! too many parameters to function '%s'\n", pStackAtom->u.pFunction->pszFunction));
 
                         /*
-                         * Too many parameters to functor. Get 0wt.
+                         * Too many parameters to function. Get 0wt.
                          */
                         MemFree(pAtom);
                         EvaluatorCleanUp(pEval, &Stack);
                         return RERR_TOO_MANY_PARAMETERS;
                     }
 
-                    if (pStackAtom->cFunctorParams < pStackAtom->u.pFunctor->cMinParams)
+                    if (pStackAtom->cFunctionParams < pStackAtom->u.pFunction->cMinParams)
                     {
-                        DEBUGPRINTF(("Error! too few parameters to functor '%s'\n", pStackAtom->u.pFunctor->pszFunctor));
+                        DEBUGPRINTF(("Error! too few parameters to function '%s'\n", pStackAtom->u.pFunction->pszFunction));
 
                         /*
-                         * Too few parameters to functor. 0wttie.
+                         * Too few parameters to function. 0wttie.
                          */
                         MemFree(pAtom);
                         EvaluatorCleanUp(pEval, &Stack);
                         return RERR_TOO_FEW_PARAMETERS;
                     }
 
-                    DEBUGPRINTF(("Functor '%s' cParams=%u\n", pStackAtom->u.pFunctor->pszFunctor, (unsigned)pStackAtom->cFunctorParams));
+                    DEBUGPRINTF(("Function '%s' cParams=%u\n", pStackAtom->u.pFunction->pszFunction, (unsigned)pStackAtom->cFunctionParams));
                 }
             }
             else if (OperatorIsParamSeparator(pOperator))
@@ -1171,12 +1171,12 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 }
 
                 /*
-                 * Check if the paranthesis is part of a functor, if so increment the parameter count
-                 * in the functor structure.
+                 * Check if the paranthesis is part of a function, if so increment the parameter count
+                 * in the function structure.
                  */
                 PATOM pOpenParenthesisAtom = StackPop(&Stack);
-                PATOM pFunctorAtom = StackPop(&Stack);
-                if (!AtomIsFunctor(pFunctorAtom))
+                PATOM pFunctionAtom = StackPop(&Stack);
+                if (!AtomIsFunction(pFunctionAtom))
                 {
                     DEBUGPRINTF(("No function specified\n"));
                     MemFree(pAtom);
@@ -1184,14 +1184,14 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     return RERR_PARANTHESIS_SEPARATOR_UNEXPECTED;
                 }
 
-                ++pFunctorAtom->cFunctorParams;
-                if (pFunctorAtom->cFunctorParams >= pFunctorAtom->u.pFunctor->cMaxParams)
+                ++pFunctionAtom->cFunctionParams;
+                if (pFunctionAtom->cFunctionParams >= pFunctionAtom->u.pFunction->cMaxParams)
                 {
-                    DEBUGPRINTF(("Error too many parameters to functor '%s' maximum=%d\n", pFunctorAtom->u.pFunctor->pszFunctor,
-                                pFunctorAtom->u.pFunctor->cMaxParams));
+                    DEBUGPRINTF(("Error too many parameters to function '%s' maximum=%d\n", pFunctionAtom->u.pFunction->pszFunction,
+                                pFunctionAtom->u.pFunction->cMaxParams));
 
                     /*
-                     * Too many parameters to functor. Exit, stage 0wt.
+                     * Too many parameters to function. Exit, stage 0wt.
                      */
                     MemFree(pAtom);
                     EvaluatorCleanUp(pEval, &Stack);
@@ -1199,12 +1199,12 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 }
 
                 /*
-                 * Now that we've recorded the info into the functor Atom, restore the stack items as though
+                 * Now that we've recorded the info into the function Atom, restore the stack items as though
                  * nothing happened :)
                  */
-                StackPush(&Stack, pFunctorAtom);
+                StackPush(&Stack, pFunctionAtom);
                 StackPush(&Stack, pOpenParenthesisAtom);
-                DEBUGPRINTF(("Functor '%s' cParams=%u\n", pFunctorAtom->u.pFunctor->pszFunctor, (unsigned)pFunctorAtom->cFunctorParams));
+                DEBUGPRINTF(("Function '%s' cParams=%u\n", pFunctionAtom->u.pFunction->pszFunction, (unsigned)pFunctionAtom->cFunctionParams));
             }
             else if (OperatorIsAssignment(pOperator))
             {
@@ -1335,9 +1335,9 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 StackPush(&Stack, pAtom);
             }
         }
-        else if (pAtom->Type == enmAtomFunctor)
+        else if (pAtom->Type == enmAtomFunction)
         {
-            DEBUGPRINTF(("Pushing functor '%s' to stack\n", pAtom->u.pFunctor->pszFunctor));
+            DEBUGPRINTF(("Pushing function '%s' to stack\n", pAtom->u.pFunction->pszFunction));
             StackPush(&Stack, pAtom);
         }
         else if (pAtom->Type == enmAtomVariable)
@@ -1618,18 +1618,18 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 return rc;
             }
         }
-        else if (pAtom->Type == enmAtomFunctor)
+        else if (pAtom->Type == enmAtomFunction)
         {
-            PCFUNCTOR pFunctor = pAtom->u.pFunctor;
-            DEBUGPRINTF(("%s ", pFunctor->pszFunctor));
-            if (StackSize(&Stack) < pAtom->cFunctorParams)
+            PCFUNCTION pFunction = pAtom->u.pFunction;
+            DEBUGPRINTF(("%s ", pFunction->pszFunction));
+            if (StackSize(&Stack) < pAtom->cFunctionParams)
             {
-                DEBUGPRINTF(("Error StackSize=%u Functor '%s' cParams=%d cMinParams=%d cMaxParams=%d\n",
-                             (unsigned)StackSize(&Stack), pFunctor->pszFunctor, pAtom->cFunctorParams,
-                             pFunctor->cMinParams, pFunctor->cMaxParams));
+                DEBUGPRINTF(("Error StackSize=%u Function '%s' cParams=%d cMinParams=%d cMaxParams=%d\n",
+                             (unsigned)StackSize(&Stack), pFunction->pszFunction, pAtom->cFunctionParams,
+                             pFunction->cMinParams, pFunction->cMaxParams));
 
                 /*
-                 * Insufficient parameters to functor. Buh bye.
+                 * Insufficient parameters to function. Buh bye.
                  */
                 MemFree(pAtom);
                 EvaluatorCleanUp(pEval, &Stack);
@@ -1638,11 +1638,11 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 
             /*
              * Construct an array of maximum possible PATOMS parameters and
-             * pass it to the Functor evaluator if any, otherwise
+             * pass it to the Function evaluator if any, otherwise
              * just push the first parameter as the result.
              */
-            Assert(pFunctor->cMaxParams <= MAX_FUNCTOR_PARAMETERS);
-            uint32_t cParams = R_MIN(pAtom->cFunctorParams, MAX_FUNCTOR_PARAMETERS);
+            Assert(pFunction->cMaxParams <= MAX_FUNCTION_PARAMETERS);
+            uint32_t cParams = R_MIN(pAtom->cFunctionParams, MAX_FUNCTION_PARAMETERS);
             PATOM *papAtoms = MemAlloc(cParams * sizeof(ATOM));
             if (!papAtoms)
             {
@@ -1656,17 +1656,17 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 papAtoms[i] = StackPop(&Stack);
 
                 /*
-                 * Check if functor can cast to required type to perform it's operation.
+                 * Check if function can cast to required type to perform it's operation.
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
-                if (   pFunctor->fUIntParams
+                if (   pFunction->fUIntParams
                     && !CanCastAtom(papAtoms[i], (FLOAT)MIN_INTEGER, (FLOAT)MAX_UINTEGER))
                 {
                     /*
-                     * Bleh, functor cannot handle this big a number. 0wT.
+                     * Bleh, function cannot handle this big a number. 0wT.
                      */
                     rc = RERR_UNDEFINED_BEHAVIOUR;
-                    DEBUGPRINTF(("Parameter to '%s' cannot be cast to integer without UB. rc=%d\n", pFunctor->pszFunctor, rc));
+                    DEBUGPRINTF(("Parameter to '%s' cannot be cast to integer without UB. rc=%d\n", pFunction->pszFunction, rc));
                     MemFree(pAtom);
                     EvaluatorCleanUp(pEval, &Stack);
                     return rc;
@@ -1674,10 +1674,10 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             }
 
             PATOM pResultantAtom = NULL;
-            if (pFunctor->pfnFunctor)
+            if (pFunction->pfnFunction)
             {
                 EvaluatorInvertAtomArray(papAtoms, cParams);
-                rc = pFunctor->pfnFunctor(pEval, papAtoms, cParams);
+                rc = pFunction->pfnFunction(pEval, papAtoms, cParams);
                 if (RC_SUCCESS(rc))
                     pResultantAtom = papAtoms[0];
             }
@@ -1695,7 +1695,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             else
             {
                 Assert(RC_FAILURE(rc));
-                DEBUGPRINTF(("Functor '%s' on given operands failed! rc=%d\n", pFunctor->pszFunctor, rc));
+                DEBUGPRINTF(("Function '%s' on given operands failed! rc=%d\n", pFunction->pszFunction, rc));
                 MemFree(pAtom);
                 MemFree(papAtoms);
                 EvaluatorCleanUp(pEval, &Stack);
@@ -1960,7 +1960,7 @@ int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
         /*
          * Let us for now only allow Operators taking 2 or lower parameters.
          * The evaluation logic can of course handle any number of parameters
-         * but we don't have a parameter separator for Operators unlike Functors.
+         * but we don't have a parameter separator for Operators unlike Functions.
          */
         if (pOperator->cParams > 2)
         {
@@ -2040,54 +2040,54 @@ int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
     }
 
     /*
-     * Check for functor duplicates.
+     * Check for function duplicates.
      */
-    for (unsigned i = 0; i < g_cFunctors; i++)
+    for (unsigned i = 0; i < g_cFunctions; i++)
     {
-        PCFUNCTOR pFunctor = &g_aFunctors[i];
-        for (unsigned k = 0; k < g_cFunctors; k++)
+        PCFUNCTION pFunction = &g_aFunctions[i];
+        for (unsigned k = 0; k < g_cFunctions; k++)
         {
             if (i == k)
                 continue;
 
-            PCFUNCTOR pCur = &g_aFunctors[k];
-            if (!StrCmp(pCur->pszFunctor, pFunctor->pszFunctor))
+            PCFUNCTION pCur = &g_aFunctions[k];
+            if (!StrCmp(pCur->pszFunction, pFunction->pszFunction))
             {
-                StrNPrintf(pszError, cbError, "Functor '%s' is duplicated. at [%d] and [%d].", pFunctor->pszFunctor, i, k);
-                return RERR_DUPLICATE_FUNCTOR;
+                StrNPrintf(pszError, cbError, "Function '%s' is duplicated. at [%d] and [%d].", pFunction->pszFunction, i, k);
+                return RERR_DUPLICATE_FUNCTION;
             }
         }
     }
 
     /*
-     * Sort functor list to workaround overlapping functor names, eg: "sqr" and "sqrt".
+     * Sort function list to workaround overlapping function names, eg: "sqr" and "sqrt".
      */
-    qsort(g_aFunctors, g_cFunctors, sizeof(FUNCTOR), FunctorSortCompare);
-    DEBUGPRINTF(("Sorted Functors\n"));
-    for (unsigned i = 0; i < g_cFunctors; i++)
+    qsort(g_aFunctions, g_cFunctions, sizeof(FUNCTION), FunctionSortCompare);
+    DEBUGPRINTF(("Sorted Functions\n"));
+    for (unsigned i = 0; i < g_cFunctions; i++)
     {
-        if (   !g_aFunctors[i].pszFunctor
-            || !g_aFunctors[i].pszSyntax
-            || !g_aFunctors[i].pszDesc)
+        if (   !g_aFunctions[i].pszFunction
+            || !g_aFunctions[i].pszSyntax
+            || !g_aFunctions[i].pszDesc)
         {
-            StrNPrintf(pszError, cbError, "Functor with missing name/syntax or description. index=%d.", i);
-            return RERR_INVALID_FUNCTOR;
+            StrNPrintf(pszError, cbError, "Function with missing name/syntax or description. index=%d.", i);
+            return RERR_INVALID_FUNCTION;
         }
 
-        DEBUGPRINTF(("%s cMinParams=%d cMaxParams=%d\n", g_aFunctors[i].pszFunctor, g_aFunctors[i].cMinParams, g_aFunctors[i].cMaxParams));
+        DEBUGPRINTF(("%s cMinParams=%d cMaxParams=%d\n", g_aFunctions[i].pszFunction, g_aFunctions[i].cMinParams, g_aFunctions[i].cMaxParams));
     }
 
     /*
-     * Create alphabetically sorted Functor list (for help listing)
+     * Create alphabetically sorted Function list (for help listing)
      */
-    if (g_paSortedFunctors)
-        MemFree(g_paSortedFunctors);
-    g_paSortedFunctors = MemAlloc(sizeof(FUNCTOR) * g_cFunctors);
-    if (!g_paSortedFunctors)
+    if (g_paSortedFunctions)
+        MemFree(g_paSortedFunctions);
+    g_paSortedFunctions = MemAlloc(sizeof(FUNCTION) * g_cFunctions);
+    if (!g_paSortedFunctions)
         return RERR_NO_MEMORY;
 
-    MemCpy(g_paSortedFunctors, &g_aFunctors, sizeof(FUNCTOR) * g_cFunctors);
-    qsort(g_paSortedFunctors, g_cFunctors, sizeof(FUNCTOR), AscendingFunctorSortCompare);
+    MemCpy(g_paSortedFunctions, &g_aFunctions, sizeof(FUNCTION) * g_cFunctions);
+    qsort(g_paSortedFunctions, g_cFunctions, sizeof(FUNCTION), AscendingFunctionSortCompare);
 
     /*
      * Create alphabetically sorted Command list (for help listing)
@@ -2274,7 +2274,7 @@ int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
 
 
 /**
- * Searches the global list of functor for commands.
+ * Searches the global list of function for commands.
  * @todo later this must probably be part of a Evaluator object so that
  * it may find variables? Probably but that's after I implemented proper
  * variable support.
@@ -2286,17 +2286,17 @@ int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
  * @param   iStart      Starting index to search from.
  * @param   piEnd       Where to store the last index from the search.
  */
-const char *EvaluatorFindFunctor(const char *pszCommand, uint32_t cchCommand, uint32_t iStart, uint32_t *piEnd)
+const char *EvaluatorFindFunction(const char *pszCommand, uint32_t cchCommand, uint32_t iStart, uint32_t *piEnd)
 {
-    for (uint32_t i = iStart; i < g_cFunctors; i++)
+    for (uint32_t i = iStart; i < g_cFunctions; i++)
     {
-        PCFUNCTOR pFunctor = &g_aFunctors[i];
-        if (!pFunctor)
+        PCFUNCTION pFunction = &g_aFunctions[i];
+        if (!pFunction)
             break;
 
         *piEnd = i + 1;
-        if (!StrNCmp(pszCommand, pFunctor->pszFunctor, cchCommand))
-            return pFunctor->pszFunctor;
+        if (!StrNCmp(pszCommand, pFunction->pszFunction, cchCommand))
+            return pFunction->pszFunction;
     }
 
     return NULL;
@@ -2304,34 +2304,34 @@ const char *EvaluatorFindFunctor(const char *pszCommand, uint32_t cchCommand, ui
 
 
 /**
- * Returns the syntax and description of a functor.
+ * Returns the syntax and description of a function.
  *
  * @return  RINF_SUCCESS on success, othwerise appropriate status code.
- * @param   uIndex      The index of the requested functor.
- * @param   ppszName    Where to store the name of the functor, caller frees with StrFree()
- * @param   ppszSyntax  Where to store the syntax for the functor, caller frees with StrFree()
- * @param   ppszHelp    Where to store the description for the functor, caller frees with StreFree()
+ * @param   uIndex      The index of the requested function.
+ * @param   ppszName    Where to store the name of the function, caller frees with StrFree()
+ * @param   ppszSyntax  Where to store the syntax for the function, caller frees with StrFree()
+ * @param   ppszHelp    Where to store the description for the function, caller frees with StreFree()
  */
-int EvaluatorFunctorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp)
+int EvaluatorFunctionHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp)
 {
-    if (uIndex > g_cFunctors)
+    if (uIndex > g_cFunctions)
         return RERR_NO_DATA;
 
-    *ppszName   = StrDup(g_paSortedFunctors[uIndex].pszFunctor);
-    *ppszSyntax = StrDup(g_paSortedFunctors[uIndex].pszSyntax);
-    *ppszHelp   = StrDup(g_paSortedFunctors[uIndex].pszDesc);
+    *ppszName   = StrDup(g_paSortedFunctions[uIndex].pszFunction);
+    *ppszSyntax = StrDup(g_paSortedFunctions[uIndex].pszSyntax);
+    *ppszHelp   = StrDup(g_paSortedFunctions[uIndex].pszDesc);
 
     return RINF_SUCCESS;
 }
 
 /**
- * Returns the total number of functors.
+ * Returns the total number of functions.
  *
- * @return  The total number of functors.
+ * @return  The total number of functions.
  */
-unsigned EvaluatorFunctorCount(void)
+unsigned EvaluatorFunctionCount(void)
 {
-    return g_cFunctors;
+    return g_cFunctions;
 }
 
 

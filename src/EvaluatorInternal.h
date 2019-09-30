@@ -32,7 +32,7 @@
 
 /** Maximum number of parameters that can be passed to an operator */
 #define MAX_OPERATOR_PARAMETERS     2
-#define MAX_FUNCTOR_PARAMETERS      65536
+#define MAX_FUNCTION_PARAMETERS     32
 #define OPEN_PAREN_ID               INT_MAX - 1
 #define CLOSE_PAREN_ID              INT_MAX - 2
 #define PARAM_SEP_ID                INT_MAX - 3
@@ -89,7 +89,7 @@ typedef enum ATOMTYPE
     enmAtomEmpty = 1,
     enmAtomNumber,
     enmAtomOperator,
-    enmAtomFunctor,
+    enmAtomFunction,
     enmAtomVariable,
     enmAtomCommand
 } ATOMTYPE;
@@ -104,8 +104,8 @@ typedef struct ATOM
     ATOMTYPE       Type;
     /** Cursor position, an Index used to flag errors. */
     uint32_t       Position;
-    /** Holds number of parameters to pass to the Functor. */
-    uint32_t       cFunctorParams;
+    /** Holds number of parameters to pass to the Function. */
+    uint32_t       cFunctionParams;
     /** Variable Name if this is a variable. */
     char           szVariable[MAX_VARIABLE_NAME_LENGTH];
     /** The expression of a command if this is a command. */
@@ -119,8 +119,8 @@ typedef struct ATOM
         struct NUMBER            Number;
         /** Pointer to the OPERATOR for an Operator Atom. */
         struct OPERATOR const   *pOperator;
-        /** Pointer to the FUNCTOR for a Functor Atom. */
-        struct FUNCTOR  const   *pFunctor;
+        /** Pointer to the FUNCTION for a Function Atom. */
+        struct FUNCTION const   *pFunction;
         /** Pointer to the VARIABLE entry for a Variable Atom. */
         struct VARIABLE         *pVariable;
         /** Pointer to the COMMAND entry for the Command Atom. */
@@ -180,35 +180,36 @@ typedef OPERATOR *POPERATOR;
 typedef const OPERATOR *PCOPERATOR;
 
 
-/** A Functor function. */
-typedef int FNFUNCTOR(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms);
-/** Pointer to a Functor function. */
-typedef FNFUNCTOR *PFNFUNCTOR;
+/** A function. */
+typedef int FNFUNCTION(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms);
+/** Pointer to a Function function. */
+typedef FNFUNCTION *PFNFUNCTION;
 
 /**
- * FUNCTOR: Sounds cooler than function.
+ * FUNCTION: A function.
+ * A function takes one or more parameters and produces a result.
  */
-typedef struct FUNCTOR
+typedef struct FUNCTION
 {
-    /** Name of the Functor as seen in the expression. */
-    const char     *pszFunctor;
-    /** Pointer to the Functor evaluator function. */
-    PFNFUNCTOR      pfnFunctor;
+    /** Name of the Function as seen in the expression. */
+    const char     *pszFunction;
+    /** Pointer to the Function evaluator function. */
+    PFNFUNCTION     pfnFunction;
     /** Whether the parameters must all fit into UINTEGER */
     bool            fUIntParams;
-    /** Minimum parameters accepted by @a pfnFunctor. */
+    /** Minimum parameters accepted by @a pfnFunction. */
     uint32_t        cMinParams;
-    /** Maximum paramaters accepted by @a pfnFunctor. */
+    /** Maximum paramaters accepted by @a pfnFunction. */
     uint32_t        cMaxParams;
-    /** Short description of the Functor, NULL if already described. */
+    /** Short description of the Function, NULL if already described. */
     const char     *pszSyntax;
-    /** Long description of the Functor, NULL if already described. */
+    /** Long description of the Function, NULL if already described. */
     const char     *pszDesc;
-} FUNCTOR;
-/** Pointer to a Functor object. */
-typedef FUNCTOR *PFUNCTOR;
-/** Pointer to a const Functor object. */
-typedef const FUNCTOR *PCFUNCTOR;
+} FUNCTION;
+/** Pointer to a Function object. */
+typedef FUNCTION *PFUNCTION;
+/** Pointer to a const Function object. */
+typedef const FUNCTION *PCFUNCTION;
 
 
 /**

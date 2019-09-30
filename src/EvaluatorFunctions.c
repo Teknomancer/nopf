@@ -1,5 +1,5 @@
 /** @file
- * Evaluator Functors.
+ * Evaluator Functions.
  */
 
 /*
@@ -23,7 +23,7 @@
  *   Header Files                                                              *
  *******************************************************************************/
 #include "Evaluator.h"
-#include "EvaluatorFunctors.h"
+#include "EvaluatorFunctions.h"
 #include "Errors.h"
 #include "GenericDefs.h"
 #include "StringOps.h"
@@ -31,7 +31,7 @@
 
 
 /*******************************************************************************
- *   Functor Functors!                                                         *
+ *   Function Functions!                                                       *
  *******************************************************************************/
 int FnSum(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
@@ -183,7 +183,7 @@ int FnIf(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 
 int FnByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
-    /* -XXX- @todo make functors specify minimum parameter widths like operators */
+    /** @todo Make Functions specify minimum parameter widths like Operators. */
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
@@ -706,9 +706,9 @@ int FnAlign(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 
 
 /**
- * g_aFunctors: Table of functors.
+ * g_aFunctions: Table of Functions.
  */
-FUNCTOR g_aFunctors[] =
+FUNCTION g_aFunctions[] =
 {
     /*  Name            Function               fUInt   cMin  cMax    Args    Desc   */
     { "help",           NULL,                  false,    1,  1,          "", "Like you don't know what this does." },
@@ -716,15 +716,15 @@ FUNCTOR g_aFunctors[] =
     { "quit",           NULL,                  false,    1,  1,          "", "Exit, stage left." },
     { "bye",            NULL,                  false,    1,  1,          "", "Exit, stage smiling." },
 
-    { "sum",            FnSum,                 false,    1,  MAX_FUNCTOR_PARAMETERS, "<num1> [,<num2>...<numN>]", "Sum of the numbers." },
-    { "avg",            FnAverage,             false,    1,  MAX_FUNCTOR_PARAMETERS, "<num1> [,<num2>...<numN>]", "Average (arithmetic mean) of the numbers." },
+    { "sum",            FnSum,                 false,    1,  MAX_FUNCTION_PARAMETERS, "<num1> [,<num2>...<numN>]", "Sum of the numbers." },
+    { "avg",            FnAverage,             false,    1,  MAX_FUNCTION_PARAMETERS, "<num1> [,<num2>...<numN>]", "Average (arithmetic mean) of the numbers." },
     { "if",             FnIf,                  false,    3,  3,          "<cond>,<expr-t>,<expr-f>", "If <cond> evaluates to true, returns <expr-t> otherwise <expr-f>." },
     { "fact",           FnFactorial,           true,     1,  1,          "<num1>", "Factorial." },
-    { "gcd",            FnGCD,                 true,     2,  MAX_FUNCTOR_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "GCD, Greatest Common Divisor." },
-    { "hcf",            FnGCD,                 true,     2,  MAX_FUNCTOR_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "HCF, Highest Common Factor." },
-    { "lcm",            FnLCM,                 true,     2,  MAX_FUNCTOR_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "LCM, Least Common Multiple." },
-    { "max",            FnMax,                 true,     2,  MAX_FUNCTOR_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "Maximum of the numbers." },
-    { "min",            FnMin,                 true,     2,  MAX_FUNCTOR_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "Minimum of the numbers." },
+    { "gcd",            FnGCD,                 true,     2,  MAX_FUNCTION_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "GCD, Greatest Common Divisor." },
+    { "hcf",            FnGCD,                 true,     2,  MAX_FUNCTION_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "HCF, Highest Common Factor." },
+    { "lcm",            FnLCM,                 true,     2,  MAX_FUNCTION_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "LCM, Least Common Multiple." },
+    { "max",            FnMax,                 true,     2,  MAX_FUNCTION_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "Maximum of the numbers." },
+    { "min",            FnMin,                 true,     2,  MAX_FUNCTION_PARAMETERS, "<num1>, <num2> [,<num3>...<numN>]", "Minimum of the numbers." },
 
     { "pow",            FnPow,                 false,    2,  2, "<num1>, <num2>", "Returns <num1> raised to the power of <num2>." },
     { "root",           FnRoot,                false,    2,  2, "<num1>, <num2>", "Returns the <num2>th root of <num1>." },
@@ -823,6 +823,6 @@ FUNCTOR g_aFunctors[] =
     { "RT_ALIGN_64",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." }
 };
 
-/** Total number of functors in the table. */
-const uint32_t g_cFunctors = R_ARRAY_ELEMENTS(g_aFunctors);
+/** Total number of Functions in the table. */
+const uint32_t g_cFunctions = R_ARRAY_ELEMENTS(g_aFunctions);
 

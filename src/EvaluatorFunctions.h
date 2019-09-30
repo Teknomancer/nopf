@@ -1,5 +1,5 @@
 /** @file
- * Evaluator Functors, header.
+ * Evaluator Functions, header.
  */
 
 /*
@@ -19,13 +19,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef EVALUATOR_FUNCTORS_H___
-#define EVALUATOR_FUNCTORS_H___
+#ifndef EVALUATOR_FUNCTIONS_H___
+#define EVALUATOR_FUNCTIONS_H___
 
 #include "EvaluatorInternal.h"
 
-extern FUNCTOR g_aFunctors[];
-extern const unsigned g_cFunctors;
+extern FUNCTION g_aFunctions[];
+extern const unsigned g_cFunctions;
 
-#endif /* EVALUATOR_FUNCTORS_H___ */
+#endif /* EVALUATOR_FUNCTIONS_H___ */
 

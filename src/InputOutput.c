@@ -124,7 +124,7 @@ static char *TextLineGenerator(const char *pszText, int fState)
 
     /* Return the next name which partially matches from the command list. */
     uint32_t iEnd = 0;
-    const char *pszCommand = EvaluatorFindFunctor(pszText, s_cchCommand, s_iCommandIndex, &iEnd);
+    const char *pszCommand = EvaluatorFindFunction(pszText, s_cchCommand, s_iCommandIndex, &iEnd);
     s_iCommandIndex = iEnd;
     if (pszCommand)
         return StrDup(pszCommand);
