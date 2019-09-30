@@ -38,34 +38,38 @@
 #include <errno.h>
 
 /*******************************************************************************
+ *   Static functions                                                          *
+ *******************************************************************************/
+static int OpAdd(PEVALUATOR, PATOM[]);
+static int OpSubtract(PEVALUATOR, PATOM[]);
+static int OpNegate(PEVALUATOR, PATOM[]);
+static int OpMultiply(PEVALUATOR, PATOM[]);
+static int OpDivide(PEVALUATOR, PATOM[]);
+static int OpIncrement(PEVALUATOR, PATOM[]);
+static int OpDecrement(PEVALUATOR, PATOM[]);
+static int OpShiftLeft(PEVALUATOR, PATOM[]);
+static int OpShiftRight(PEVALUATOR, PATOM[]);
+static int OpBitNegate(PEVALUATOR, PATOM[]);
+static int OpModulo(PEVALUATOR, PATOM[]);
+static int OpLessThan(PEVALUATOR, PATOM[]);
+static int OpGreaterThan(PEVALUATOR, PATOM[]);
+static int OpEqualTo(PEVALUATOR, PATOM[]);
+static int OpLessThanOrEqualTo(PEVALUATOR, PATOM[]);
+static int OpGreaterThanOrEqualTo(PEVALUATOR, PATOM[]);
+static int OpNotEqualTo(PEVALUATOR, PATOM[]);
+static int OpLogicalNot(PEVALUATOR, PATOM[]);
+static int OpBitwiseAnd(PEVALUATOR, PATOM[]);
+static int OpBitwiseXor(PEVALUATOR, PATOM[]);
+static int OpBitwiseOr(PEVALUATOR, PATOM[]);
+static int OpLogicalAnd(PEVALUATOR, PATOM[]);
+static int OpLogicalOr(PEVALUATOR, PATOM[]);
+
+
+/*******************************************************************************
  *   Globals, Typedefs & Defines                                               *
  *******************************************************************************/
 PCOPERATOR g_pOperatorOpenParenthesis = NULL;
 PCOPERATOR g_pOperatorCloseParenthesis = NULL;
-
-int OpAdd(PEVALUATOR, PATOM[]);
-int OpSubtract(PEVALUATOR, PATOM[]);
-int OpNegate(PEVALUATOR, PATOM[]);
-int OpMultiply(PEVALUATOR, PATOM[]);
-int OpDivide(PEVALUATOR, PATOM[]);
-int OpIncrement(PEVALUATOR, PATOM[]);
-int OpDecrement(PEVALUATOR, PATOM[]);
-int OpShiftLeft(PEVALUATOR, PATOM[]);
-int OpShiftRight(PEVALUATOR, PATOM[]);
-int OpBitNegate(PEVALUATOR, PATOM[]);
-int OpModulo(PEVALUATOR, PATOM[]);
-int OpLessThan(PEVALUATOR, PATOM[]);
-int OpGreaterThan(PEVALUATOR, PATOM[]);
-int OpEqualTo(PEVALUATOR, PATOM[]);
-int OpLessThanOrEqualTo(PEVALUATOR, PATOM[]);
-int OpGreaterThanOrEqualTo(PEVALUATOR, PATOM[]);
-int OpNotEqualTo(PEVALUATOR, PATOM[]);
-int OpLogicalNot(PEVALUATOR, PATOM[]);
-int OpBitwiseAnd(PEVALUATOR, PATOM[]);
-int OpBitwiseXor(PEVALUATOR, PATOM[]);
-int OpBitwiseOr(PEVALUATOR, PATOM[]);
-int OpLogicalAnd(PEVALUATOR, PATOM[]);
-int OpLogicalOr(PEVALUATOR, PATOM[]);
 
 /** List of Operators. */
 OPERATOR g_aOperators[] =
@@ -232,7 +236,6 @@ static inline bool AtomIsParenthesis(PCATOM pAtom)
     return (AtomIsOpenParenthesis(pAtom) || AtomIsCloseParenthesis(pAtom));
 }
 
-
 static void EvaluatorInvertAtomArray(PATOM apAtoms[], uint32_t cAtoms)
 {
     if (cAtoms < 2)
@@ -297,7 +300,7 @@ static void EvaluatorDestroyVariable(PVARIABLE pVariable)
 
 
 /**
- * Cleans up the variable queue of unassigned variables.
+ * Cleans up the variable queue of unassigned Variables.
  */
 static void EvaluatorCleanVariables(void)
 {
@@ -338,7 +341,7 @@ void EvaluatorPrintVarList(PLIST pList)
 
 
 /**
- * Parses a number and returns a Numeric Atom.
+ * Parses a number and returns a Number Atom.
  *
  * @return  Pointer to an allocated Number Atom or NULL if @a pszExpr is not a
  *          number.
