@@ -232,16 +232,16 @@ static void PrintHelp(PSETTINGS pSettings)
     Printf(INDENT_SPACES "Functions:\n");
 
     /*
-     * Display help for each functor with some attempt at pretty formatting.
+     * Display help for each Function with some attempt at pretty formatting.
      */
-    unsigned cFunctors = EvaluatorFunctorCount();
-    for (unsigned i = 0; i < cFunctors; i++)
+    unsigned cFunctions = EvaluatorFunctionCount();
+    for (unsigned i = 0; i < cFunctions; i++)
     {
-        char *pszFunctor = NULL;
+        char *pszFunction = NULL;
         char *pszSyntax = NULL;
         char *pszDesc = NULL;
 
-        int rc = EvaluatorFunctorHelp(i, &pszFunctor, &pszSyntax, &pszDesc);
+        int rc = EvaluatorFunctionHelp(i, &pszFunction, &pszSyntax, &pszDesc);
         if (RC_SUCCESS(rc))
         {
             size_t cbSyntaxFmted = StrLen(pszSyntax) + sizeof("()");
@@ -259,11 +259,11 @@ static void PrintHelp(PSETTINGS pSettings)
             else
                 StrCopy(pszSyntaxFmted, sizeof(pszSyntaxFmted), "");
 
-            ColorPrintf(PREFIX_COLOR, "%11s ", pszFunctor);
+            ColorPrintf(PREFIX_COLOR, "%11s ", pszFunction);
             ColorPrintf(PARAM_COLOR, "%-20s ", pszSyntaxFmted);
             Printf("%s\n", pszDesc);
         }
-        StrFree(pszFunctor);
+        StrFree(pszFunction);
         StrFree(pszSyntax);
         StrFree(pszDesc);
     }
@@ -276,12 +276,12 @@ static void PrintHelp(PSETTINGS pSettings)
         Printf("Legend:\n");
         ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<numx>");
         Printf("A number (internally represented as both integer and floating point).\n");
-        Printf("%s%*sAny functor/operator taking <numX> will compute both integer and float.\n", pszIndent, cIndent, "");
-        Printf("%s%*sSome functors/operators make compute float and cast to integer.\n", pszIndent, cIndent, "");
+        Printf("%s%*sAny Function/Operator taking <numX> will compute both integer and float.\n", pszIndent, cIndent, "");
+        Printf("%s%*sSome Functions/Operators make compute float and cast to integer.\n", pszIndent, cIndent, "");
 
         ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<intX>");
         Printf("An integer.\n");
-        Printf("%s%*sAny functor/operator taking <intX> will compute integer and cast to float.\n", pszIndent, cIndent, "");
+        Printf("%s%*sAny Function/Operator taking <intX> will compute integer and cast to float.\n", pszIndent, cIndent, "");
 
         ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<cond>");
         Printf("A condition or truth value.\n", pszIndent, cIndent, "");
@@ -388,8 +388,8 @@ static int ProcessExpression(PSETTINGS pSettings, PEVALUATOR pEval, const char *
         switch (rc)
         {
             case RERR_EXPRESSION_INVALID:       ErrorPrintf(rc, "%s Invalid expression.\n", szComponent); break;
-            case RERR_TOO_FEW_PARAMETERS:       ErrorPrintf(rc, "%s Not enough parameters to operator/functor.\n", szComponent); break;
-            case RERR_TOO_MANY_PARAMETERS:      ErrorPrintf(rc, "%s Too many parameters to operator/functor.\n", szComponent); break;
+            case RERR_TOO_FEW_PARAMETERS:       ErrorPrintf(rc, "%s Not enough parameters to operator/function.\n", szComponent); break;
+            case RERR_TOO_MANY_PARAMETERS:      ErrorPrintf(rc, "%s Too many parameters to operator/function.\n", szComponent); break;
             case RERR_NO_MEMORY:                ErrorPrintf(rc, "%s Out of memory.\n", szComponent); break;
             case RERR_UNDEFINED_BEHAVIOUR:      ErrorPrintf(rc, "%s Pesky overflow, calculation hindered.\n", szComponent); break;
             case RERR_VARIABLE_UNDEFINED:       ErrorPrintf(rc, "%s Variable '%s' undefined.\n", szComponent, pEval->Result.szVariable); break;

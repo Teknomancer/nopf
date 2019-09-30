@@ -47,10 +47,10 @@
 #define RERR_CONFLICTING_OPERATORS                  (-105)
 /** Invalid operator. */
 #define RERR_INVALID_OPERATOR                       (-106)
-/** Functor invalid. */
-#define RERR_INVALID_FUNCTOR                        (-107)
-/** Duplicate functor. */
-#define RERR_DUPLICATE_FUNCTOR                      (-108)
+/** Function invalid. */
+#define RERR_INVALID_FUNCTION                       (-107)
+/** Duplicate function. */
+#define RERR_DUPLICATE_FUNCTION                     (-108)
 /** Syntax error. */
 #define RERR_SYNTAX_ERROR                           (-108)
 /** Invalid RPN, parsing had failed. */
@@ -71,9 +71,9 @@
 #define RERR_BASIC_OPERATOR_MISSING                 (-117)
 /** Invalid parameter separator position. */
 #define RERR_PARANTHESIS_SEPARATOR_UNEXPECTED       (-118)
-/** Too many parameters to functor. */
+/** Too many parameters to function. */
 #define RERR_TOO_MANY_PARAMETERS                    (-119)
-/** Too few parameters to functor. */
+/** Too few parameters to function. */
 #define RERR_TOO_FEW_PARAMETERS                     (-120)
 /** Invalid l-value assignment. */
 #define RERR_INVALID_ASSIGNMENT                     (-121)
