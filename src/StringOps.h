@@ -58,12 +58,12 @@
 #define StrLen              strlen
 #define MemZero(s)          (memset((s), 0, sizeof((s))))
 
-void *MemAllocZ(uint32_t cb);
-char *StrDup(const char *pszSrc);
-int   StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc);
-char *StrStrip(char *pszBuf);
-char *StrStripLF(char *pszBuf, bool *pfStripped);
-char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits);
+void   *MemAllocZ(uint32_t cb);
+char   *StrDup(const char *pszSrc);
+int     StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc);
+char   *StrStrip(char *pszBuf);
+char   *StrStripLF(char *pszBuf, bool *pfStripped);
+char   *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits);
 
 /*
  * String flags for StrFormat.

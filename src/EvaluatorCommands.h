@@ -30,16 +30,11 @@
  */
 typedef enum REGBITTYPE
 {
-    /** Reserved */
-    enmRsvd = 0,
-    /** Reserved Must Be 1.*/
-    enmRsvdMB1,
-    /** Reserved Must Be 0. */
-    enmRsvdMBZ,
-    /** Part of a bit range, previously recognized (normal) bit. */
-    enmInRange,
-    /** Normal bit. */
-    enmNormal
+    enmRsvd = 0,    /**< Reserved */
+    enmRsvdMB1,     /**< Reserved Must Be 1.*/
+    enmRsvdMBZ,     /**< Reserved Must Be 0. */
+    enmInRange,     /**< Part of a bit range, previously recognized (normal) bit. */
+    enmNormal       /**< Normal bit. */
 } REGBITTYPE;
 
 
@@ -48,14 +43,10 @@ typedef enum REGBITTYPE
  */
 typedef struct REGBITDESC
 {
-    /** Register bit type.  */
-    REGBITTYPE      enmType;
-    /** Name of this bit. */
-    char            szName[64];
-    /** Description name. */
-    char            szLongName[128];
-    /** Long description of this bit. */
-    char            szDesc[256];
+    REGBITTYPE      enmType;            /**< Register bit type.  */
+    char            szName[64];         /**< Name of this bit. */
+    char            szLongName[128];    /**< Description name. */
+    char            szDesc[256];        /**< Long description of this bit. */
 } REGBITDESC;
 /** Pointer to a register bit descriptor object. */
 typedef REGBITDESC *PREGBITDESC;
@@ -68,14 +59,10 @@ typedef const REGBITDESC *PCREGBITDESC;
  */
 typedef struct REGDESC32
 {
-    /** Name of the register. */
-    char        szName[64];
-    /** Long description of the register. */
-    char        szDesc[256];
-    /** Additional description (notes, tables etc.) */
-    char        szAddDesc[2048];
-    /** Pointer to bit descriptor array for 32 bits. */
-    PREGBITDESC paRegBitDesc;
+    char            szName[64];         /**< Name of the register. */
+    char            szDesc[256];        /**< Long description of the register. */
+    char            szAddDesc[2048];    /**< Additional description (notes, tables etc.) */
+    PREGBITDESC     paRegBitDesc;       /**< Pointer to bit descriptor array for 32 bits. */
 } REGDESC32;
 /** Pointer to a 32-bit register descriptor object. */
 typedef REGDESC32 *PREGDESC32;

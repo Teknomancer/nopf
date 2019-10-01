@@ -78,8 +78,8 @@
 /** NUMBER: A number. */
 typedef struct NUMBER
 {
-    UINTEGER    uValue;
-    FLOAT       dValue;
+    UINTEGER    uValue;     /**< Value representation as integer. */
+    FLOAT       dValue;     /**< Value representation as floating point. */
 } NUMBER;
 /** Pointer to an Number object. */
 typedef NUMBER *PNUMBER;
@@ -92,12 +92,12 @@ typedef const NUMBER *PCNUMBER;
  */
 typedef enum ATOMTYPE
 {
-    enmAtomEmpty = 1,
-    enmAtomNumber,
-    enmAtomOperator,
-    enmAtomFunction,
-    enmAtomVariable,
-    enmAtomCommand
+    enmAtomEmpty = 1,  /**< Empty/invalid. */
+    enmAtomNumber,     /**< Number Atom. */
+    enmAtomOperator,   /**< Operator Atom. */
+    enmAtomFunction,   /**< Function Atom. */
+    enmAtomVariable,   /**< Variable Atom. */
+    enmAtomCommand     /**< Command Atom. */
 } ATOMTYPE;
 
 /**
@@ -106,31 +106,21 @@ typedef enum ATOMTYPE
  */
 typedef struct ATOM
 {
-    /** The type. */
-    ATOMTYPE       Type;
-    /** Cursor position, an Index used to flag errors. */
-    uint32_t       Position;
-    /** Holds number of parameters to pass to the Function. */
-    uint32_t       cFunctionParams;
-    /** Variable Name if this is a variable. */
-    char           szVariable[MAX_VARIABLE_NAME_LENGTH];
-    /** The expression of a command if this is a command. */
-    const char    *pszCommandExpr;
-    /** Pointer to the Number Atom argument for a command Atom. */
-    void           *pvCommandParamAtom;
+    ATOMTYPE     Type;                                  /**< The type. */
+    uint32_t     Position;                              /**< Cursor position, an Index used to flag errors. */
+    uint32_t     cFunctionParams;                       /**< Number of parameters to pass to the Function atom. */
+    char         szVariable[MAX_VARIABLE_NAME_LENGTH];  /**< Variable Name if this is a Variable atom. */
+    const char  *pszCommandExpr;                        /**< The expression of a command if this is a command. */
+    void        *pvCommandParamAtom;                    /**< The Number Atom argument for a Command Atom. */
+
     /** The data union. */
     union
     {
-        /** The NUMBER for a Number Atom. */
-        struct NUMBER            Number;
-        /** Pointer to the OPERATOR for an Operator Atom. */
-        struct OPERATOR const   *pOperator;
-        /** Pointer to the FUNCTION for a Function Atom. */
-        struct FUNCTION const   *pFunction;
-        /** Pointer to the VARIABLE entry for a Variable Atom. */
-        struct VARIABLE         *pVariable;
-        /** Pointer to the COMMAND entry for the Command Atom. */
-        struct COMMAND          *pCommand;
+        struct NUMBER            Number;        /**< The NUMBER for a Number Atom. */
+        struct OPERATOR const   *pOperator;     /**< Pointer to the OPERATOR for an Operator Atom. */
+        struct FUNCTION const   *pFunction;     /**< Pointer to the FUNCTION for a Function Atom. */
+        struct VARIABLE         *pVariable;     /**< Pointer to the VARIABLE entry for a Variable Atom. */
+        struct COMMAND          *pCommand;      /**< Pointer to the COMMAND entry for the Command Atom. */
     } u;
 } ATOM;
 /** Pointer to an Atom object. */
@@ -150,9 +140,9 @@ typedef FNOPERATOR *PFNOPERATOR;
  */
 typedef enum OPERATORDIR
 {
-    enmDirNone = 1,
-    enmDirLeft,
-    enmDirRight
+    enmDirNone = 1,     /**< None/invalid. */
+    enmDirLeft,         /**< Operator is left associative. */
+    enmDirRight         /**< Operator is right associative. */
 } OPERATORDIR;
 
 /**
@@ -161,24 +151,16 @@ typedef enum OPERATORDIR
  */
 typedef struct OPERATOR
 {
-    /** The operator Id, used to identify certain key Operators. */
-    int             OperatorId;
-    /** Operator priority, value is relative to Operators. */
-    int             Priority;
-    /** Operator associativity. */
-    OPERATORDIR     Direction;
-    /** Number of parameters to the operator, valid values: (0-2). */
-    uint8_t         cParams;
-    /** Whether the parameters must all fit into UINTEGER */
-    bool            fUIntParams;
-    /** Name of the Operator as seen in the expression. */
-    const char     *pszOperator;
-    /** Pointer to the Operator evaluator function. */
-    PFNOPERATOR     pfnOperator;
-    /** Short description of the Operator, NULL if already described. */
-    const char     *pszSyntax;
-    /** Long description of the Operator, NULL if already described. */
-    const char     *pszDesc;
+    int             OperatorId;     /**< The operator Id, used to identify certain key Operators. */
+    int             Priority;       /**< Operator priority, value is relative to Operators. */
+    OPERATORDIR     Direction;      /**< Operator associativity. */
+    uint8_t         cParams;        /**< Number of parameters to the operator, valid values: (0-2). */
+    bool            fUIntParams;    /**< Whether the parameters must all fit into UINTEGER */
+    const char     *pszOperator;    /**< Name of the Operator as seen in the expression. */
+    PFNOPERATOR     pfnOperator;    /**< Pointer to the Operator evaluator function. */
+    const char     *pszSyntax;      /**< Short description of the Operator, NULL if already described. */
+    const char     *pszDesc;        /**< Long description of the Operator, NULL if already described. */
+
 } OPERATOR;
 /** Pointer to an Operator object. */
 typedef OPERATOR *POPERATOR;
@@ -197,20 +179,13 @@ typedef FNFUNCTION *PFNFUNCTION;
  */
 typedef struct FUNCTION
 {
-    /** Name of the Function as seen in the expression. */
-    const char     *pszFunction;
-    /** Pointer to the Function evaluator function. */
-    PFNFUNCTION     pfnFunction;
-    /** Whether the parameters must all fit into UINTEGER */
-    bool            fUIntParams;
-    /** Minimum parameters accepted by @a pfnFunction. */
-    uint32_t        cMinParams;
-    /** Maximum paramaters accepted by @a pfnFunction. */
-    uint32_t        cMaxParams;
-    /** Short description of the Function, NULL if already described. */
-    const char     *pszSyntax;
-    /** Long description of the Function, NULL if already described. */
-    const char     *pszDesc;
+    const char     *pszFunction;    /**< Name of the Function as seen in the expression. */
+    PFNFUNCTION     pfnFunction;    /**< Pointer to the Function evaluator function. */
+    bool            fUIntParams;    /**< Whether the parameters must all fit into UINTEGER */
+    uint32_t        cMinParams;     /**< Minimum parameters accepted by @a pfnFunction. */
+    uint32_t        cMaxParams;     /**< Maximum paramaters accepted by @a pfnFunction. */
+    const char     *pszSyntax;      /**< Short description of the Function, NULL if already described. */
+    const char     *pszDesc;        /**< Long description of the Function, NULL if already described. */
 } FUNCTION;
 /** Pointer to a Function object. */
 typedef FUNCTION *PFUNCTION;
@@ -223,14 +198,10 @@ typedef const FUNCTION *PCFUNCTION;
  */
 typedef struct VARIABLE
 {
-    /** Name of the variable as seen in the expression. */
-    char                     szVariable[MAX_VARIABLE_NAME_LENGTH];
-    /** The expression assigned to the variable. */
-    char                    *pszExpr;
-    /** Whether this variable can be re-assigned. */
-    bool                     fCanReinit;
-    /** Pointer to the RPN Queue. */
-    void                    *pvRPNQueue;
+    char    szVariable[MAX_VARIABLE_NAME_LENGTH]; /**< Name of the variable as seen in the expression. */
+    char   *pszExpr;                              /**< The expression assigned to the variable. */
+    bool    fCanReinit;                           /**< Whether this variable can be re-assigned. */
+    void   *pvRPNQueue;                           /**< Pointer to the RPN Queue. */
 } VARIABLE;
 /** Pointer to a Varbucket object. */
 typedef VARIABLE *PVARIABLE;
@@ -251,16 +222,10 @@ typedef FNCOMMAND *PFNCOMMAND;
  */
 typedef struct COMMAND
 {
-    /** Name of the Command as seen in the expression. */
-    const char     *pszCommand;
-    /** Pointer to the Command evaluator function. */
-    PFNCOMMAND      pfnCommand;
-    /** Short description of the Command, NULL if already
-     *  described. */
-    const char     *pszSyntax;
-    /** Long description of the Command, NULL if already
-     *  described. */
-    const char     *pszDesc;
+    const char     *pszCommand;    /**< Name of the Command as seen in the expression. */
+    PFNCOMMAND      pfnCommand;    /**< Pointer to the Command evaluator function. */
+    const char     *pszSyntax;     /**< Short description of the Command, NULL if already described. */
+    const char     *pszDesc;       /** Long description of the Command, NULL if already described. */
 } COMMAND;
 /** Pointer to a Command object. */
 typedef COMMAND *PCOMMAND;

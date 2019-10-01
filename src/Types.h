@@ -85,11 +85,11 @@ typedef int32_t  S32INTEGER;
 
 extern CFLOAT g_MachEpsilon;
 
-bool EssentiallyEqual(FLOAT a, FLOAT b);
-bool ApproximatelyEqual(FLOAT a, FLOAT b);
-bool DefinitelyGreaterThan(FLOAT a, FLOAT b);
-bool DefinitelyLessThan(FLOAT a, FLOAT b);
-bool CanCastTo(FLOAT dValue, FLOAT dMaxValueForDst);
+bool    EssentiallyEqual(FLOAT a, FLOAT b);
+bool    ApproximatelyEqual(FLOAT a, FLOAT b);
+bool    DefinitelyGreaterThan(FLOAT a, FLOAT b);
+bool    DefinitelyLessThan(FLOAT a, FLOAT b);
+bool    CanCastTo(FLOAT dValue, FLOAT dMaxValueForDst);
 
 #endif /* TYPES_H___ */
 
