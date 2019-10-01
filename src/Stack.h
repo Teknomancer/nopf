@@ -30,14 +30,10 @@
  */
 typedef struct STACKITEM
 {
-    /** Opaque private data pointer. */
-    void                *pvData;
-    /** Pointer to the next item on the stack. */
-    struct STACKITEM    *pNext;
+    void                *pvData;    /**< Pointer to the data. */
+    struct STACKITEM    *pNext;     /**< Pointer to the next item. */
 } STACKITEM;
-/** Pointer to a Stack item object. */
 typedef STACKITEM *PSTACKITEM;
-/** Pointer to a const Stack item object. */
 typedef const STACKITEM *PCSTACKITEM;
 
 /**
@@ -45,23 +41,18 @@ typedef const STACKITEM *PCSTACKITEM;
  */
 typedef struct STACK
 {
-    /** Pointer to the top of the stack. */
-    STACKITEM           *pTop;
-    /** Number of items on the stack. */
-    uint32_t             cItems;
+    STACKITEM           *pTop;      /**< Pointer to the top of the stack. */
+    uint32_t             cItems;    /**< Number of items. */
 } STACK;
-/** Pointer to a Stack object. */
 typedef STACK *PSTACK;
-/** Pointer to a const Stack object. */
 typedef const STACK *PCSTACK;
 
-/** Stack access routines. */
-void StackInit(PSTACK pStack);
-uint32_t StackSize(PSTACK pStack);
-bool StackIsEmpty(PSTACK pStack);
-int StackPush(PSTACK pStack, void *pvData);
-void *StackPop(PSTACK pStack);
-void *StackPeek(PSTACK pStack);
+void        StackInit(PSTACK pStack);
+uint32_t    StackSize(PSTACK pStack);
+bool        StackIsEmpty(PSTACK pStack);
+int         StackPush(PSTACK pStack, void *pvData);
+void       *StackPop(PSTACK pStack);
+void       *StackPeek(PSTACK pStack);
 
 #endif /* NOPFSTACK_H___ */
 

@@ -27,29 +27,29 @@
 
 typedef struct QUEUEITEM
 {
-    void                *pvData;
-    struct QUEUEITEM    *pNext;
+    void                *pvData;    /**< Pointer to the data. */
+    struct QUEUEITEM    *pNext;     /**< Pointer to the next item. */
 } QUEUEITEM;
 typedef QUEUEITEM *PQUEUEITEM;
 typedef const QUEUEITEM *PCQUEUEITEM;
 
 typedef struct QUEUE
 {
-    QUEUEITEM           *pHead;
-    QUEUEITEM           *pTail;
-    uint32_t             cItems;
+    QUEUEITEM           *pHead;     /**< Pointer to the head. */
+    QUEUEITEM           *pTail;     /**< Pointer to the tail. */
+    uint32_t             cItems;    /**< Number of items. */
 } QUEUE;
 typedef QUEUE *PQUEUE;
 typedef const QUEUE *PCQUEUE;
 
-void QueueInit(PQUEUE pQueue);
-uint32_t QueueSize(PQUEUE pQueue);
-bool QueueIsEmpty(PQUEUE pQueue);
-int QueueAdd(PQUEUE pQueue, void *pvData);
-void *QueueRemove(PQUEUE pQueue);
-void *QueuePeekHead(PQUEUE pQueue);
-void *QueuePeekTail(PQUEUE pQueue);
-void *QueueItemAt(PQUEUE pQueue, uint32_t uIndex);
+void        QueueInit(PQUEUE pQueue);
+uint32_t    QueueSize(PQUEUE pQueue);
+bool        QueueIsEmpty(PQUEUE pQueue);
+int         QueueAdd(PQUEUE pQueue, void *pvData);
+void       *QueueRemove(PQUEUE pQueue);
+void       *QueuePeekHead(PQUEUE pQueue);
+void       *QueuePeekTail(PQUEUE pQueue);
+void       *QueueItemAt(PQUEUE pQueue, uint32_t uIndex);
 
 #endif /* NOPFQUEUE_H___ */
 

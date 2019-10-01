@@ -27,30 +27,30 @@
 
 typedef struct LISTITEM
 {
-    void               *pvData;
-    struct LISTITEM    *pNext;
-    struct LISTITEM    *pPrev;
+    void               *pvData;     /**< Pointer to the data. */
+    struct LISTITEM    *pNext;      /**< Pointer to the next item. */
+    struct LISTITEM    *pPrev;      /**< Pointer to the previous item. */
 } LISTITEM;
 typedef LISTITEM *PLISTITEM;
 typedef const LISTITEM *PCLISTITEM;
 
 typedef struct LIST
 {
-    PLISTITEM           pHead;
-    PLISTITEM           pTail;
-    uint32_t            cItems;
+    PLISTITEM           pHead;      /**< Pointer to the head. */
+    PLISTITEM           pTail;      /**< Pointer to the tail. */
+    uint32_t            cItems;     /**< Number of items. */
 } LIST;
 typedef LIST *PLIST;
 typedef const LIST *PCLIST;
 
-void ListInit(PLIST pList);
-uint32_t ListSize(PLIST pList);
-bool ListIsEmpty(PLIST pList);
-int ListAdd(PLIST pList, void *pvData);
-void ListRemove(PLIST pList, void *pvData);
-void *ListRemoveItemAt(PLIST pList, uint32_t uIndex);
-void *ListItemAt(PLIST pList, uint32_t uIndex);
-void ListAppend(PLIST pList, PLIST pSrcList);
+void        ListInit(PLIST pList);
+uint32_t    ListSize(PLIST pList);
+bool        ListIsEmpty(PLIST pList);
+int         ListAdd(PLIST pList, void *pvData);
+void        ListRemove(PLIST pList, void *pvData);
+void       *ListRemoveItemAt(PLIST pList, uint32_t uIndex);
+void       *ListItemAt(PLIST pList, uint32_t uIndex);
+void        ListAppend(PLIST pList, PLIST pSrcList);
 
 #endif /* NOPFLIST_H___ */
 

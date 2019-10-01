@@ -39,24 +39,15 @@
  */
 typedef struct EVALRESULT
 {
-    /** Is this a variable assignment? */
-    bool            fVariableAssignment;
-    /** Is this an evaluated command? */
-    bool            fCommandEvaluated;
-    /** Name of assigned variable if any. */
-    char            szVariable[MAX_VARIABLE_NAME_LENGTH];
-    /** Name of the function if it's a single function call (truncated to 128 characters for now) */
-    char            szFunction[MAX_VARIABLE_NAME_LENGTH];
-    /** Name of evaluated command if any. */
-    char            szCommand[MAX_COMMAND_NAME_LENGTH];
-    /** Output of the command if it's a command. */
-    char            szCommandResult[MAX_COMMAND_RESULT_LENGTH];
-    /** Integer value of the parse/evaluation phase. */
-    UINTEGER        uValue;
-    /** Float value of the parse/evaluation phase. */
-    FLOAT           dValue;
-    /** Index into the original expression if an error occurred. */
-    int             ErrorIndex;
+    bool        fVariableAssignment;                           /**< Whether this is a Variable assignment. */
+    bool        fCommandEvaluated;                             /**< Whether this is an evaluated Command. */
+    char        szVariable[MAX_VARIABLE_NAME_LENGTH];          /**< Name of assigned Variable if any. */
+    char        szFunction[MAX_VARIABLE_NAME_LENGTH];          /**< Name of the Function if it's a single function call. */
+    char        szCommand[MAX_COMMAND_NAME_LENGTH];            /**< Name of evaluated Command if any. */
+    char        szCommandResult[MAX_COMMAND_RESULT_LENGTH];    /**< Output of the Command if it's a Command. */
+    UINTEGER    uValue;                                        /**< Integer value of the parse/evaluation phase. */
+    FLOAT       dValue;                                        /**< Float value of the parse/evaluation phase. */
+    int         ErrorIndex;                                    /**< Index into the original expression if case of an error. */
 } EVALRESULT;
 typedef EVALRESULT *PEVALRESULT;
 typedef const EVALRESULT *PCCEVALRESULT;
@@ -67,37 +58,31 @@ typedef const EVALRESULT *PCCEVALRESULT;
  */
 typedef struct EVALUATOR
 {
-    /** Magic (RMAG_EVALUATOR). */
-    uint32_t        u32Magic;
-    /** The result of the last parse/evaluation pass. */
-    EVALRESULT      Result;
-    /** The current expression. */
-    const char     *pszExpr;
-    /** Internal RPN representation (Queue) done by the parse phase. */
-    void           *pvRPNQueue;
-    /** List of variables being evaluated, used for circular dependency prevention. */
-    LIST            VarList;
+    uint32_t        u32Magic;       /**< Magic (RMAG_EVALUATOR). */
+    EVALRESULT      Result;         /**< The result of the last parse/evaluation pass. */
+    const char     *pszExpr;        /**< The current expression. */
+    void           *pvRPNQueue;     /**< Internal RPN representation (Queue) done by the parse phase. */
+    LIST            VarList;        /**< List of Variables being evaluated, used for circular dependency prevention. */
 } EVALUATOR;
 typedef EVALUATOR *PEVALUATOR;
 typedef const EVALUATOR *PCEVALUATOR;
 
 
-int EvaluatorInitGlobals(void);
-void EvaluatorDestroyGlobals(void);
+int         EvaluatorInitGlobals(void);
+void        EvaluatorDestroyGlobals(void);
 
-int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError);
-void EvaluatorDestroy(PEVALUATOR pEval);
-int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr);
-int EvaluatorEvaluate(PEVALUATOR pEval);
-
+int         EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError);
+void        EvaluatorDestroy(PEVALUATOR pEval);
+int         EvaluatorParse(PEVALUATOR pEval, const char *pszExpr);
+int         EvaluatorEvaluate(PEVALUATOR pEval);
 
 const char *EvaluatorFindFunction(const char *pszCommand, uint32_t cchCommand, uint32_t iStart, uint32_t *piEnd);
-unsigned EvaluatorFunctionCount(void);
-int EvaluatorFunctionHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp);
-unsigned EvaluatorOperatorCount(void);
-int EvaluatorOperatorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp);
-int EvaluatorVariableValue(unsigned uIndex, char **ppszName, char **ppszExpr);
-unsigned EvaluatorCommandCount(void);
+unsigned    EvaluatorFunctionCount(void);
+int         EvaluatorFunctionHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp);
+unsigned    EvaluatorOperatorCount(void);
+int         EvaluatorOperatorHelp(unsigned uIndex, char **ppszName, char **ppszSyntax, char **ppszHelp);
+int         EvaluatorVariableValue(unsigned uIndex, char **ppszName, char **ppszExpr);
+unsigned    EvaluatorCommandCount(void);
 
 #endif /* EVALUATOR_H___ */
 

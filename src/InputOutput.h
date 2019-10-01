@@ -40,24 +40,23 @@ void DebugPrintf(char *pszMsg, ...);
  */
 typedef struct TEXTLINE
 {
-    uint32_t        u32Magic;
-    /** The complete/original buffer line */
-    char           *pszRaw;
-    /** The line stripped/altered, a subset of 'pszRaw' */
-    char           *pszData;
+    uint32_t        u32Magic;   /**< Magic. */
+    char           *pszRaw;     /**< The complete/original buffer line */
+    char           *pszData;    /**< The line stripped/altered, a subset of 'pszRaw' */
+
 } TEXTLINE;
 /** Pointer to a line record. */
 typedef TEXTLINE *PTEXTLINE;
 typedef const TEXTLINE *PCTEXTLINE;
 
 /** TextLine data structure manipulators. */
-void TextLineInit(PTEXTLINE pLine);
-void TextLineDelete(PTEXTLINE pLine);
+void    TextLineInit(PTEXTLINE pLine);
+void    TextLineDelete(PTEXTLINE pLine);
 
 /** TextLine library routines */
-int TextLineLibraryInit(const char *pszRCFileName);
-void TextLineLibraryTerm(void);
-int TextLineRead(PTEXTLINE pLine, char *pszPrompt);
+int     TextLineLibraryInit(const char *pszRCFileName);
+void    TextLineLibraryTerm(void);
+int     TextLineRead(PTEXTLINE pLine, char *pszPrompt);
 
 #endif /* INPUT_OUTPUT_H___ */
 

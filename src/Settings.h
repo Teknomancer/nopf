@@ -25,31 +25,24 @@
 #include <stdbool.h>
 
 /**
- * The settings blob.
+ * The settings object.
  */
 typedef struct SETTINGS
 {
-    /** Use xTerm colors in the output. */
-    bool            fUseColors;
-    /** The input prompt. */
-    char           *pszPrompt;
-    /** Output Boolean */
-    bool            fOutputBaseBool;
-    /** Output Decimal */
-    bool            fOutputBaseDec;
-    /** Output Octal */
-    bool            fOutputBaseOct;
-    /** Output Hexadecimal */
-    bool            fOutputBaseHex;
-    /** Output Binary */
-    bool            fOutputBaseBin;
+    bool            fUseColors;         /**< Whether to use xTerm colors in the output. */
+    char           *pszPrompt;          /**< The input prompt. */
+    bool            fOutputBaseBool;    /**< Whether to output Boolean. */
+    bool            fOutputBaseDec;     /**< Whether to output Decimal. */
+    bool            fOutputBaseOct;     /**< Whether to output Octal. */
+    bool            fOutputBaseHex;     /**< Whether to output Hexadecimal. */
+    bool            fOutputBaseBin;     /**< Whether to output Binary. */
 } SETTINGS;
-/** Pointer to rawb settings. */
 typedef SETTINGS *PSETTINGS;
 typedef SETTINGS const *PCSETTINGS;
 
-int SettingsCreate(PSETTINGS *ppSettings, PCSETTINGS pFrom);
-void SettingsDestroy(PSETTINGS pSettings);
+int     SettingsCreate(PSETTINGS *ppSettings, PCSETTINGS pFrom);
+void    SettingsDestroy(PSETTINGS pSettings);
+
 extern const SETTINGS g_FactorySettings;
 
 #endif /* SETTINGS_H___ */
