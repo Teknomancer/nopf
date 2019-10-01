@@ -33,7 +33,7 @@
 /*******************************************************************************
  *   Function Functions!                                                       *
  *******************************************************************************/
-int FnSum(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSum(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     for (uint32_t i = 1; i < cAtoms; i++)
     {
@@ -43,7 +43,7 @@ int FnSum(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnAverage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnAverage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     int rc = FnSum(pEval, apAtoms, cAtoms);
     if (RC_SUCCESS(rc))
@@ -54,7 +54,7 @@ int FnAverage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnFactorial(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnFactorial(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     UINTEGER uValue = apAtoms[0]->u.Number.uValue;
     UINTEGER uFact  = 1;
@@ -68,7 +68,7 @@ int FnFactorial(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnGCD(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGCD(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /*
      * Bleh, just write something quickly now. I'll revisit this to make it
@@ -109,7 +109,7 @@ int FnGCD(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnLCM(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnLCM(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /*
      * Bleh, just write something quickly now. I'll revisit this to make it
@@ -151,28 +151,28 @@ int FnLCM(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnPow(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPow(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue = FPOWFLOAT(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     apAtoms[0]->u.Number.uValue = (UINTEGER)(apAtoms[0]->u.Number.dValue + 0.50);
     return RINF_SUCCESS;
 }
 
-int FnSqrt(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSqrt(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue = FPOWFLOAT(apAtoms[0]->u.Number.dValue, (FLOAT)0.50);
     apAtoms[0]->u.Number.uValue = (UINTEGER)(apAtoms[0]->u.Number.dValue + 0.50);
     return RINF_SUCCESS;
 }
 
-int FnRoot(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnRoot(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue = FPOWFLOAT(apAtoms[0]->u.Number.dValue, 1 / (FLOAT)apAtoms[1]->u.Number.dValue);
     apAtoms[0]->u.Number.uValue = (UINTEGER)(apAtoms[0]->u.Number.dValue + 0.50);
     return RINF_SUCCESS;
 }
 
-int FnIf(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnIf(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     uint8_t const idxResultAtom = apAtoms[0]->u.Number.uValue ? 1 : 2;
     apAtoms[0]->u.Number.uValue = apAtoms[idxResultAtom]->u.Number.uValue;
@@ -181,7 +181,7 @@ int FnIf(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /** @todo Make Functions specify minimum parameter widths like Operators. */
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
@@ -189,28 +189,28 @@ int FnByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1K;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1M;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1G;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1T;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
@@ -218,29 +218,29 @@ int FnByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnKiloByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnKiloByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1K;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnKiloByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnKiloByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToKiloByte(pEval, apAtoms, cAtoms);
 }
 
-int FnKiloByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnKiloByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToMegaByte(pEval, apAtoms, cAtoms);
 }
 
-int FnKiloByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnKiloByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToGigaByte(pEval, apAtoms, cAtoms);
 }
 
-int FnKiloByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnKiloByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue * _1K + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
@@ -248,31 +248,31 @@ int FnKiloByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMegaByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMegaByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1M;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnMegaByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMegaByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1K;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnMegaByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMegaByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToKiloByte(pEval, apAtoms, cAtoms);
 }
 
-int FnMegaByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMegaByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToMegaByte(pEval, apAtoms, cAtoms);
 }
 
-int FnMegaByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMegaByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue * _1M + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
@@ -280,93 +280,93 @@ int FnMegaByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnGigaByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGigaByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1G;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnGigaByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGigaByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnMegaByteToByte(pEval, apAtoms, cAtoms);
 }
 
-int FnGigaByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGigaByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnMegaByteToKiloByte(pEval, apAtoms, cAtoms);
 }
 
-int FnGigaByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGigaByteToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnByteToKiloByte(pEval, apAtoms, cAtoms);
 }
 
-int FnGigaByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnGigaByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue * _1G + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnTeraByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnTeraByteToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1T;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnTeraByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnTeraByteToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnGigaByteToByte(pEval, apAtoms, cAtoms);
 }
 
-int FnTeraByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnTeraByteToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnMegaByteToByte(pEval, apAtoms, cAtoms);
 }
 
-int FnTeraByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnTeraByteToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return FnKiloByteToByte(pEval, apAtoms, cAtoms);
 }
 
-int FnTeraByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnTeraByteToPage(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue * _1T + _MEM_PAGEOFFSET) >> _MEM_PAGESHIFT;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnPageToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPageToByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _MEM_PAGESIZE;
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnPageToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPageToKiloByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= (_MEM_PAGESIZE / _1K);
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnPageToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPageToMegaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= (_MEM_PAGESIZE / _1M);
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnPageToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPageToGigaByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= (_MEM_PAGESIZE / _1G);
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int FnPageToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnPageToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= (_MEM_PAGESIZE / _1T);
     apAtoms[0]->u.Number.dValue  = apAtoms[0]->u.Number.uValue;
@@ -375,70 +375,70 @@ int FnPageToTeraByte(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 
 
 
-int FnNanosecToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1MILLI;
     apAtoms[0]->u.Number.dValue /= _1MILLI;
     return RINF_SUCCESS;
 }
 
-int FnNanosecToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1MICRO;
     apAtoms[0]->u.Number.dValue /= _1MICRO;
     return RINF_SUCCESS;
 }
 
-int FnNanosecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1NANO;
     apAtoms[0]->u.Number.dValue /= _1NANO;
     return RINF_SUCCESS;
 }
 
-int FnNanosecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (60 * _1NANO);
     apAtoms[0]->u.Number.dValue /= (60 * _1NANO);
     return RINF_SUCCESS;
 }
 
-int FnNanosecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (3600LL * _1NANO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)3600LL * _1NANO);
     return RINF_SUCCESS;
 }
 
-int FnNanosecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (86400LL * _1NANO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)86400LL * _1NANO);
     return RINF_SUCCESS;
 }
 
-int FnNanosecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (604800LL * _1NANO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)604800LL * _1NANO);
     return RINF_SUCCESS;
 }
 
-int FnNanosecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnNanosecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (31556926LL * _1NANO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)31556926LL * _1NANO);
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1MILLI;
     apAtoms[0]->u.Number.dValue *= _1MILLI;
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1MILLI;
     apAtoms[0]->u.Number.dValue /= _1MILLI;
@@ -446,7 +446,7 @@ int FnMicrosecToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMicrosecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1MICRO;
     apAtoms[0]->u.Number.dValue /= _1MICRO;
@@ -454,35 +454,35 @@ int FnMicrosecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMicrosecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (60 * _1MICRO);
     apAtoms[0]->u.Number.dValue /= (60 * _1MICRO);
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (3600LL * _1MICRO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)3600LL * _1MICRO);
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (86400LL * _1MICRO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)86400LL * _1MICRO);
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (604800LL * _1MICRO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)604800LL * _1MICRO);
     return RINF_SUCCESS;
 }
 
-int FnMicrosecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMicrosecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (31556926LL * _1MICRO);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)31556926LL * _1MICRO);
@@ -490,14 +490,14 @@ int FnMicrosecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMillisecToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1MICRO;
     apAtoms[0]->u.Number.dValue *= _1MICRO;
     return RINF_SUCCESS;
 }
 
-int FnMillisecToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1MILLI;
     apAtoms[0]->u.Number.dValue *= _1MILLI;
@@ -505,7 +505,7 @@ int FnMillisecToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMillisecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= _1MILLI;
     apAtoms[0]->u.Number.dValue /= _1MILLI;
@@ -513,35 +513,35 @@ int FnMillisecToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnMillisecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (60 * _1MILLI);
     apAtoms[0]->u.Number.dValue /= (60 * _1MILLI);
     return RINF_SUCCESS;
 }
 
-int FnMillisecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (3600LL * _1MILLI);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)3600LL * _1MILLI);
     return RINF_SUCCESS;
 }
 
-int FnMillisecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (86400LL * _1MILLI);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)86400LL * _1MILLI);
     return RINF_SUCCESS;
 }
 
-int FnMillisecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (604800LL * _1MILLI);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)604800LL * _1MILLI);
     return RINF_SUCCESS;
 }
 
-int FnMillisecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMillisecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= (31556926LL * _1MILLI);
     apAtoms[0]->u.Number.dValue /= ((FLOAT)31556926LL * _1MILLI);
@@ -549,119 +549,119 @@ int FnMillisecToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 }
 
 
-int FnSecondToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1NANO;
     apAtoms[0]->u.Number.dValue *= _1NANO;
     return RINF_SUCCESS;
 }
 
-int FnSecondToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1MICRO;
     apAtoms[0]->u.Number.dValue *= _1MICRO;
     return RINF_SUCCESS;
 }
 
-int FnSecondToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= _1MILLI;
     apAtoms[0]->u.Number.dValue *= _1MILLI;
     return RINF_SUCCESS;
 }
 
-int FnSecondToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToMinute(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 60LL;
     apAtoms[0]->u.Number.dValue /= 60LL;
     return RINF_SUCCESS;
 }
 
-int FnSecondToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 3600LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)3600LL;
     return RINF_SUCCESS;
 }
 
-int FnSecondToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 86400LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)86400LL;
     return RINF_SUCCESS;
 }
 
-int FnSecondToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 604800LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)604800LL;
     return RINF_SUCCESS;
 }
 
-int FnSecondToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSecondToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 31556926LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)31556926LL;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToNanosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue *= 60 * _1NANO;
     apAtoms[0]->u.Number.dValue *= 60 * _1NANO;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToMicrosec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= 60 * _1MICRO;
     apAtoms[0]->u.Number.dValue *= 60 * _1MICRO;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToMillisec(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= 60 * _1MILLI;
     apAtoms[0]->u.Number.dValue *= 60 * _1MILLI;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToSecond(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue *= 60LL;
     apAtoms[0]->u.Number.dValue *= 60LL;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToHour(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 60LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)60LL;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToDay(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue /= 1440LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)1440LL;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToWeek(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 10080LL;
     apAtoms[0]->u.Number.dValue /= (FLOAT)10080LL;
     return RINF_SUCCESS;
 }
 
-int FnMinuteToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMinuteToYear(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.uValue /= 525948.766;
     apAtoms[0]->u.Number.dValue /= (FLOAT)525948.766;
     return RINF_SUCCESS;
 }
 
-int FnCelciusToFahrenheit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnCelciusToFahrenheit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue *= (FLOAT)(9 / 5.0);
     apAtoms[0]->u.Number.dValue += 32;
@@ -669,7 +669,7 @@ int FnCelciusToFahrenheit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnFahrenheitToCelcius(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnFahrenheitToCelcius(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     apAtoms[0]->u.Number.dValue -= 32;
     apAtoms[0]->u.Number.dValue /= (FLOAT)(9 / 5.0);
@@ -677,7 +677,7 @@ int FnFahrenheitToCelcius(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnSetBit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSetBit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /* We're fine shifting unsigned, well defined behaviour*/
     apAtoms[0]->u.Number.uValue = (1U << apAtoms[0]->u.Number.uValue);
@@ -685,17 +685,17 @@ int FnSetBit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RINF_SUCCESS;
 }
 
-int FnMax(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMax(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return RERR_NOT_IMPLEMENTED;
 }
 
-int FnMin(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnMin(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     return RERR_NOT_IMPLEMENTED;
 }
 
-int FnAlign(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnAlign(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     U64INTEGER const uVal   = apAtoms[0]->u.Number.uValue;
     U64INTEGER const uAlign = apAtoms[1]->u.Number.uValue;

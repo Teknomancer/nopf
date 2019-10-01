@@ -233,7 +233,7 @@ typedef const VARIABLE *PCVARIABLE;
 
 
 /** A Command function. */
-typedef int FNCOMMAND(PEVALUATOR pEval, PATOM pAtom, char **ppszResult);
+typedef int FNCOMMAND(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult);
 /** Pointer to a Command function. */
 typedef FNCOMMAND *PFNCOMMAND;
 
