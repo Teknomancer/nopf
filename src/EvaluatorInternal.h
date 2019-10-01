@@ -30,13 +30,19 @@
 #include "Types.h"
 #include "Evaluator.h"
 
-/** Maximum number of parameters that can be passed to an operator */
+/** Maximum number of parameters that can be passed to an Operator */
 #define MAX_OPERATOR_PARAMETERS     2
+/** Maximum number of parameters that can be passed to a Function. */
 #define MAX_FUNCTION_PARAMETERS     1024
+/** Open paranthesis Operator Id.   */
 #define OPEN_PAREN_ID               INT_MAX - 1
+/** Close paranthesis Operator Id.   */
 #define CLOSE_PAREN_ID              INT_MAX - 2
+/** Parameter separator Operator Id.   */
 #define PARAM_SEP_ID                INT_MAX - 3
+/** Variable assignment Operator Id. */
 #define VAR_ASSIGN_ID               INT_MAX - 4
+/** Maximum length of a Variable name. */
 #define MAX_VARIABLE_NAME_LENGTH    128
 
 /** More handy constant definitions */
