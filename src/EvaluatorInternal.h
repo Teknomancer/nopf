@@ -32,7 +32,7 @@
 
 /** Maximum number of parameters that can be passed to an operator */
 #define MAX_OPERATOR_PARAMETERS     2
-#define MAX_FUNCTION_PARAMETERS     32
+#define MAX_FUNCTION_PARAMETERS     1024
 #define OPEN_PAREN_ID               INT_MAX - 1
 #define CLOSE_PAREN_ID              INT_MAX - 2
 #define PARAM_SEP_ID                INT_MAX - 3
