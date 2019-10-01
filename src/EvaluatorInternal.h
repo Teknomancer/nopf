@@ -232,6 +232,7 @@ typedef COMMAND *PCOMMAND;
 /** Pointer to a const Command object. */
 typedef const COMMAND *PCCOMMAND;
 
+
 static inline bool AtomIsNumber(PCATOM pAtom)
 {
     return (pAtom && pAtom->Type == enmAtomNumber);

@@ -31,7 +31,9 @@ typedef struct LISTITEM
     struct LISTITEM    *pNext;      /**< Pointer to the next item. */
     struct LISTITEM    *pPrev;      /**< Pointer to the previous item. */
 } LISTITEM;
+/** Pointer to a list item. */
 typedef LISTITEM *PLISTITEM;
+/** Pointer to a const list item. */
 typedef const LISTITEM *PCLISTITEM;
 
 typedef struct LIST
@@ -40,7 +42,9 @@ typedef struct LIST
     PLISTITEM           pTail;      /**< Pointer to the tail. */
     uint32_t            cItems;     /**< Number of items. */
 } LIST;
+/** Pointer to a list. */
 typedef LIST *PLIST;
+/** Pointer to a const list. */
 typedef const LIST *PCLIST;
 
 void        ListInit(PLIST pList);

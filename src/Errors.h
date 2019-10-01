@@ -109,14 +109,12 @@
  */
 typedef struct RCSTATUSMSG
 {
-    /** Symbolic name of error as a string. */
-    const char *pszName;
-    /** The error code. */
-    int         rc;
+    const char *pszName;    /**< Symbolic name of error as a string. */
+    int         rc;         /**< The error code. */
 } RCSTATUSMSG;
-/** Pointer to a Status Message object. */
+/** Pointer to a status message. */
 typedef RCSTATUSMSG *PRCSTATUSMSG;
-/** Pointer to a const Status Message object. */
+/** Pointer to a const status message. */
 typedef const RCSTATUSMSG *PCRCSTATUSMSG;
 
 extern const RCSTATUSMSG g_aStatusMsgs[];
