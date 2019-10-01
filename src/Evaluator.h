@@ -49,7 +49,9 @@ typedef struct EVALRESULT
     FLOAT       dValue;                                        /**< Float value of the parse/evaluation phase. */
     int         ErrorIndex;                                    /**< Index into the original expression if case of an error. */
 } EVALRESULT;
+/** Pointer to an evaluation result. */
 typedef EVALRESULT *PEVALRESULT;
+/** Pointer to a const evaluation result. */
 typedef const EVALRESULT *PCCEVALRESULT;
 
 
@@ -64,7 +66,9 @@ typedef struct EVALUATOR
     void           *pvRPNQueue;     /**< Internal RPN representation (Queue) done by the parse phase. */
     LIST            VarList;        /**< List of Variables being evaluated, used for circular dependency prevention. */
 } EVALUATOR;
+/** Pointer to an evaluator. */
 typedef EVALUATOR *PEVALUATOR;
+/** Pointer to a const evaluator. */
 typedef const EVALUATOR *PCEVALUATOR;
 
 

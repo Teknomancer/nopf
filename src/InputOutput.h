@@ -43,10 +43,10 @@ typedef struct TEXTLINE
     uint32_t        u32Magic;   /**< Magic. */
     char           *pszRaw;     /**< The complete/original buffer line */
     char           *pszData;    /**< The line stripped/altered, a subset of 'pszRaw' */
-
 } TEXTLINE;
 /** Pointer to a line record. */
 typedef TEXTLINE *PTEXTLINE;
+/** Pointer to a const line record. */
 typedef const TEXTLINE *PCTEXTLINE;
 
 /** TextLine data structure manipulators. */

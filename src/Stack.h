@@ -33,7 +33,9 @@ typedef struct STACKITEM
     void                *pvData;    /**< Pointer to the data. */
     struct STACKITEM    *pNext;     /**< Pointer to the next item. */
 } STACKITEM;
+/** Pointer to a stack item. */
 typedef STACKITEM *PSTACKITEM;
+/** Pointer to a const stack object. */
 typedef const STACKITEM *PCSTACKITEM;
 
 /**
@@ -44,7 +46,9 @@ typedef struct STACK
     STACKITEM           *pTop;      /**< Pointer to the top of the stack. */
     uint32_t             cItems;    /**< Number of items. */
 } STACK;
+/** Pointer to a stack. */
 typedef STACK *PSTACK;
+/** Pointer to a const stack. */
 typedef const STACK *PCSTACK;
 
 void        StackInit(PSTACK pStack);

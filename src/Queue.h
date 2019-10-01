@@ -30,7 +30,9 @@ typedef struct QUEUEITEM
     void                *pvData;    /**< Pointer to the data. */
     struct QUEUEITEM    *pNext;     /**< Pointer to the next item. */
 } QUEUEITEM;
+/** Pointer to a queue item. */
 typedef QUEUEITEM *PQUEUEITEM;
+/** Pointer to a const queue item. */
 typedef const QUEUEITEM *PCQUEUEITEM;
 
 typedef struct QUEUE
@@ -39,7 +41,9 @@ typedef struct QUEUE
     QUEUEITEM           *pTail;     /**< Pointer to the tail. */
     uint32_t             cItems;    /**< Number of items. */
 } QUEUE;
+/** Pointer to a queue. */
 typedef QUEUE *PQUEUE;
+/** Pointer to a const queue. */
 typedef const QUEUE *PCQUEUE;
 
 void        QueueInit(PQUEUE pQueue);
