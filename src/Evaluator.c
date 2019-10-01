@@ -2106,105 +2106,105 @@ int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
  *   Hello, Operator?!                                                         *
  *******************************************************************************/
 
-int OpAdd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpAdd(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue + apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue + apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpSubtract(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpSubtract(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue - apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue - apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpNegate(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpNegate(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = -apAtoms[0]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = -apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpMultiply(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpMultiply(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue * apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue * apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpDivide(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpDivide(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue / apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue / apAtoms[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpIncrement(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpIncrement(PEVALUATOR pEval, PATOM apAtoms[])
 {
     ++apAtoms[0]->u.Number.uValue;
     ++apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpDecrement(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpDecrement(PEVALUATOR pEval, PATOM apAtoms[])
 {
     --apAtoms[0]->u.Number.uValue;
     --apAtoms[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-int OpShiftLeft(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpShiftLeft(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue << apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpShiftRight(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpShiftRight(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue >> apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpBitNegate(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitNegate(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = ~apAtoms[0]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue % apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpLessThan(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLessThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue < apAtoms[1]->u.Number.uValue);
     apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-int OpGreaterThan(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpGreaterThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue > apAtoms[1]->u.Number.uValue);
     apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-int OpEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue == apAtoms[1]->u.Number.uValue);
     apAtoms[0]->u.Number.dValue = (FLOAT)EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue <= apAtoms[1]->u.Number.uValue);
     bool const fLessThan = DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
@@ -2213,7 +2213,7 @@ int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
     return RINF_SUCCESS;
 }
 
-int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue >= apAtoms[1]->u.Number.uValue);
     bool const fGreaterThan = DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
@@ -2222,7 +2222,7 @@ int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
     return RINF_SUCCESS;
 }
 
-int OpNotEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpNotEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     int rc = OpEqualTo(pEval, apAtoms);
     if (RC_SUCCESS(rc))
@@ -2233,42 +2233,42 @@ int OpNotEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
     return RINF_SUCCESS;
 }
 
-int OpLogicalNot(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalNot(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !apAtoms[0]->u.Number.dValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpBitwiseAnd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseAnd(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue & apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpBitwiseXor(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseXor(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue ^ apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpBitwiseOr(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseOr(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue | apAtoms[1]->u.Number.uValue;
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpLogicalAnd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalAnd(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue && apAtoms[1]->u.Number.dValue);
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue || apAtoms[1]->u.Number.dValue);
     apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
