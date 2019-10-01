@@ -78,8 +78,8 @@
 /** NUMBER: A number. */
 typedef struct NUMBER
 {
-    UINTEGER    uValue;     /**< Value representation as integer. */
-    FLOAT       dValue;     /**< Value representation as floating point. */
+    UINTEGER    uValue;     /**< Value represented as an unsigned integer. */
+    FLOAT       dValue;     /**< Value represented as floating point. */
 } NUMBER;
 /** Pointer to an Number object. */
 typedef NUMBER *PNUMBER;
