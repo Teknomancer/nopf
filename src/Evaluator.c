@@ -326,7 +326,7 @@ static void EvaluatorCleanVariables(void)
 
 
 #ifdef _DEBUG
-void EvaluatorPrintVarList(PLIST pList)
+static void EvaluatorPrintVarList(PLIST pList)
 {
     for (uint32_t i = 0; i < ListSize(pList); i++)
     {

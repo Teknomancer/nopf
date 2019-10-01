@@ -78,7 +78,7 @@ static inline int StrAddLine(char **pszDst, size_t cbDst, char *pszLine, uint32_
  * @param   uReg    The 32-bit value of the register.
  * @param   pReg    Pointer to the register descriptor.
  */
-char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
+static const char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
 {
     /*
      * e.g.
@@ -209,7 +209,6 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
             break;
     }
     return pszBuf;
-
 }
 
 
@@ -220,7 +219,7 @@ char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
  *          with StrFree().
  * @param   pReg    Pointer to the 32-bit register descriptor.
  */
-char *StrFormatRegDesc32(PCREGDESC32 pReg)
+static const char *StrFormatRegDesc32(PCREGDESC32 pReg)
 {
     size_t cbBuf = MAX_COMMAND_RESULT_LENGTH;
     char *pszBuf = StrAlloc(cbBuf);
@@ -291,7 +290,7 @@ char *StrFormatRegDesc32(PCREGDESC32 pReg)
 }
 
 
-int FnCr0(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
+static int FnCr0(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -350,7 +349,7 @@ int FnCr0(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 }
 
 
-int FnCr4(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
+static int FnCr4(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -409,7 +408,7 @@ int FnCr4(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 }
 
 
-int FnEflags(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
+static int FnEflags(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -468,7 +467,7 @@ int FnEflags(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 }
 
 
-int FnEfer(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
+static int FnEfer(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -527,7 +526,7 @@ int FnEfer(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
 }
 
 
-int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, char **ppszResult)
+static int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
