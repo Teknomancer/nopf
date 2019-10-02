@@ -352,6 +352,8 @@ static void EvaluatorPrintVarList(PLIST pList)
  */
 static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 {
+    DEBUGPRINTF(("Parse Number:\n"));
+
     /*
      * UINT64_MAX is the maximum supported type which is:
      *   In binary     :  1111111111111111111111111111111111111111111111111111111111111111 (64 digits)
@@ -365,8 +367,6 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     int  iRadix = 0;
     int  iNum   = 0;
     bool fDecPt = false;
-
-    DEBUGPRINTF(("Parse Number:\n"));
 
     const char *pszStart = pszExpr;
     while (*pszExpr)
@@ -642,6 +642,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
     DEBUGPRINTF(("Parse Operator:\n"));
+
     for (unsigned i = 0; i < g_cOperators; i++)
     {
         size_t cbOperator = StrLen(g_aOperators[i].pszOperator);
@@ -739,25 +740,31 @@ static PATOM EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, P
  */
 static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
+    DEBUGPRINTF(("Parse Variable:\n"));
+
     /*
      * A variable is a stream of one or more contiguous alpha numerics i.e. only "_[a-z][0-9]".
+     * Variables cannot begin with a digit [0-9] though.
      */
-    DEBUGPRINTF(("Parse Variable:\n"));
     char       szBuf[MAX_VARIABLE_NAME_LENGTH];
     unsigned   iVar = 0;
     bool       fValid = false;
-    while (*pszExpr)
+
+    if (!isdigit(*pszExpr))
     {
-        if (   *pszExpr == '_'
-            || isalnum(*pszExpr))
+        while (*pszExpr)
         {
-            fValid = true;
-            szBuf[iVar++] = *pszExpr++;
-            if (iVar == MAX_VARIABLE_NAME_LENGTH - 1)
+            if (   *pszExpr == '_'
+                || isalnum(*pszExpr))
+            {
+                fValid = true;
+                szBuf[iVar++] = *pszExpr++;
+                if (iVar == MAX_VARIABLE_NAME_LENGTH - 1)
+                    break;
+            }
+            else
                 break;
         }
-        else
-            break;
     }
     szBuf[iVar] = '\0';
     *ppszEnd = pszExpr;
@@ -811,6 +818,8 @@ static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const
  */
 static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
 {
+    DEBUGPRINTF(("Parse Command\n"));
+
     /*
      * A command must be the first atom in the expression.
      */
