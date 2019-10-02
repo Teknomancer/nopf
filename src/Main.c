@@ -215,12 +215,12 @@ static void PrintHelp(PSETTINGS pSettings)
         char *pszOperator = NULL;
         char *pszSyntax = NULL;
         char *pszDesc = NULL;
-
+        int const cIndent = 5;
         int rc = EvaluatorOperatorHelp(i, &pszOperator, &pszSyntax, &pszDesc);
         if (RC_SUCCESS(rc))
         {
-            ColorPrintf(PREFIX_COLOR, "%11s ", pszOperator);
-            ColorPrintf(PARAM_COLOR, "%-20s ", pszSyntax);
+            ColorPrintf(PREFIX_COLOR, "%10s%*s", pszOperator, cIndent, "");
+            ColorPrintf(PARAM_COLOR,  "%-20s ", pszSyntax);
             Printf("%s\n", pszDesc);
         }
         StrFree(pszOperator);
