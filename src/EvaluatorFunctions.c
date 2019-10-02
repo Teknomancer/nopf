@@ -677,12 +677,32 @@ static int FnFahrenheitToCelcius(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAt
     return RINF_SUCCESS;
 }
 
-static int FnSetBit(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnSetBit32(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
     /* We're fine shifting unsigned, well defined behaviour*/
-    apAtoms[0]->u.Number.uValue = (1U << apAtoms[0]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
-    return RINF_SUCCESS;
+    if (apAtoms[0]->u.Number.uValue <= 31)
+    {
+        U32INTEGER const u32Val = 1;
+        apAtoms[0]->u.Number.uValue = (u32Val << apAtoms[0]->u.Number.uValue);
+        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+        return RINF_SUCCESS;
+    }
+    else
+        return RERR_INVALID_COMMAND_PARAMETER;
+}
+
+static int FnSetBit64(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+{
+    /* We're fine shifting unsigned, well defined behaviour*/
+    if (apAtoms[0]->u.Number.uValue <= 63)
+    {
+        U64INTEGER const u64Val = 1;
+        apAtoms[0]->u.Number.uValue = (u64Val << apAtoms[0]->u.Number.uValue);
+        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+        return RINF_SUCCESS;
+    }
+    else
+        return RERR_INVALID_COMMAND_PARAMETER;
 }
 
 static int FnMax(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
@@ -695,13 +715,30 @@ static int FnMin(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
     return RERR_NOT_IMPLEMENTED;
 }
 
-static int FnAlign(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+static int FnAlign32(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
 {
-    U64INTEGER const uVal   = apAtoms[0]->u.Number.uValue;
-    U64INTEGER const uAlign = apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.uValue = ((uVal + uAlign - 1) & ~(uAlign - 1));
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
-    return RINF_SUCCESS;
+    U32INTEGER const u32Val   = apAtoms[0]->u.Number.uValue;
+    U32INTEGER const u32Align = apAtoms[1]->u.Number.uValue;
+    if (u32Align % 2 == 0)
+    {
+        apAtoms[0]->u.Number.uValue = ((u32Val + u32Align - 1) & ~(u32Align - 1));
+        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+        return RINF_SUCCESS;
+    }
+    return RERR_INVALID_COMMAND_PARAMETER;
+}
+
+static int FnAlign64(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms)
+{
+    U64INTEGER const u64Val   = apAtoms[0]->u.Number.uValue;
+    U64INTEGER const u64Align = apAtoms[1]->u.Number.uValue;
+    if (u64Align % 2 == 0)
+    {
+        apAtoms[0]->u.Number.uValue = ((u64Val + u64Align - 1) & ~(u64Align - 1));
+        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+        return RINF_SUCCESS;
+    }
+    return RERR_INVALID_COMMAND_PARAMETER;
 }
 
 
@@ -815,12 +852,12 @@ FUNCTION g_aFunctions[] =
     { "frh2cel",        FnFahrenheitToCelcius, false,    1,  1, "<num1>", "Fahrenheit to celcius." },
 
     /* VirtualBox style macros/functions. */
-    { "RT_BIT",         FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0." },
-    { "RT_BIT_32",      FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0. Same as RT_BIT." },
-    { "RT_BIT_64",      FnSetBit,              true,     1,  1, "<bit>", "Sets specified bit number for integer 0. Same as RT_BIT." },
-    { "RT_ALIGN",       FnAlign,               true,     2,  2, "<val>, <align>", "Aligns <val> to boundary of <align>. <align> must be a power of 2." },
-    { "RT_ALIGN_32",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." },
-    { "RT_ALIGN_64",    FnAlign,               true,     2,  2, "<val>, <align>", "Same as RT_ALIGN." }
+    { "RT_BIT",         FnSetBit32,            true,     1,  1, "<bit>", "Sets the specified bit (0-31)." },
+    { "RT_BIT_32",      FnSetBit32,            true,     1,  1, "<bit>", "Sets specified bit (0-31). Same as RT_BIT." },
+    { "RT_BIT_64",      FnSetBit64,            true,     1,  1, "<bit>", "Sets specified bit (0-63)." },
+    { "RT_ALIGN",       FnAlign32,             true,     2,  2, "<val>, <align>", "Aligns 32-bit <val> to <align>. <align> must be a power of 2." },
+    { "RT_ALIGN_32",    FnAlign32,             true,     2,  2, "<val>, <align>", "Aligns 32-bit <val> to <align>. <align> must be a power of 2. Same as RT_ALIGN." },
+    { "RT_ALIGN_64",    FnAlign64,             true,     2,  2, "<val>, <align>", "Aligns 64-bit <val> to <align>. <align> must be a power of 2." }
 };
 
 /** Total number of Functions in the table. */

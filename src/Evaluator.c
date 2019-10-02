@@ -347,6 +347,8 @@ static void EvaluatorPrintVarList(PLIST pList)
  *          number.
  * @param   pszExpr     The whitespace skipped expression to parse.
  * @param   ppszEnd     Where to store till what point in pszExpr was scanned.
+ * @param   prc         Where to store the status code while identifying the
+ *                      number.
  */
 static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 {
@@ -359,15 +361,15 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
      *
      * We allow inputing numbers in binary, so the maximum digits we need to allow is 64.
      */
-    char szNum[64];
+    char szNum[64 + 1 + 1];
     int  iRadix = 0;
     int  iNum   = 0;
     bool fDecPt = false;
 
-    DEBUGPRINTF(("Parse number\n"));
+    DEBUGPRINTF(("Parse Number:\n"));
 
     const char *pszStart = pszExpr;
-    while (pszExpr)
+    while (*pszExpr)
     {
         bool fStopNumParse = false;
 
@@ -381,17 +383,23 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
         }
 
         /*
-         * If the number buffer is full, stop.
+         * Check for overflow of known radices.
          */
-        if (iNum == sizeof(szNum))
-            break;
+        if (   (iRadix == 16 && iNum == 16)
+            || (iRadix == 8  && iNum == 22)
+            || (iRadix == 2  && iNum == 64)
+            || ((iRadix == 0 || iRadix == 10) && iNum == 20))
+        {
+            pszExpr = pszStart;
+            return NULL;
+        }
+
+        Assert(iNum < sizeof(szNum));
 
         /*
          * Parse explicit prefixes.
          */
-        if (   iNum == 0
-            || (   iNum == 1
-                && iRadix == 8))
+        if (iNum == 0)
         {
             switch (*pszExpr)
             {
@@ -399,26 +407,38 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
                 case 'n':
                 case 'N':
                 {
-                    iRadix = 2;
-                    ++pszExpr;
-                    continue;
+                    if (iRadix == 0)
+                    {
+                        iRadix = 2;
+                        ++pszExpr;
+                        continue;
+                    }
+                    break;
                 }
 
                 /* Octal. */
                 case '0':
                 {
-                    iRadix = 8;
-                    szNum[iNum++] = *pszExpr++;
-                    continue;
+                    if (iRadix == 0)
+                    {
+                        iRadix = 8;
+                        ++pszExpr;
+                        continue;
+                    }
+                    break;
                 }
 
                 /* Hexadecimal. */
                 case 'x':
                 case 'X':
                 {
-                    iRadix = 16;
-                    ++pszExpr;
-                    continue;
+                    if (iRadix == 8)
+                    {
+                        iRadix = 16;
+                        ++pszExpr;
+                        continue;
+                    }
+                    break;
                 }
             }
         }
@@ -501,43 +521,37 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
             default:
             {
                 /*
-                 * If we have an unrecognized character with -NO- numeric digits parsed so far
-                 * (with or without a prefix), it cannot be a number, (e.g.: "ULL").
-                 */
-                if (iNum == 0)
-                {
-                    pszExpr = pszStart;
-                    return NULL;
-                }
-
-                /*
                  * If we have an unrecognized character -WITH- numeric digits parsed so far
                  * (with or without a prefix), it -might- be a number (e.g.: "32UL"). Stop
                  * parsing the number in this loop, but proceed with overall parsing.
+                 *
+                 * This also applies when a sequence like "RT_BIT(0)" ends up parsing "0)"
+                 * so we -should- parse the 0 in this case but not proceed with parsing.
                  */
                 fStopNumParse = true;
                 break;
             }
         }
 
-        /*
-         * Check if we need to stop parsing the number and bail from this loop.
-         */
+        /* Check if we need to stop parsing the number and bail from this loop. */
         if (fStopNumParse)
-        {
-            Assert(iNum > 0);
-            if (iRadix == 0)    /* If we have not determined a prefix thus far, it implies a decimal prefix. */
-                iRadix = 10;
             break;
-        }
     }
 
-    if (iRadix == 0)
+    if (iNum == 0)
     {
-        pszExpr = pszStart;
-        return NULL;
+        /* When only '0' is given, we interpret it as Octal prefix and don't fill szNum, add it as a plain 0 here. */
+        if (iRadix == 8)
+        {
+            szNum[iNum++] = '0';
+            iRadix = 10;
+        }
+        else
+        {
+            pszExpr = pszStart;
+            return NULL;
+        }
     }
-    Assert(iNum > 0);
 
     /*
      * Handle suffixes, order of array is important (longest to shortest).
@@ -571,7 +585,8 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     char *pszEndTmp = NULL;
 
     errno = 0;
-    UINTEGER const uValue = strtoull(szNum, &pszEndTmp, iRadix);
+    DEBUGPRINTF(("Parse Number: szNum=\"%s\"\n", szNum));
+    UINTEGER const uValue = (UINTEGER)strtoull(szNum, &pszEndTmp, iRadix);
     if (errno)
     {
         DEBUGPRINTF(("Error while string to unsigned conversion of %s\n", szNum));
@@ -605,7 +620,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     pAtom->u.Number.dValue = dValue;
     *ppszEnd = pszExpr;
 
-    DEBUGPRINTF(("Parsed number (U=%" FMTUINTEGER_NAT " (%" FMTU64INTEGER_HEX ") F=%" FMTFLOAT ")\n", uValue, uValue, dValue));
+    DEBUGPRINTF(("Parse Number: U=%" FMTUINTEGER_NAT " (%" FMTU64INTEGER_HEX ") F=%" FMTFLOAT "\n", uValue, uValue, dValue));
 
     /*
      * Return the allocated Atom.
@@ -626,6 +641,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
  */
 static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
 {
+    DEBUGPRINTF(("Parse Operator:\n"));
     for (unsigned i = 0; i < g_cOperators; i++)
     {
         size_t cbOperator = StrLen(g_aOperators[i].pszOperator);
@@ -650,10 +666,7 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
                 /* e.g: "(-4"  and "=-4" and ",-4" */
                 if (   AtomIsOperator(pPreviousAtom)
                     && !AtomIsCloseParenthesis(pPreviousAtom))
-                {
-                    DEBUGPRINTF(("Here2 Id=%d\n", g_aOperators[i].OperatorId));
                     continue;
-                }
             }
 
             PATOM pAtom = MemAlloc(sizeof(ATOM));
@@ -729,24 +742,24 @@ static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const
     /*
      * A variable is a stream of one or more contiguous alpha numerics i.e. only "_[a-z][0-9]".
      */
-    DEBUGPRINTF(("Parse variable\n"));
-    char     szBuf[MAX_VARIABLE_NAME_LENGTH];
-    unsigned i = 0;
-    bool     fValid = false;
-    while (pszExpr)
+    DEBUGPRINTF(("Parse Variable:\n"));
+    char       szBuf[MAX_VARIABLE_NAME_LENGTH];
+    unsigned   iVar = 0;
+    bool       fValid = false;
+    while (*pszExpr)
     {
         if (   *pszExpr == '_'
             || isalnum(*pszExpr))
         {
             fValid = true;
-            szBuf[i++] = *pszExpr++;
-            if (i == MAX_VARIABLE_NAME_LENGTH - 1)
+            szBuf[iVar++] = *pszExpr++;
+            if (iVar == MAX_VARIABLE_NAME_LENGTH - 1)
                 break;
         }
         else
             break;
     }
-    szBuf[i] = '\0';
+    szBuf[iVar] = '\0';
     *ppszEnd = pszExpr;
 
     if (!fValid)
@@ -775,7 +788,7 @@ static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const
      * and the caller deals with exiting, cleaning-up etc. If we just return a NULL Atom, the caller cannot
      * identify the exact variable name.
      */
-    if (i >= MAX_VARIABLE_NAME_LENGTH)
+    if (iVar >= MAX_VARIABLE_NAME_LENGTH - 1)
         *prc = RERR_VARIABLE_NAME_TOO_LONG;
     else
         *prc = RINF_SUCCESS;
@@ -809,7 +822,7 @@ static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const 
      */
     for (unsigned i = 0; i < g_cCommands; i++)
     {
-        DEBUGPRINTF(("Parse Command %s\n", g_aCommands[i].pszCommand));
+        DEBUGPRINTF(("Parse Command: %s\n", g_aCommands[i].pszCommand));
         size_t cCommand = StrLen(g_aCommands[i].pszCommand);
         if (!StrNCmp(g_aCommands[i].pszCommand, pszExpr, cCommand))
         {
