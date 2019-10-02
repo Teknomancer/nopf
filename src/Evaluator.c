@@ -361,7 +361,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
      *
      * We allow inputing numbers in binary, so the maximum digits we need to allow is 64.
      */
-    char szNum[64 + 1 + 1];
+    char szNum[64 + 1];
     int  iRadix = 0;
     int  iNum   = 0;
     bool fDecPt = false;
