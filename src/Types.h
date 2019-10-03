@@ -30,17 +30,17 @@
 /** Printf format specifiers for the various integers. */
 #define FMT_FLT_NAT    "Lg"
 
-#define FMT_U32_NAT    "PRIu32"
-#define FMT_S32_NAT    "PRId32"
+#define FMT_U32_NAT    PRIu32
+#define FMT_S32_NAT    PRId32
 
-#define FMT_U64_NAT    "PRIu64"
-#define FMT_S64_NAT    "PRId64"
+#define FMT_U64_NAT    PRIu64
+#define FMT_S64_NAT    PRId64
 
-#define FMT_U32_HEX    "PRIx32"
-#define FMT_U64_HEX    "PRIx64"
+#define FMT_U32_HEX    PRIx32
+#define FMT_U64_HEX    PRIx64
 
-#define FMT_U32_OCT    "PRIo32"
-#define FMT_U64_OCT    "PRIo64"
+#define FMT_U32_OCT    PRIo32
+#define FMT_U64_OCT    PRIo64
 
 extern long double const g_MachEpsilon;
 

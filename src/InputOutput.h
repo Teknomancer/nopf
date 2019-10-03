@@ -23,15 +23,11 @@
 #define INPUT_OUTPUT_H___
 
 #include <stdint.h>
-#ifdef _WIN32
-/* Breaks because minwindef.h defines an ATOM type. WTF!? Ugh, no namespaces in C either and no real way to redefine a typedef. */
-/* # include <Windows.h> */
-#endif
 
-#define Printf printf
-void ErrorPrintf(int rc, char *pszError, ...);
-void ColorPrintf(char *pszColorCode, char *pszMsg, ...);
-void DebugPrintf(char *pszMsg, ...);
+#define Printf      printf
+void    ErrorPrintf(int rc, char *pszError, ...);
+void    ColorPrintf(char *pszColorCode, char *pszMsg, ...);
+void    DebugPrintf(char *pszMsg, ...);
 
 #ifdef _DEBUG
 #define DEBUGPRINTF(s)         DebugPrintf s
@@ -44,15 +40,9 @@ void DebugPrintf(char *pszMsg, ...);
  */
 typedef struct TEXTLINE
 {
-    uint32_t                     u32Magic;   /**< Magic. */
-    char                        *pszRaw;     /**< The complete/original buffer line */
-    char                        *pszData;    /**< The line stripped/altered, a subset of 'pszRaw' */
-#if 0
-#ifdef _WIN32
-    HANDLE                      hConsole;    /**< Console handle. */
-    CONSOLE_SCREEN_BUFFER_INFO  ConsoleInfo; /**< Console screen buffer info. */
-#endif
-#endif
+    uint32_t    u32Magic;       /**< Magic. */
+    char       *pszRaw;         /**< The complete/original buffer line */
+    char       *pszData;        /**< The line stripped/altered, a subset of 'pszRaw' */
 } TEXTLINE;
 /** Pointer to a line record. */
 typedef TEXTLINE *PTEXTLINE;

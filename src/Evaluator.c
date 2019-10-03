@@ -22,6 +22,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include "InputOutput.h"
 #include "EvaluatorInternal.h"
 #include "EvaluatorFunctions.h"
 #include "EvaluatorCommands.h"
@@ -33,36 +34,35 @@
 #include "Errors.h"
 #include "Magics.h"
 #include "StringOps.h"
-#include "InputOutput.h"
 
 #include <errno.h>
 
 /*******************************************************************************
  *   Static functions                                                          *
  *******************************************************************************/
-static int OpAdd(PEVALUATOR, PATOM[]);
-static int OpSubtract(PEVALUATOR, PATOM[]);
-static int OpNegate(PEVALUATOR, PATOM[]);
-static int OpMultiply(PEVALUATOR, PATOM[]);
-static int OpDivide(PEVALUATOR, PATOM[]);
-static int OpIncrement(PEVALUATOR, PATOM[]);
-static int OpDecrement(PEVALUATOR, PATOM[]);
-static int OpShiftLeft(PEVALUATOR, PATOM[]);
-static int OpShiftRight(PEVALUATOR, PATOM[]);
-static int OpBitNegate(PEVALUATOR, PATOM[]);
-static int OpModulo(PEVALUATOR, PATOM[]);
-static int OpLessThan(PEVALUATOR, PATOM[]);
-static int OpGreaterThan(PEVALUATOR, PATOM[]);
-static int OpEqualTo(PEVALUATOR, PATOM[]);
-static int OpLessThanOrEqualTo(PEVALUATOR, PATOM[]);
-static int OpGreaterThanOrEqualTo(PEVALUATOR, PATOM[]);
-static int OpNotEqualTo(PEVALUATOR, PATOM[]);
-static int OpLogicalNot(PEVALUATOR, PATOM[]);
-static int OpBitwiseAnd(PEVALUATOR, PATOM[]);
-static int OpBitwiseXor(PEVALUATOR, PATOM[]);
-static int OpBitwiseOr(PEVALUATOR, PATOM[]);
-static int OpLogicalAnd(PEVALUATOR, PATOM[]);
-static int OpLogicalOr(PEVALUATOR, PATOM[]);
+static int OpAdd(PEVALUATOR, PTOKEN[]);
+static int OpSubtract(PEVALUATOR, PTOKEN[]);
+static int OpNegate(PEVALUATOR, PTOKEN[]);
+static int OpMultiply(PEVALUATOR, PTOKEN[]);
+static int OpDivide(PEVALUATOR, PTOKEN[]);
+static int OpIncrement(PEVALUATOR, PTOKEN[]);
+static int OpDecrement(PEVALUATOR, PTOKEN[]);
+static int OpShiftLeft(PEVALUATOR, PTOKEN[]);
+static int OpShiftRight(PEVALUATOR, PTOKEN[]);
+static int OpBitNegate(PEVALUATOR, PTOKEN[]);
+static int OpModulo(PEVALUATOR, PTOKEN[]);
+static int OpLessThan(PEVALUATOR, PTOKEN[]);
+static int OpGreaterThan(PEVALUATOR, PTOKEN[]);
+static int OpEqualTo(PEVALUATOR, PTOKEN[]);
+static int OpLessThanOrEqualTo(PEVALUATOR, PTOKEN[]);
+static int OpGreaterThanOrEqualTo(PEVALUATOR, PTOKEN[]);
+static int OpNotEqualTo(PEVALUATOR, PTOKEN[]);
+static int OpLogicalNot(PEVALUATOR, PTOKEN[]);
+static int OpBitwiseAnd(PEVALUATOR, PTOKEN[]);
+static int OpBitwiseXor(PEVALUATOR, PTOKEN[]);
+static int OpBitwiseOr(PEVALUATOR, PTOKEN[]);
+static int OpLogicalAnd(PEVALUATOR, PTOKEN[]);
+static int OpLogicalOr(PEVALUATOR, PTOKEN[]);
 
 
 /*******************************************************************************
@@ -131,44 +131,44 @@ PFUNCTION g_paSortedFunctions = NULL;
 /*******************************************************************************
 *   Helper Functions                                                           *
 *******************************************************************************/
-static inline bool CanCastAtom(PCATOM pAtom, long double MinValue, long double MaxValue)
+static inline bool CanCastToken(PCTOKEN pToken, long double MinValue, long double MaxValue)
 {
-    return (DefinitelyLessThan(pAtom->u.Number.dValue, MaxValue) && DefinitelyGreaterThan(pAtom->u.Number.dValue, MinValue));
+    return (DefinitelyLessThan(pToken->u.Number.dValue, MaxValue) && DefinitelyGreaterThan(pToken->u.Number.dValue, MinValue));
 }
 
-static inline void AtomInit(PATOM pAtom)
+static inline void TokenInit(PTOKEN pToken)
 {
-    pAtom->Type = enmAtomEmpty;
-    pAtom->Position = 0;
+    pToken->Type = enmTokenEmpty;
+    pToken->Position = 0;
 }
 
-static PATOM AtomDup(PCATOM pSrcAtom)
+static PTOKEN TokenDup(PCTOKEN pSrcToken)
 {
-    PATOM pDstAtom = MemAlloc(sizeof(ATOM));
-    if (pDstAtom)
+    PTOKEN pDstToken = MemAlloc(sizeof(TOKEN));
+    if (pDstToken)
     {
-        pDstAtom->Type            = pSrcAtom->Type;
-        pDstAtom->Position        = pSrcAtom->Position;
-        pDstAtom->cFunctionParams = pSrcAtom->cFunctionParams;
-        StrCopy(pDstAtom->szVariable, sizeof(pDstAtom->szVariable), pSrcAtom->szVariable);
-        pDstAtom->u               = pSrcAtom->u; /* yeah implicit memcpy */
+        pDstToken->Type            = pSrcToken->Type;
+        pDstToken->Position        = pSrcToken->Position;
+        pDstToken->cFunctionParams = pSrcToken->cFunctionParams;
+        StrCopy(pDstToken->szVariable, sizeof(pDstToken->szVariable), pSrcToken->szVariable);
+        pDstToken->u               = pSrcToken->u; /* yeah implicit memcpy */
     }
-    return pDstAtom;
+    return pDstToken;
 }
 
-static inline bool AtomIsOperator(PCATOM pAtom)
+static inline bool TokenIsOperator(PCTOKEN pToken)
 {
-    return (pAtom && pAtom->Type == enmAtomOperator);
+    return (pToken && pToken->Type == enmTokenOperator);
 }
 
-static inline bool AtomIsFunction(PCATOM pAtom)
+static inline bool TokenIsFunction(PCTOKEN pToken)
 {
-    return (pAtom && pAtom->Type == enmAtomFunction);
+    return (pToken && pToken->Type == enmTokenFunction);
 }
 
-static inline bool AtomIsVariable(PCATOM pAtom)
+static inline bool TokenIsVariable(PCTOKEN pToken)
 {
-    return (pAtom && pAtom->Type == enmAtomVariable);
+    return (pToken && pToken->Type == enmTokenVariable);
 }
 
 static inline bool OperatorIsOpenParenthesis(PCOPERATOR pOperator)
@@ -191,72 +191,72 @@ static inline bool OperatorIsAssignment(PCOPERATOR pOperator)
     return (pOperator->OperatorId == VAR_ASSIGN_ID);
 }
 
-static inline bool NumberIsNegative(PATOM pAtom)
+static inline bool NumberIsNegative(PTOKEN pToken)
 {
-    return DefinitelyLessThan(pAtom->u.Number.dValue, (long double)0);
+    return DefinitelyLessThan(pToken->u.Number.dValue, (long double)0);
 }
 
-static inline bool AtomIsCloseParenthesis(PCATOM pAtom)
+static inline bool TokenIsCloseParenthesis(PCTOKEN pToken)
 {
-    if (   !pAtom
-        || !AtomIsOperator(pAtom))
+    if (   !pToken
+        || !TokenIsOperator(pToken))
         return false;
-    return OperatorIsCloseParenthesis(pAtom->u.pOperator);
+    return OperatorIsCloseParenthesis(pToken->u.pOperator);
 }
 
-static inline bool AtomIsOpenParenthesis(PCATOM pAtom)
+static inline bool TokenIsOpenParenthesis(PCTOKEN pToken)
 {
-    if (   !pAtom
-        || !AtomIsOperator(pAtom))
+    if (   !pToken
+        || !TokenIsOperator(pToken))
         return false;
-    return OperatorIsOpenParenthesis(pAtom->u.pOperator);
+    return OperatorIsOpenParenthesis(pToken->u.pOperator);
 }
 
-static inline bool AtomIsAssignment(PCATOM pAtom)
+static inline bool TokenIsAssignment(PCTOKEN pToken)
 {
-    if (   !pAtom
-        || !AtomIsOperator(pAtom))
+    if (   !pToken
+        || !TokenIsOperator(pToken))
         return false;
-    return OperatorIsAssignment(pAtom->u.pOperator);
+    return OperatorIsAssignment(pToken->u.pOperator);
 }
 
-static inline bool AtomIsParamSeparator(PCATOM pAtom)
+static inline bool TokenIsParamSeparator(PCTOKEN pToken)
 {
-    if (   !pAtom
-        || !AtomIsOperator(pAtom))
+    if (   !pToken
+        || !TokenIsOperator(pToken))
         return false;
-    return OperatorIsParamSeparator(pAtom->u.pOperator);
+    return OperatorIsParamSeparator(pToken->u.pOperator);
 }
 
-static inline bool AtomIsParenthesis(PCATOM pAtom)
+static inline bool TokenIsParenthesis(PCTOKEN pToken)
 {
-    if (   !pAtom
-        || !AtomIsOperator(pAtom))
+    if (   !pToken
+        || !TokenIsOperator(pToken))
         return false;
-    return (AtomIsOpenParenthesis(pAtom) || AtomIsCloseParenthesis(pAtom));
+    return (TokenIsOpenParenthesis(pToken) || TokenIsCloseParenthesis(pToken));
 }
 
-static void EvaluatorInvertAtomArray(PATOM apAtoms[], uint32_t cAtoms)
+static void EvaluatorInvertTokenArray(PTOKEN apTokens[], uint32_t cTokens)
 {
-    if (cAtoms < 2)
+    if (cTokens < 2)
         return;
 
     uint32_t i = 0;
-    PATOM pUnstableAtom = NULL;
-    for (i = 0; i < cAtoms / 2; i++)
+    PTOKEN pUnstableToken = NULL;
+    for (i = 0; i < cTokens / 2; i++)
     {
-        --cAtoms;
-        pUnstableAtom = apAtoms[i];
-        apAtoms[i] = apAtoms[cAtoms];
-        apAtoms[cAtoms] = pUnstableAtom;
+        --cTokens;
+        pUnstableToken = apTokens[i];
+        apTokens[i] = apTokens[cTokens];
+        apTokens[cTokens] = pUnstableToken;
     }
 }
 
 
 /**
- * Searches for a variable and returns a Variable Atom if found.
+ * Searches for a variable and returns a Variable Token if found.
  *
- * @return  Pointer to an allocated Variable Atom or NULL if @a pszVariable could
+ * @return  Pointer to an allocated Variable Token or NULL if @a pszVariable could
  *          not be found.
  * @param   pszVariable     Name of the variable to find.
  */
@@ -285,9 +285,9 @@ static void EvaluatorDestroyVariable(PVARIABLE pVariable)
     {
         if (pVariable->pvRPNQueue)
         {
-            PATOM pAtom = NULL;
-            while ((pAtom = (PATOM)QueueRemove(pVariable->pvRPNQueue)) != NULL)
-                MemFree(pAtom);
+            PTOKEN pToken = NULL;
+            while ((pToken = (PTOKEN)QueueRemove(pVariable->pvRPNQueue)) != NULL)
+                MemFree(pToken);
         }
         MemFree(pVariable->pvRPNQueue);
 
@@ -341,16 +341,16 @@ static void EvaluatorPrintVarList(PLIST pList)
 
 
 /**
- * Parses a number and returns a Number Atom.
+ * Parses a number and returns a Number Token.
  *
- * @return  Pointer to an allocated Number Atom or NULL if @a pszExpr is not a
+ * @return  Pointer to an allocated Number Token or NULL if @a pszExpr is not a
  *          number.
  * @param   pszExpr     The whitespace skipped expression to parse.
  * @param   ppszEnd     Where to store till what point in pszExpr was scanned.
  * @param   prc         Where to store the status code while identifying the
  *                      number.
  */
-static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
+static PTOKEN EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 {
     DEBUGPRINTF(("Parse Number:\n"));
 
@@ -610,36 +610,36 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
         dValue = uValue;
 
     /*
-     * Create a new Number Atom and store the numeric values.
+     * Create a new Number Token and store the numeric values.
      */
-    PATOM pAtom = MemAlloc(sizeof(ATOM));
-    if (!pAtom)
+    PTOKEN pToken = MemAlloc(sizeof(TOKEN));
+    if (!pToken)
         return NULL;
-    pAtom->Type = enmAtomNumber;
-    pAtom->u.Number.uValue = uValue;
-    pAtom->u.Number.dValue = dValue;
+    pToken->Type = enmTokenNumber;
+    pToken->u.Number.uValue = uValue;
+    pToken->u.Number.dValue = dValue;
     *ppszEnd = pszExpr;
 
     DEBUGPRINTF(("Parse Number: U=%" FMT_U64_NAT " (%" FMT_U64_HEX ") F=%" FMT_FLT_NAT "\n", uValue, uValue, dValue));
 
     /*
-     * Return the allocated Atom.
+     * Return the allocated Token.
      */
-    return pAtom;
+    return pToken;
 }
 
 
 /**
- * Parses an operator and returns an Operator Atom.
+ * Parses an operator and returns an Operator Token.
  *
- * @return  Pointer to an allocated Operator Atom or NULL if @a pszExpr was not an
+ * @return  Pointer to an allocated Operator Token or NULL if @a pszExpr was not an
  *          operator.
  * @param   pszExpr         The whitespace skipped expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ * @param   pPreviousToken   The previously passed Token in @a pszExpr if any, can be
  *                          NULL.
  */
-static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
+static PTOKEN EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, PCTOKEN pPreviousToken)
 {
     DEBUGPRINTF(("Parse Operator:\n"));
 
@@ -650,34 +650,34 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
         {
             /*
              * Verify if there are enough parameters on the queue for left associative operators.
-             * e.g for binary '-', the previous atom must exist and must not be an open parenthesis or any
+             * e.g for binary '-', the previous token must exist and must not be an open parenthesis or any
              * other operator.
              */
             if (g_aOperators[i].Direction == enmDirLeft)
             {
                 /* e.g: "-4" */
-                if (!pPreviousAtom)
+                if (!pPreviousToken)
                     continue;
 
                 /*
-                 * pPreviousAtom should never  be close parantheis as it's deleted in EvaluatorParse(),
+                 * pPreviousToken should never  be close parantheis as it's deleted in EvaluatorParse(),
                  * but included in here for the logical condition.
                  */
 
                 /* e.g: "(-4"  and "=-4" and ",-4" */
-                if (   AtomIsOperator(pPreviousAtom)
-                    && !AtomIsCloseParenthesis(pPreviousAtom))
+                if (   TokenIsOperator(pPreviousToken)
+                    && !TokenIsCloseParenthesis(pPreviousToken))
                     continue;
             }
 
-            PATOM pAtom = MemAlloc(sizeof(ATOM));
-            if (!pAtom)
+            PTOKEN pToken = MemAlloc(sizeof(TOKEN));
+            if (!pToken)
                 return NULL;
-            pAtom->Type = enmAtomOperator;
-            pAtom->u.pOperator = &g_aOperators[i];
+            pToken->Type = enmTokenOperator;
+            pToken->u.pOperator = &g_aOperators[i];
             pszExpr += cbOperator;
             *ppszEnd = pszExpr;
-            return pAtom;
+            return pToken;
         }
     }
     return NULL;
@@ -685,16 +685,16 @@ static PATOM EvaluatorParseOperator(const char *pszExpr, const char **ppszEnd, P
 
 
 /**
- * Parses a Function and returns a Function Atom.
+ * Parses a Function and returns a Function Token.
  *
- * @return  Pointer to an allocated Function Atom or NULL if @a pszExpr was not a
+ * @return  Pointer to an allocated Function Token or NULL if @a pszExpr was not a
  *          function.
  * @param   pszExpr         The whitespace skipped expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ * @param   pPreviousToken   The previously passed Token in @a pszExpr if any, can be
  *                          NULL.
  */
-static PATOM EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom)
+static PTOKEN EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, PCTOKEN pPreviousToken)
 {
     for (unsigned i = 0; i < g_cFunctions; i++)
     {
@@ -711,14 +711,14 @@ static PATOM EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, P
             if (!StrNCmp(pszExpr, g_pOperatorOpenParenthesis->pszOperator,
                             StrLen(g_pOperatorOpenParenthesis->pszOperator)))
             {
-                PATOM pAtom = MemAlloc(sizeof(ATOM));
-                if (!pAtom)
+                PTOKEN pToken = MemAlloc(sizeof(TOKEN));
+                if (!pToken)
                     return NULL;
-                pAtom->Type = enmAtomFunction;
-                pAtom->u.pFunction = &g_aFunctions[i];
-                pAtom->cFunctionParams = 0;
+                pToken->Type = enmTokenFunction;
+                pToken->u.pFunction = &g_aFunctions[i];
+                pToken->cFunctionParams = 0;
                 *ppszEnd = pszExpr;
-                return pAtom;
+                return pToken;
             }
         }
     }
@@ -727,18 +727,18 @@ static PATOM EvaluatorParseFunction(const char *pszExpr, const char **ppszEnd, P
 
 
 /**
- * Parses a variable and returns a Variable Atom.
+ * Parses a variable and returns a Variable Token.
  *
- * @return  Pointer to an allocated Variable Atom or NULL if @a pszExpr was not a
+ * @return  Pointer to an allocated Variable Token or NULL if @a pszExpr was not a
  *          variable.
  * @param   pEval           The Evaluator object.
  * @param   pszExpr         The whitespace skipped expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom   The previously passed Atom in if any, can be NULL.
+ * @param   pPreviousToken   The previously passed Token in if any, can be NULL.
  * @param   prc             Where to store the status code while identifying the
  *                          variable.
  */
-static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
+static PTOKEN EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCTOKEN pPreviousToken, int *prc)
 {
     DEBUGPRINTF(("Parse Variable:\n"));
 
@@ -775,55 +775,55 @@ static PATOM EvaluatorParseVariable(PEVALUATOR pEval, const char *pszExpr, const
         return NULL;
     }
 
-    PATOM pAtom = MemAlloc(sizeof(ATOM));
-    if (!pAtom)
+    PTOKEN pToken = MemAlloc(sizeof(TOKEN));
+    if (!pToken)
     {
         *prc = RERR_NO_MEMORY;
         return NULL;
     }
-    pAtom->Type = enmAtomVariable;
+    pToken->Type = enmTokenVariable;
 
     /*
-     * Associate the Atom with a predefined Variable, if not just record the name.
+     * Associate the Token with a predefined Variable, if not just record the name.
      * When we assign the Variable, we will create the actual Variable entry.
      */
-    pAtom->u.pVariable = EvaluatorFindVariable(szBuf, &g_VarList);
-    StrCopy(pAtom->szVariable, sizeof(pAtom->szVariable), szBuf);
+    pToken->u.pVariable = EvaluatorFindVariable(szBuf, &g_VarList);
+    StrCopy(pToken->szVariable, sizeof(pToken->szVariable), szBuf);
 
     /*
-     * Determine error code. For variables too long we return a successful (name truncated) Variable Atom
-     * and the caller deals with exiting, cleaning-up etc. If we just return a NULL Atom, the caller cannot
+     * Determine error code. For variables too long we return a successful (name truncated) Variable Token
+     * and the caller deals with exiting, cleaning-up etc. If we just return a NULL Token, the caller cannot
      * identify the exact variable name.
      */
     if (iVar >= MAX_VARIABLE_NAME_LENGTH - 1)
         *prc = RERR_VARIABLE_NAME_TOO_LONG;
     else
         *prc = RINF_SUCCESS;
-    return pAtom;
+    return pToken;
 }
 
 
 /**
- * Parses a command and returns a Command Atom.
+ * Parses a command and returns a Command Token.
  *
- * @return  Pointer to an allocated Command Atom or NULL if @a pszExpr was not a
+ * @return  Pointer to an allocated Command Token or NULL if @a pszExpr was not a
  *          command.
  * @param   pEval           The Evaluator object.
  * @param   pszExpr         The whitespace skipped expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom   The previously passed Atom in @pszExpr if any, can be
+ * @param   pPreviousToken   The previously passed Token in @pszExpr if any, can be
  *                          NULL.
  * @param   prc             Where to store the status code while identifying the
  *                          variable.
  */
-static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
+static PTOKEN EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCTOKEN pPreviousToken, int *prc)
 {
     DEBUGPRINTF(("Parse Command\n"));
 
     /*
-     * A command must be the first atom in the expression.
+     * A command must be the first token in the expression.
      */
-    if (pPreviousAtom)
+    if (pPreviousToken)
         return NULL;
 
     /*
@@ -851,13 +851,13 @@ static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const 
                 while (isspace(*pszExpr))
                     pszExpr++;
 
-                PATOM pAtom = MemAllocZ(sizeof(ATOM));
-                if (!pAtom)
+                PTOKEN pToken = MemAllocZ(sizeof(TOKEN));
+                if (!pToken)
                     return NULL;
-                pAtom->Type = enmAtomCommand;
-                pAtom->u.pCommand = &g_aCommands[i];
+                pToken->Type = enmTokenCommand;
+                pToken->u.pCommand = &g_aCommands[i];
                 *ppszEnd = pszExpr;
-                return pAtom;
+                return pToken;
             }
         }
     }
@@ -866,21 +866,21 @@ static PATOM EvaluatorParseCommand(PEVALUATOR pEval, const char *pszExpr, const 
 
 
 /**
- * Parses an Atom.
+ * Parses an Token.
  *
- * @return  Pointer to an allocated Atom or NULL if @a pszExpr has run out of
- *          identifying atoms.
+ * @return  Pointer to an allocated Token or NULL if @a pszExpr has run out of
+ *          identifying tokens.
  * @param   pEval           The Evaluator object.
  * @param   pszExpr         The expression to parse.
  * @param   ppszEnd         Where to store till what point in pszExpr was scanned.
- * @param   pPreviousAtom   The previously passed Atom in @a pszExpr if any, can be
+ * @param   pPreviousToken   The previously passed Token in @a pszExpr if any, can be
  *                          NULL.
  * @param   prc             Where to store the status code during parsing.
  */
-static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCATOM pPreviousAtom, int *prc)
+static PTOKEN EvaluatorParseToken(PEVALUATOR pEval, const char *pszExpr, const char **ppszEnd, PCTOKEN pPreviousToken, int *prc)
 {
-    DEBUGPRINTF(("GetAtom %s\n", pszExpr));
-    PATOM pAtom = NULL;
+    DEBUGPRINTF(("GetToken %s\n", pszExpr));
+    PTOKEN pToken = NULL;
     while (*pszExpr)
     {
         /*
@@ -895,43 +895,43 @@ static PATOM EvaluatorParseAtom(PEVALUATOR pEval, const char *pszExpr, const cha
         /*
          * Parse function.
          */
-        pAtom = EvaluatorParseFunction(pszExpr, ppszEnd, pPreviousAtom);
-        if (pAtom)
+        pToken = EvaluatorParseFunction(pszExpr, ppszEnd, pPreviousToken);
+        if (pToken)
             break;
 
         /*
          * Parse command.
          */
-        pAtom = EvaluatorParseCommand(pEval, pszExpr, ppszEnd, pPreviousAtom, prc);
-        if (pAtom)
+        pToken = EvaluatorParseCommand(pEval, pszExpr, ppszEnd, pPreviousToken, prc);
+        if (pToken)
             break;
 
         /*
          * Parse number.
          */
-        pAtom = EvaluatorParseNumber(pszExpr, ppszEnd);
-        if (pAtom)
+        pToken = EvaluatorParseNumber(pszExpr, ppszEnd);
+        if (pToken)
             break;
 
         /*
          * Parse operator.
          */
-        pAtom = EvaluatorParseOperator(pszExpr, ppszEnd, pPreviousAtom);
-        if (pAtom)
+        pToken = EvaluatorParseOperator(pszExpr, ppszEnd, pPreviousToken);
+        if (pToken)
             break;
 
         /*
          * Parse variable.
          */
-        pAtom = EvaluatorParseVariable(pEval, pszExpr, ppszEnd, pPreviousAtom, prc);
-        if (pAtom)
+        pToken = EvaluatorParseVariable(pEval, pszExpr, ppszEnd, pPreviousToken, prc);
+        if (pToken)
             break;
 
         /** @todo hmm, think about this!? */
         *ppszEnd = pszExpr;
         break;
     }
-    return pAtom;
+    return pToken;
 }
 
 
@@ -1009,12 +1009,12 @@ static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
 {
     Assert(pEval);
 
-    PATOM pAtom = NULL;
+    PTOKEN pToken = NULL;
     PQUEUE pQueue = (PQUEUE)pEval->pvRPNQueue;
     if (pQueue)
     {
-        while ((pAtom = QueueRemove(pQueue)) != NULL)
-            MemFree(pAtom);
+        while ((pToken = QueueRemove(pQueue)) != NULL)
+            MemFree(pToken);
         MemFree(pQueue);
     }
     pEval->pvRPNQueue = NULL;
@@ -1028,8 +1028,8 @@ static void EvaluatorCleanUp(PEVALUATOR pEval, PSTACK pStack)
 
     if (pStack)
     {
-        while ((pAtom = StackPop(pStack)) != NULL)
-            MemFree(pAtom);
+        while ((pToken = StackPop(pStack)) != NULL)
+            MemFree(pToken);
     }
 }
 
@@ -1050,8 +1050,8 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
     AssertReturn(pEval->u32Magic == RMAG_EVALUATOR, RERR_BAD_MAGIC);
 
     const char *pszEnd   = NULL;
-    PCATOM pPreviousAtom = NULL;
-    PATOM pAtom          = NULL;
+    PCTOKEN pPreviousToken = NULL;
+    PTOKEN pToken          = NULL;
 
     STACK Stack;
     StackInit(&Stack);
@@ -1071,106 +1071,106 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
     MemZero(pEval->Result.szCommandResult);
 
     /*
-     * Parse atoms onto the stack or queue.
+     * Parse tokens onto the stack or queue.
      */
     int rc = RERR_UNDEFINED;
-    while ((pAtom = EvaluatorParseAtom(pEval, pszExpr, &pszEnd, pPreviousAtom, &rc)) != NULL)
+    while ((pToken = EvaluatorParseToken(pEval, pszExpr, &pszEnd, pPreviousToken, &rc)) != NULL)
     {
-        if (AtomIsCloseParenthesis(pPreviousAtom))
+        if (TokenIsCloseParenthesis(pPreviousToken))
         {
-            MemFree((void *)pPreviousAtom);
-            pPreviousAtom = NULL;
+            MemFree((void *)pPreviousToken);
+            pPreviousToken = NULL;
         }
 
-        if (pAtom->Type == enmAtomNumber)
+        if (pToken->Type == enmTokenNumber)
         {
-            DEBUGPRINTF(("Adding number (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") to queue\n", pAtom->u.Number.uValue,
-                         pAtom->u.Number.dValue));
-            QueueAdd(pQueue, pAtom);
+            DEBUGPRINTF(("Adding number (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") to queue\n", pToken->u.Number.uValue,
+                         pToken->u.Number.dValue));
+            QueueAdd(pQueue, pToken);
         }
-        else if (pAtom->Type == enmAtomOperator)
+        else if (pToken->Type == enmTokenOperator)
         {
-            PCOPERATOR pOperator = pAtom->u.pOperator;
+            PCOPERATOR pOperator = pToken->u.pOperator;
             if (OperatorIsOpenParenthesis(pOperator))
             {
                 /*
                  * Open parenthesis.
                  */
-                DEBUGPRINTF(("Parenthesis begin '%s' pushing to stack\n", pAtom->u.pOperator->pszOperator));
-                StackPush(&Stack, pAtom);
+                DEBUGPRINTF(("Parenthesis begin '%s' pushing to stack\n", pToken->u.pOperator->pszOperator));
+                StackPush(&Stack, pToken);
             }
             else if (OperatorIsCloseParenthesis(pOperator))
             {
                 /*
                  * Close paranthesis.
                  */
-                DEBUGPRINTF(("Parenthesis end '%s'\n", pAtom->u.pOperator->pszOperator));
-                PATOM pStackAtom = NULL;
-                while ((   pStackAtom = StackPeek(&Stack)) != NULL
-                        && !AtomIsOpenParenthesis(pStackAtom))
+                DEBUGPRINTF(("Parenthesis end '%s'\n", pToken->u.pOperator->pszOperator));
+                PTOKEN pStackToken = NULL;
+                while ((   pStackToken = StackPeek(&Stack)) != NULL
+                        && !TokenIsOpenParenthesis(pStackToken))
                 {
-                    DEBUGPRINTF(("Popping '%s' to queue\n", pStackAtom->u.pOperator->pszOperator));
+                    DEBUGPRINTF(("Popping '%s' to queue\n", pStackToken->u.pOperator->pszOperator));
                     StackPop(&Stack);
-                    QueueAdd(pQueue, pStackAtom);
+                    QueueAdd(pQueue, pStackToken);
                 }
 
                 /*
                  * If no matching open parenthesis for close parenthesis found, bail.
                  */
-                if (pStackAtom == NULL)
+                if (pStackToken == NULL)
                 {
                      DEBUGPRINTF(("Missing open paranthesis\n"));
-                     MemFree(pAtom);
+                     MemFree(pToken);
                      EvaluatorCleanUp(pEval, &Stack);
                      return RERR_PARENTHESIS_UNBALANCED;
                 }
 
                 /*
-                 * This means "pStackAtom" is an open parenthesis, verify and discard.
+                 * This means "pStackToken" is an open parenthesis, verify and discard.
                  */
-                Assert(AtomIsOpenParenthesis(pStackAtom));
+                Assert(TokenIsOpenParenthesis(pStackToken));
                 StackPop(&Stack);
-                MemFree(pStackAtom);
-                pStackAtom = NULL;
+                MemFree(pStackToken);
+                pStackToken = NULL;
 
                 /*
                  * If the left parenthesis is preceeded by a function, pop it to the Queue incrementing number
                  * of parameters the function already has.
                  */
-                pStackAtom = StackPeek(&Stack);
-                if (   pStackAtom
-                    && AtomIsFunction(pStackAtom))
+                pStackToken = StackPeek(&Stack);
+                if (   pStackToken
+                    && TokenIsFunction(pStackToken))
                 {
-                    DEBUGPRINTF(("Popping function '%s' to queue\n", pStackAtom->u.pFunction->pszFunction));
+                    DEBUGPRINTF(("Popping function '%s' to queue\n", pStackToken->u.pFunction->pszFunction));
                     StackPop(&Stack);
-                    QueueAdd(pQueue, pStackAtom);
+                    QueueAdd(pQueue, pStackToken);
 
-                    ++pStackAtom->cFunctionParams;
-                    if (pStackAtom->cFunctionParams > MAX_FUNCTION_PARAMETERS)
+                    ++pStackToken->cFunctionParams;
+                    if (pStackToken->cFunctionParams > MAX_FUNCTION_PARAMETERS)
                     {
-                        DEBUGPRINTF(("Error! too many parameters to function '%s'\n", pStackAtom->u.pFunction->pszFunction));
+                        DEBUGPRINTF(("Error! too many parameters to function '%s'\n", pStackToken->u.pFunction->pszFunction));
 
                         /*
                          * Too many parameters to function. Get 0wt.
                          */
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         return RERR_TOO_MANY_PARAMETERS;
                     }
 
-                    if (pStackAtom->cFunctionParams < pStackAtom->u.pFunction->cMinParams)
+                    if (pStackToken->cFunctionParams < pStackToken->u.pFunction->cMinParams)
                     {
-                        DEBUGPRINTF(("Error! too few parameters to function '%s'\n", pStackAtom->u.pFunction->pszFunction));
+                        DEBUGPRINTF(("Error! too few parameters to function '%s'\n", pStackToken->u.pFunction->pszFunction));
 
                         /*
                          * Too few parameters to function. 0wttie.
                          */
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         return RERR_TOO_FEW_PARAMETERS;
                     }
 
-                    DEBUGPRINTF(("Function '%s' cParams=%u\n", pStackAtom->u.pFunction->pszFunction, (unsigned)pStackAtom->cFunctionParams));
+                    DEBUGPRINTF(("Function '%s' cParams=%u\n", pStackToken->u.pFunction->pszFunction, (unsigned)pStackToken->cFunctionParams));
                 }
             }
             else if (OperatorIsParamSeparator(pOperator))
@@ -1178,19 +1178,19 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 /*
                  * Function parameter separator.
                  */
-                DEBUGPRINTF(("Parameter separator '%s'\n", pAtom->u.pOperator->pszOperator));
-                PATOM pStackAtom = NULL;
-                while ((pStackAtom = StackPeek(&Stack)) != NULL)
+                DEBUGPRINTF(("Parameter separator '%s'\n", pToken->u.pOperator->pszOperator));
+                PTOKEN pStackToken = NULL;
+                while ((pStackToken = StackPeek(&Stack)) != NULL)
                 {
-                    if (AtomIsOpenParenthesis(pStackAtom))
+                    if (TokenIsOpenParenthesis(pStackToken))
                         break;
                     StackPop(&Stack);
-                    QueueAdd(pQueue, pStackAtom);
+                    QueueAdd(pQueue, pStackToken);
                 }
-                if (!AtomIsOpenParenthesis(pStackAtom))
+                if (!TokenIsOpenParenthesis(pStackToken))
                 {
                     DEBUGPRINTF(("Operator '%s' parameter mismatch\n", pOperator->pszOperator));
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return RERR_PARANTHESIS_SEPARATOR_UNEXPECTED;
                 }
@@ -1199,46 +1199,46 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                  * Check if the paranthesis is part of a function, if so increment the parameter count
                  * in the function structure.
                  */
-                PATOM pOpenParenthesisAtom = StackPop(&Stack);
-                PATOM pFunctionAtom = StackPop(&Stack);
-                if (!AtomIsFunction(pFunctionAtom))
+                PTOKEN pOpenParenthesisToken = StackPop(&Stack);
+                PTOKEN pFunctionToken = StackPop(&Stack);
+                if (!TokenIsFunction(pFunctionToken))
                 {
                     DEBUGPRINTF(("No function specified\n"));
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return RERR_PARANTHESIS_SEPARATOR_UNEXPECTED;
                 }
 
-                ++pFunctionAtom->cFunctionParams;
-                if (pFunctionAtom->cFunctionParams >= pFunctionAtom->u.pFunction->cMaxParams)
+                ++pFunctionToken->cFunctionParams;
+                if (pFunctionToken->cFunctionParams >= pFunctionToken->u.pFunction->cMaxParams)
                 {
-                    DEBUGPRINTF(("Error too many parameters to function '%s' maximum=%d\n", pFunctionAtom->u.pFunction->pszFunction,
-                                pFunctionAtom->u.pFunction->cMaxParams));
+                    DEBUGPRINTF(("Error too many parameters to function '%s' maximum=%d\n", pFunctionToken->u.pFunction->pszFunction,
+                                pFunctionToken->u.pFunction->cMaxParams));
 
                     /*
                      * Too many parameters to function. Exit, stage 0wt.
                      */
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return RERR_TOO_MANY_PARAMETERS;
                 }
 
                 /*
-                 * Now that we've recorded the info into the function Atom, restore the stack items as though
+                 * Now that we've recorded the info into the function Token, restore the stack items as though
                  * nothing happened :)
                  */
-                StackPush(&Stack, pFunctionAtom);
-                StackPush(&Stack, pOpenParenthesisAtom);
-                DEBUGPRINTF(("Function '%s' cParams=%u\n", pFunctionAtom->u.pFunction->pszFunction, (unsigned)pFunctionAtom->cFunctionParams));
+                StackPush(&Stack, pFunctionToken);
+                StackPush(&Stack, pOpenParenthesisToken);
+                DEBUGPRINTF(("Function '%s' cParams=%u\n", pFunctionToken->u.pFunction->pszFunction, (unsigned)pFunctionToken->cFunctionParams));
             }
             else if (OperatorIsAssignment(pOperator))
             {
                 /*
                  * Variable assignment operator. This is going to be fun.
                  */
-                PATOM pVarAtom = QueuePeekTail(pQueue);
-                if (   pVarAtom
-                    && AtomIsVariable(pVarAtom))
+                PTOKEN pVarToken = QueuePeekTail(pQueue);
+                if (   pVarToken
+                    && TokenIsVariable(pVarToken))
                 {
                     EVALUATOR SubExprEval;
                     EvaluatorInitInternal(&SubExprEval);
@@ -1249,63 +1249,63 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     {
                         DEBUGPRINTF(("-- Done subexpression assignment '%s'\n", pszRightExpr));
 
-                        if (!pVarAtom->u.pVariable)
+                        if (!pVarToken->u.pVariable)
                         {
-                            DEBUGPRINTF(("Creating global variable entry for '%s'\n", pVarAtom->szVariable));
+                            DEBUGPRINTF(("Creating global variable entry for '%s'\n", pVarToken->szVariable));
 
                             /*
-                             * Create a variable entry for the Variable Atom.
+                             * Create a variable entry for the Variable Token.
                              */
                             PVARIABLE pVariable = MemAlloc(sizeof(VARIABLE));
                             if (!pVariable)
                             {
-                                MemFree(pAtom);
+                                MemFree(pToken);
                                 EvaluatorCleanUp(pEval, &Stack);
                                 EvaluatorDestroy(&SubExprEval);
                                 return RERR_NO_MEMORY;
                             }
-                            StrCopy(pVariable->szVariable, sizeof(pVariable->szVariable), pVarAtom->szVariable);
+                            StrCopy(pVariable->szVariable, sizeof(pVariable->szVariable), pVarToken->szVariable);
                             pVariable->pszExpr = StrDup(pszRightExpr);  /* @todo check for failure */
                             pVariable->pvRPNQueue = SubExprEval.pvRPNQueue;
                             pVariable->fCanReinit = true;
                             SubExprEval.pvRPNQueue = NULL;  /* tricky shit, i know... */
 
                             /*
-                             * Add variable entry to the 'global' list & connect Atom to the variable.
+                             * Add variable entry to the 'global' list & connect Token to the variable.
                              * Heh, good thing we are not multi-threaded.
                              */
                             ListAdd(&g_VarList, pVariable);
-                            MemFree(pAtom);
+                            MemFree(pToken);
                         }
-                        else if (pVarAtom->u.pVariable->fCanReinit)
+                        else if (pVarToken->u.pVariable->fCanReinit)
                         {
                             /*
                              * Reassigning existing variable.
                              */
-                            if (pVarAtom->u.pVariable->pszExpr)
-                                StrFree(pVarAtom->u.pVariable->pszExpr);
-                            pVarAtom->u.pVariable->pszExpr = StrDup(pszRightExpr);
-                            if (!pVarAtom->u.pVariable->pszExpr)
+                            if (pVarToken->u.pVariable->pszExpr)
+                                StrFree(pVarToken->u.pVariable->pszExpr);
+                            pVarToken->u.pVariable->pszExpr = StrDup(pszRightExpr);
+                            if (!pVarToken->u.pVariable->pszExpr)
                             {
-                                MemFree(pAtom);
+                                MemFree(pToken);
                                 EvaluatorCleanUp(pEval, &Stack);
                                 EvaluatorDestroy(&SubExprEval);
                                 return RERR_NO_MEMORY;
                             }
 
-                            pVarAtom->u.pVariable->pvRPNQueue = SubExprEval.pvRPNQueue;
+                            pVarToken->u.pVariable->pvRPNQueue = SubExprEval.pvRPNQueue;
                             SubExprEval.pvRPNQueue = NULL;  /* tricky shit, i know... */
                         }
                         else
                         {
-                            StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pVarAtom->szVariable);
-                            MemFree(pAtom);
+                            StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pVarToken->szVariable);
+                            MemFree(pToken);
                             EvaluatorCleanUp(pEval, &Stack);
                             EvaluatorDestroy(&SubExprEval);
                             return RERR_VARIABLE_CANNOT_REASSIGN;
                         }
 
-                        StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pVarAtom->szVariable);
+                        StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pVarToken->szVariable);
                         pEval->Result.fVariableAssignment = true;
 
                         /*
@@ -1317,7 +1317,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                     }
                     else
                     {
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         EvaluatorDestroy(&SubExprEval);
                         return RERR_EXPRESSION_INVALID;
@@ -1325,7 +1325,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 }
                 else
                 {
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return RERR_INVALID_ASSIGNMENT;
                 }
@@ -1335,63 +1335,63 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 /*
                  * Regular operator, handle precedence.
                  */
-                PATOM pStackAtom = NULL;
-                while ((pStackAtom = StackPeek(&Stack)) != NULL)
+                PTOKEN pStackToken = NULL;
+                while ((pStackToken = StackPeek(&Stack)) != NULL)
                 {
-                    if (  !AtomIsOperator(pStackAtom)
-                        || AtomIsParenthesis(pStackAtom))
+                    if (  !TokenIsOperator(pStackToken)
+                        || TokenIsParenthesis(pStackToken))
                         break;
 
-                    PCOPERATOR pStackOperator = pStackAtom->u.pOperator;
+                    PCOPERATOR pStackOperator = pStackToken->u.pOperator;
                     if (   (pOperator->Direction == enmDirLeft && pOperator->Priority <= pStackOperator->Priority)
                         || (pOperator->Direction == enmDirRight && pOperator->Priority < pStackOperator->Priority))
                     {
-                        DEBUGPRINTF(("Moving operator '%s' cParams=%d from stack to queue\n", pStackAtom->u.pOperator->pszOperator,
-                                    pStackAtom->u.pOperator->cParams));
+                        DEBUGPRINTF(("Moving operator '%s' cParams=%d from stack to queue\n", pStackToken->u.pOperator->pszOperator,
+                                    pStackToken->u.pOperator->cParams));
                         StackPop(&Stack);
-                        QueueAdd(pQueue, pStackAtom);
+                        QueueAdd(pQueue, pStackToken);
                     }
                     else
                         break;
                 }
 
-                DEBUGPRINTF(("Pushing operator '%s' (id=%d) cParams=%d to stack\n", pAtom->u.pOperator->pszOperator,
-                        pAtom->u.pOperator->OperatorId, pAtom->u.pOperator->cParams));
-                StackPush(&Stack, pAtom);
+                DEBUGPRINTF(("Pushing operator '%s' (id=%d) cParams=%d to stack\n", pToken->u.pOperator->pszOperator,
+                        pToken->u.pOperator->OperatorId, pToken->u.pOperator->cParams));
+                StackPush(&Stack, pToken);
             }
         }
-        else if (pAtom->Type == enmAtomFunction)
+        else if (pToken->Type == enmTokenFunction)
         {
-            DEBUGPRINTF(("Pushing function '%s' to stack\n", pAtom->u.pFunction->pszFunction));
-            StackPush(&Stack, pAtom);
+            DEBUGPRINTF(("Pushing function '%s' to stack\n", pToken->u.pFunction->pszFunction));
+            StackPush(&Stack, pToken);
         }
-        else if (pAtom->Type == enmAtomVariable)
+        else if (pToken->Type == enmTokenVariable)
         {
             if (rc == RERR_VARIABLE_NAME_TOO_LONG)
             {
-                DEBUGPRINTF(("Variable name '%s' too long\n", pAtom->u.pVariable->szVariable));
-                MemFree(pAtom);
+                DEBUGPRINTF(("Variable name '%s' too long\n", pToken->u.pVariable->szVariable));
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return rc;
             }
             else if (rc == RERR_VARIABLE_NAME_INVALID)
             {
-                DEBUGPRINTF(("Variable name '%s' invalid\n", pAtom->u.pVariable->szVariable));
-                MemFree(pAtom);
+                DEBUGPRINTF(("Variable name '%s' invalid\n", pToken->u.pVariable->szVariable));
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return rc;
             }
 
-            DEBUGPRINTF(("Adding variable '%s' to queue\n", pAtom->szVariable));
-            QueueAdd(pQueue, pAtom);
+            DEBUGPRINTF(("Adding variable '%s' to queue\n", pToken->szVariable));
+            QueueAdd(pQueue, pToken);
         }
-        else if (pAtom->Type == enmAtomCommand)
+        else if (pToken->Type == enmTokenCommand)
         {
-            DEBUGPRINTF(("Adding command '%s' to queue\n", pAtom->u.pCommand->pszCommand));
-            QueueAdd(pQueue, pAtom);
+            DEBUGPRINTF(("Adding command '%s' to queue\n", pToken->u.pCommand->pszCommand));
+            QueueAdd(pQueue, pToken);
 
             /*
-             * Evaluate the rest of the expression as an argument to the command atom if any.
+             * Evaluate the rest of the expression as an argument to the command token if any.
              */
             const char *pszRightExpr = pszEnd;
             if (*pszRightExpr)
@@ -1406,53 +1406,53 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
 
                     if (SubExprEval.Result.fVariableAssignment)
                     {
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         EvaluatorDestroy(&SubExprEval);
                         return RERR_CANT_ASSIGN_VARIABLE_FOR_COMMAND;
                     }
 
-                    Assert(!pAtom->pszCommandExpr);
-                    pAtom->pszCommandExpr = pszRightExpr;
-                    DEBUGPRINTF(("pszCommandExpr=%s\n", pAtom->pszCommandExpr));
-                    if (!pAtom->pszCommandExpr)
+                    Assert(!pToken->pszCommandExpr);
+                    pToken->pszCommandExpr = pszRightExpr;
+                    DEBUGPRINTF(("pszCommandExpr=%s\n", pToken->pszCommandExpr));
+                    if (!pToken->pszCommandExpr)
                     {
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         EvaluatorDestroy(&SubExprEval);
                         return RERR_NO_MEMORY;
                     }
 
                     /*
-                     * Evaluate it and add resulting atom to the RPN queue.
+                     * Evaluate it and add resulting token to the RPN queue.
                      */
                     rc2 = EvaluatorEvaluate(&SubExprEval);
                     if (RC_SUCCESS(rc2))
                     {
                         if (SubExprEval.Result.fCommandEvaluated)
                         {
-                            MemFree(pAtom);
+                            MemFree(pToken);
                             EvaluatorCleanUp(pEval, &Stack);
                             EvaluatorDestroy(&SubExprEval);
                             return RERR_INVALID_COMMAND_PARAMETER;
                         }
 
-                        PATOM pParamAtom = MemAlloc(sizeof(ATOM));
-                        if (!pParamAtom)
+                        PTOKEN pParamToken = MemAlloc(sizeof(TOKEN));
+                        if (!pParamToken)
                         {
-                            MemFree(pAtom);
+                            MemFree(pToken);
                             EvaluatorCleanUp(pEval, &Stack);
                             EvaluatorDestroy(&SubExprEval);
                             return RERR_NO_MEMORY;
                         }
-                        pParamAtom->Type = enmAtomNumber;
-                        pParamAtom->u.Number.uValue = SubExprEval.Result.uValue;
-                        pParamAtom->u.Number.dValue = SubExprEval.Result.dValue;
-                        pAtom->pvCommandParamAtom = pParamAtom;
+                        pParamToken->Type = enmTokenNumber;
+                        pParamToken->u.Number.uValue = SubExprEval.Result.uValue;
+                        pParamToken->u.Number.dValue = SubExprEval.Result.dValue;
+                        pToken->pvCommandParamToken = pParamToken;
                     }
                     else
                     {
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         EvaluatorDestroy(&SubExprEval);
                         return RERR_INVALID_PARAMETER;
@@ -1460,7 +1460,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
                 }
                 else
                 {
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     EvaluatorDestroy(&SubExprEval);
                     return RERR_EXPRESSION_INVALID;
@@ -1469,46 +1469,46 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
             }
             else
             {
-                Assert(!pAtom->pszCommandExpr);
-                Assert(!pAtom->pvCommandParamAtom);
+                Assert(!pToken->pszCommandExpr);
+                Assert(!pToken->pvCommandParamToken);
                 DEBUGPRINTF(("Command: -- Parsing completed sucessfully no params.\n"));
             }
 
             /*
-             * Stop parsing now that we've parsed a command and prepared any parameters atoms.
+             * Stop parsing now that we've parsed a command and prepared any parameters tokens.
              */
             break;
         }
         else
         {
             DEBUGPRINTF(("unknown!\n"));
-            MemFree(pAtom);
-            pAtom = NULL;
+            MemFree(pToken);
+            pToken = NULL;
             break;
         }
         pszExpr = pszEnd;
-        pPreviousAtom = pAtom;
+        pPreviousToken = pToken;
     }
 
     /*
      * Pop remainder operators/functions to the queue.
      */
-    while ((pAtom = StackPop(&Stack)) != NULL)
+    while ((pToken = StackPop(&Stack)) != NULL)
     {
         /*
          * An open parenthesis on the stop of stack means we've got
          * unbalanced parenthesis, just get 0wt.
          */
         if (   StackSize(&Stack) == 0
-            && AtomIsOpenParenthesis(pAtom))
+            && TokenIsOpenParenthesis(pToken))
         {
             DEBUGPRINTF(("Unbalanced paranthesis\n"));
-            MemFree(pAtom);
+            MemFree(pToken);
             return RERR_PARENTHESIS_UNBALANCED;
         }
 
         DEBUGPRINTF(("Popping stack and adding to queue\n"));
-        QueueAdd(pQueue, pAtom);
+        QueueAdd(pQueue, pToken);
     }
 
     /*
@@ -1517,8 +1517,8 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
     PQUEUE pPrevQueue = (PQUEUE)pEval->pvRPNQueue;
     if (pPrevQueue)
     {
-        while ((pAtom = QueueRemove(pPrevQueue)) != NULL)
-            MemFree(pAtom);
+        while ((pToken = QueueRemove(pPrevQueue)) != NULL)
+            MemFree(pToken);
         MemFree(pPrevQueue);
     }
     pEval->pvRPNQueue = pQueue;
@@ -1526,7 +1526,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
     if (QueueSize(pQueue) == 0)
     {
         EvaluatorCleanUp(pEval, &Stack);
-        DEBUGPRINTF(("Error, no atoms detected!\n"));
+        DEBUGPRINTF(("Error, no tokens detected!\n"));
         return RERR_EXPRESSION_INVALID;
     }
     return RINF_SUCCESS;
@@ -1552,22 +1552,22 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 
     STACK Stack;
     StackInit(&Stack);
-    PATOM pAtom = NULL;
+    PTOKEN pToken = NULL;
 
     /*
      * Evaluate RPN from Queue to the Stack.
      */
     DEBUGPRINTF(("EvaluatorEvaluate: RPN: \n"));
-    while ((pAtom = QueueRemove(pQueue)) != NULL)
+    while ((pToken = QueueRemove(pQueue)) != NULL)
     {
-        if (pAtom->Type == enmAtomNumber)
+        if (pToken->Type == enmTokenNumber)
         {
-            DEBUGPRINTF(("Number: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") ", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
-            StackPush(&Stack, pAtom);
+            DEBUGPRINTF(("Number: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") ", pToken->u.Number.uValue, pToken->u.Number.dValue));
+            StackPush(&Stack, pToken);
         }
-        else if (pAtom->Type == enmAtomOperator)
+        else if (pToken->Type == enmTokenOperator)
         {
-            PCOPERATOR pOperator = pAtom->u.pOperator;
+            PCOPERATOR pOperator = pToken->u.pOperator;
             DEBUGPRINTF(("%s ", pOperator->pszOperator));
             if (StackSize(&Stack) < pOperator->cParams)
             {
@@ -1578,37 +1578,37 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * Insufficient parameters to operator.
                  * Destroy remained of the queue, the stack and bail.
                  */
-                MemFree(pAtom);
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_TOO_FEW_PARAMETERS;
             }
 
             /*
-             * Construct the array of PATOMS parameters and pass it to the Operator evaluator if any, otherwise
+             * Construct the array of PTOKENS parameters and pass it to the Operator evaluator if any, otherwise
              * just push the first parameter as the result.
              */
-            PATOM apAtoms[MAX_OPERATOR_PARAMETERS];
-            memset(apAtoms, 0, sizeof(apAtoms));
+            PTOKEN apTokens[MAX_OPERATOR_PARAMETERS];
+            memset(apTokens, 0, sizeof(apTokens));
             Assert(pOperator->cParams <= MAX_OPERATOR_PARAMETERS);
             int rc = RINF_SUCCESS;
-            PATOM pResultantAtom = NULL;
+            PTOKEN pResultantToken = NULL;
             for (int i = 0; i < pOperator->cParams; i++)
             {
-                apAtoms[i] = StackPop(&Stack);
+                apTokens[i] = StackPop(&Stack);
 
                 /*
                  * Check if operator can cast to required type to perform it's operation.
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pOperator->fUIntParams
-                    && !CanCastAtom(apAtoms[i], (long double)INT64_MIN, (long double)UINT64_MAX))
+                    && !CanCastToken(apTokens[i], (long double)INT64_MIN, (long double)UINT64_MAX))
                 {
                     /*
                      * Bleh, operator cannot handle this big a number. Exit, stage whatever.
                      */
                     rc = RERR_UNDEFINED_BEHAVIOUR;
                     DEBUGPRINTF(("Operand to '%s' cannot be cast to integer without UB. rc=%d\n", pOperator->pszOperator, rc));
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return rc;
                 }
@@ -1618,58 +1618,58 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             {
                 if (pOperator->pfnOperator)
                 {
-                    EvaluatorInvertAtomArray(apAtoms, pOperator->cParams);
-                    rc = pOperator->pfnOperator(pEval, apAtoms);
+                    EvaluatorInvertTokenArray(apTokens, pOperator->cParams);
+                    rc = pOperator->pfnOperator(pEval, apTokens);
                     if (RC_SUCCESS(rc))
-                        pResultantAtom = apAtoms[0];
+                        pResultantToken = apTokens[0];
                 }
                 else
-                    pResultantAtom = apAtoms[0];
+                    pResultantToken = apTokens[0];
             }
 
             if (RC_SUCCESS(rc))
             {
-                Assert(pResultantAtom);
+                Assert(pResultantToken);
                 for (int i = 1; i < pOperator->cParams; i++)
-                    MemFree(apAtoms[i]);
-                StackPush(&Stack, pResultantAtom);
+                    MemFree(apTokens[i]);
+                StackPush(&Stack, pResultantToken);
             }
             else
             {
                 Assert(RC_FAILURE(rc));
                 DEBUGPRINTF(("Operator '%s' on given operands failed. rc=%d\n", pOperator->pszOperator, rc));
-                MemFree(pAtom);
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return rc;
             }
         }
-        else if (pAtom->Type == enmAtomFunction)
+        else if (pToken->Type == enmTokenFunction)
         {
-            PCFUNCTION pFunction = pAtom->u.pFunction;
+            PCFUNCTION pFunction = pToken->u.pFunction;
             DEBUGPRINTF(("%s ", pFunction->pszFunction));
-            if (StackSize(&Stack) < pAtom->cFunctionParams)
+            if (StackSize(&Stack) < pToken->cFunctionParams)
             {
                 DEBUGPRINTF(("Error StackSize=%u Function '%s' cParams=%d cMinParams=%d cMaxParams=%d\n",
-                             (unsigned)StackSize(&Stack), pFunction->pszFunction, pAtom->cFunctionParams,
+                             (unsigned)StackSize(&Stack), pFunction->pszFunction, pToken->cFunctionParams,
                              pFunction->cMinParams, pFunction->cMaxParams));
 
                 /*
                  * Insufficient parameters to function. Buh bye.
                  */
-                MemFree(pAtom);
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_TOO_FEW_PARAMETERS;
             }
 
             /*
-             * Construct an array of maximum possible PATOMS parameters and
+             * Construct an array of maximum possible PTOKENS parameters and
              * pass it to the Function evaluator if any, otherwise
              * just push the first parameter as the result.
              */
             Assert(pFunction->cMaxParams <= MAX_FUNCTION_PARAMETERS);
-            uint32_t cParams = R_MIN(pAtom->cFunctionParams, MAX_FUNCTION_PARAMETERS);
-            PATOM *papAtoms = MemAlloc(cParams * sizeof(ATOM));
-            if (!papAtoms)
+            uint32_t cParams = R_MIN(pToken->cFunctionParams, MAX_FUNCTION_PARAMETERS);
+            PTOKEN *papTokens = MemAlloc(cParams * sizeof(TOKEN));
+            if (!papTokens)
             {
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_NO_MEMORY;
@@ -1678,79 +1678,79 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             int rc = RERR_UNDEFINED;
             for (uint32_t i = 0; i < cParams; i++)
             {
-                papAtoms[i] = StackPop(&Stack);
+                papTokens[i] = StackPop(&Stack);
 
                 /*
                  * Check if function can cast to required type to perform it's operation.
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pFunction->fUIntParams
-                    && !CanCastAtom(papAtoms[i], (long double)INT64_MIN, (long double)UINT64_MAX))
+                    && !CanCastToken(papTokens[i], (long double)INT64_MIN, (long double)UINT64_MAX))
                 {
                     /*
                      * Bleh, function cannot handle this big a number. 0wT.
                      */
                     rc = RERR_UNDEFINED_BEHAVIOUR;
                     DEBUGPRINTF(("Parameter to '%s' cannot be cast to integer without UB. rc=%d\n", pFunction->pszFunction, rc));
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return rc;
                 }
             }
 
-            PATOM pResultantAtom = NULL;
+            PTOKEN pResultantToken = NULL;
             if (pFunction->pfnFunction)
             {
-                EvaluatorInvertAtomArray(papAtoms, cParams);
-                rc = pFunction->pfnFunction(pEval, papAtoms, cParams);
+                EvaluatorInvertTokenArray(papTokens, cParams);
+                rc = pFunction->pfnFunction(pEval, papTokens, cParams);
                 if (RC_SUCCESS(rc))
-                    pResultantAtom = papAtoms[0];
+                    pResultantToken = papTokens[0];
             }
             else
-                pResultantAtom = papAtoms[0];
+                pResultantToken = papTokens[0];
 
-            if (pResultantAtom)
+            if (pResultantToken)
             {
                 for (uint32_t k = 1; k < cParams; k++)
-                    MemFree(papAtoms[k]);
+                    MemFree(papTokens[k]);
 
-                MemFree(papAtoms);
-                StackPush(&Stack, pResultantAtom);
+                MemFree(papTokens);
+                StackPush(&Stack, pResultantToken);
             }
             else
             {
                 Assert(RC_FAILURE(rc));
                 DEBUGPRINTF(("Function '%s' on given operands failed! rc=%d\n", pFunction->pszFunction, rc));
-                MemFree(pAtom);
-                MemFree(papAtoms);
+                MemFree(pToken);
+                MemFree(papTokens);
                 EvaluatorCleanUp(pEval, &Stack);
                 return rc;
             }
         }
-        else if (pAtom->Type == enmAtomCommand)
+        else if (pToken->Type == enmTokenCommand)
         {
-            PCOMMAND pCommand = pAtom->u.pCommand;
+            PCOMMAND pCommand = pToken->u.pCommand;
             Assert(pCommand);
 
             DEBUGPRINTF(("EvaluatorEvaluate: Command %s\n", pCommand->pszCommand));
 
             char *pszResult  = NULL;
-            PATOM pParamAtom = NULL;
+            PTOKEN pParamToken = NULL;
             int rc;
-            if (pAtom->pvCommandParamAtom)
+            if (pToken->pvCommandParamToken)
             {
-                pParamAtom = pAtom->pvCommandParamAtom;
-                if (!AtomIsNumber(pParamAtom))
+                pParamToken = pToken->pvCommandParamToken;
+                if (!TokenIsNumber(pParamToken))
                 {
-                    DEBUGPRINTF(("Not a number atom for command argument.\n"));
-                    MemFree(pAtom);
-                    MemFree(pParamAtom);
+                    DEBUGPRINTF(("Not a number token for command argument.\n"));
+                    MemFree(pToken);
+                    MemFree(pParamToken);
                     EvaluatorCleanUp(pEval, &Stack);
                     return RERR_INVALID_COMMAND_PARAMETER;
                 }
             }
 
-            rc = pCommand->pfnCommand(pEval, pParamAtom, &pszResult);
+            rc = pCommand->pfnCommand(pEval, pParamToken, &pszResult);
             if (RC_SUCCESS(rc))
             {
                 pEval->Result.fCommandEvaluated = true;
@@ -1767,36 +1767,36 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 rc = RERR_COMMAND_FAILED;
             }
 
-            MemFree(pAtom);
-            if (pParamAtom)
-                MemFree(pParamAtom);
+            MemFree(pToken);
+            if (pParamToken)
+                MemFree(pParamToken);
             EvaluatorCleanUp(pEval, &Stack);
             break;
         }
-        else if (pAtom->Type == enmAtomVariable)
+        else if (pToken->Type == enmTokenVariable)
         {
-            PVARIABLE pVariable = pAtom->u.pVariable;
+            PVARIABLE pVariable = pToken->u.pVariable;
             if (!pVariable)
             {
                 /*
-                 * Try find the variable if the Variable atom was created BEFORE the creation of
+                 * Try find the variable if the Variable token was created BEFORE the creation of
                  * the variable entry. e.g. _a=_b+1, _b=5, _a and we are evaluating "_a" now whose
-                 * RPN Atom "_b" has no association with the global variable entry "_b" yet.
+                 * RPN Token "_b" has no association with the global variable entry "_b" yet.
                  */
-                pAtom->u.pVariable = EvaluatorFindVariable(pAtom->szVariable, &g_VarList);
-                if (!pAtom->u.pVariable)
+                pToken->u.pVariable = EvaluatorFindVariable(pToken->szVariable, &g_VarList);
+                if (!pToken->u.pVariable)
                 {
-                    StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pAtom->szVariable);
+                    StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pToken->szVariable);
                     EvaluatorCleanVariables();
                     EvaluatorCleanUp(pEval, &Stack);
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     return RERR_VARIABLE_UNDEFINED;
                 }
 
-                pVariable = pAtom->u.pVariable;
+                pVariable = pToken->u.pVariable;
             }
 
-            PQUEUE pVarQueue = pAtom->u.pVariable->pvRPNQueue;
+            PQUEUE pVarQueue = pToken->u.pVariable->pvRPNQueue;
             if (!pVarQueue)
             {
                 /*
@@ -1813,7 +1813,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
              * a list of variables. As we recurse into sub-variables we check the list to make sure we are
              * not evaluating a variable being evaluated.
              */
-            PVARIABLE pAncestorVar = EvaluatorFindVariable(pAtom->u.pVariable->szVariable, &pEval->VarList);
+            PVARIABLE pAncestorVar = EvaluatorFindVariable(pToken->u.pVariable->szVariable, &pEval->VarList);
             if (!pAncestorVar)
             {
                 /*
@@ -1824,16 +1824,16 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 QueueInit(pEvalQueue);
                 for (uint32_t i = 0; i < QueueSize(pVarQueue); i++)
                 {
-                    PATOM pSrcAtom = QueueItemAt(pVarQueue, i);
-                    Assert(pSrcAtom);
-                    PATOM pTmpAtom = AtomDup(pSrcAtom);
-                    if (!pTmpAtom)
+                    PTOKEN pSrcToken = QueueItemAt(pVarQueue, i);
+                    Assert(pSrcToken);
+                    PTOKEN pTmpToken = TokenDup(pSrcToken);
+                    if (!pTmpToken)
                     {
-                        MemFree(pAtom);
+                        MemFree(pToken);
                         EvaluatorCleanUp(pEval, &Stack);
                         return RERR_NO_MEMORY;
                     }
-                    QueueAdd(pEvalQueue, pTmpAtom);
+                    QueueAdd(pEvalQueue, pTmpToken);
                 }
 
                 /*
@@ -1845,7 +1845,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 ListAppend(&VarEval.VarList, &pEval->VarList);
                 ListAdd(&VarEval.VarList, pVariable);
 
-                DEBUGPRINTF(("Evaluating variable '%s'\n", pAtom->u.pVariable->szVariable));
+                DEBUGPRINTF(("Evaluating variable '%s'\n", pToken->u.pVariable->szVariable));
 #ifdef _DEBUG
                 EvaluatorPrintVarList(&VarEval.VarList);
 #endif
@@ -1853,25 +1853,25 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 if (RC_SUCCESS(rc))
                 {
                     /*
-                     * Reuse Variable Atom as a Number Atom & push it to the Stack.
+                     * Reuse Variable Token as a Number Token & push it to the Stack.
                      */
-                    DEBUGPRINTF(("Variable '%s' is %" FMT_FLT_NAT "\n", pAtom->u.pVariable->szVariable, VarEval.Result.dValue));
-                    pAtom->Type = enmAtomNumber;
-                    pAtom->u.Number.uValue = VarEval.Result.uValue;
-                    pAtom->u.Number.dValue = VarEval.Result.dValue;
+                    DEBUGPRINTF(("Variable '%s' is %" FMT_FLT_NAT "\n", pToken->u.pVariable->szVariable, VarEval.Result.dValue));
+                    pToken->Type = enmTokenNumber;
+                    pToken->u.Number.uValue = VarEval.Result.uValue;
+                    pToken->u.Number.dValue = VarEval.Result.dValue;
 
                     /*
                      * Remove the variable from the dependency list.
                      */
-                    StackPush(&Stack, pAtom);
+                    StackPush(&Stack, pToken);
                     EvaluatorDestroy(&VarEval);
                 }
                 else
                 {
                     /** Do -NOT- alter rc, it could be circular dependency error. */
-                    DEBUGPRINTF(("Failed to evaluate right-hand expression for variable '%s'\n", pAtom->u.pVariable->szVariable));
+                    DEBUGPRINTF(("Failed to evaluate right-hand expression for variable '%s'\n", pToken->u.pVariable->szVariable));
                     StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), VarEval.Result.szVariable);
-                    MemFree(pAtom);
+                    MemFree(pToken);
                     EvaluatorDestroy(&VarEval);
                     EvaluatorCleanUp(pEval, &Stack);
                     return rc;
@@ -1881,15 +1881,15 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             {
                 DEBUGPRINTF(("Circular variable depedency on variable '%s'\n", pAncestorVar->szVariable));
                 StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pAncestorVar->szVariable);
-                MemFree(pAtom);
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_CIRCULAR_DEPENDENCY;
             }
         }
         else
         {
-            DEBUGPRINTF(("UnknownAtom!\n"));
-            MemFree(pAtom);
+            DEBUGPRINTF(("UnknownToken!\n"));
+            MemFree(pToken);
         }
     }
 
@@ -1911,24 +1911,24 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
      */
     if (StackSize(&Stack) == 1)
     {
-        pAtom = StackPop(&Stack);
-        DEBUGPRINTF(("Result: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
+        pToken = StackPop(&Stack);
+        DEBUGPRINTF(("Result: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pToken->u.Number.uValue, pToken->u.Number.dValue));
         pEval->Result.ErrorIndex = -1;
-        pEval->Result.uValue = pAtom->u.Number.uValue;
-        pEval->Result.dValue = pAtom->u.Number.dValue;
-        MemFree(pAtom);
+        pEval->Result.uValue = pToken->u.Number.uValue;
+        pEval->Result.dValue = pToken->u.Number.dValue;
+        MemFree(pToken);
         return RINF_SUCCESS;
     }
     else
         DEBUGPRINTF(("Here\n"));
 
-    while ((pAtom = StackPop(&Stack)) != NULL)
+    while ((pToken = StackPop(&Stack)) != NULL)
     {
-        DEBUGPRINTF(("PATOM free (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
-        MemFree(pAtom);
+        DEBUGPRINTF(("PTOKEN free (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pToken->u.Number.uValue, pToken->u.Number.dValue));
+        MemFree(pToken);
     }
 
-    DEBUGPRINTF(("Too many atoms, invalid expression\n"));
+    DEBUGPRINTF(("Too many tokens, invalid expression\n"));
     pEval->Result.ErrorIndex = -1;
     return RERR_EXPRESSION_INVALID;
 }
@@ -2128,172 +2128,172 @@ int EvaluatorInit(PEVALUATOR pEval, char *pszError, size_t cbError)
  *   Hello, Operator?!                                                         *
  *******************************************************************************/
 
-static int OpAdd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpAdd(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue + apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue + apAtoms[1]->u.Number.dValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue + apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.dValue + apTokens[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpSubtract(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpSubtract(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue - apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue - apAtoms[1]->u.Number.dValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue - apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.dValue - apTokens[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpNegate(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpNegate(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = -apAtoms[0]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = -apAtoms[0]->u.Number.dValue;
+    apTokens[0]->u.Number.uValue = -apTokens[0]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = -apTokens[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpMultiply(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpMultiply(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue * apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue * apAtoms[1]->u.Number.dValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue * apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.dValue * apTokens[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpDivide(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpDivide(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue / apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.dValue / apAtoms[1]->u.Number.dValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue / apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.dValue / apTokens[1]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpIncrement(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpIncrement(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    ++apAtoms[0]->u.Number.uValue;
-    ++apAtoms[0]->u.Number.dValue;
+    ++apTokens[0]->u.Number.uValue;
+    ++apTokens[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpDecrement(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpDecrement(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    --apAtoms[0]->u.Number.uValue;
-    --apAtoms[0]->u.Number.dValue;
+    --apTokens[0]->u.Number.uValue;
+    --apTokens[0]->u.Number.dValue;
     return RINF_SUCCESS;
 }
 
-static int OpShiftLeft(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpShiftLeft(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue << apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue << apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = (uint64_t)apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpShiftRight(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpShiftRight(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue >> apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue >> apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = (uint64_t)apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpBitNegate(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitNegate(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = ~apAtoms[0]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = ~apTokens[0]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = (uint64_t)apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpModulo(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue % apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue % apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpLessThan(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLessThan(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue < apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (long double)DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apTokens[0]->u.Number.uValue = !!(apTokens[0]->u.Number.uValue < apTokens[1]->u.Number.uValue);
+    apTokens[0]->u.Number.dValue = (long double)DefinitelyLessThan(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-static int OpGreaterThan(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpGreaterThan(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue > apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (long double)DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apTokens[0]->u.Number.uValue = !!(apTokens[0]->u.Number.uValue > apTokens[1]->u.Number.uValue);
+    apTokens[0]->u.Number.dValue = (long double)DefinitelyGreaterThan(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-static int OpEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpEqualTo(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue == apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (long double)EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apTokens[0]->u.Number.uValue = !!(apTokens[0]->u.Number.uValue == apTokens[1]->u.Number.uValue);
+    apTokens[0]->u.Number.dValue = (long double)EssentiallyEqual(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
-static int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLessThanOrEqualTo(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue <= apAtoms[1]->u.Number.uValue);
-    bool const fLessThan = DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    bool const fEqualTo  = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = (long double)(fLessThan || fEqualTo);
+    apTokens[0]->u.Number.uValue = !!(apTokens[0]->u.Number.uValue <= apTokens[1]->u.Number.uValue);
+    bool const fLessThan = DefinitelyLessThan(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
+    bool const fEqualTo  = EssentiallyEqual(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
+    apTokens[0]->u.Number.dValue = (long double)(fLessThan || fEqualTo);
     return RINF_SUCCESS;
 }
 
-static int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue >= apAtoms[1]->u.Number.uValue);
-    bool const fGreaterThan = DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    bool const fEqualTo = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = (long double)(fGreaterThan || fEqualTo);
+    apTokens[0]->u.Number.uValue = !!(apTokens[0]->u.Number.uValue >= apTokens[1]->u.Number.uValue);
+    bool const fGreaterThan = DefinitelyGreaterThan(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
+    bool const fEqualTo = EssentiallyEqual(apTokens[0]->u.Number.dValue, apTokens[1]->u.Number.dValue);
+    apTokens[0]->u.Number.dValue = (long double)(fGreaterThan || fEqualTo);
     return RINF_SUCCESS;
 }
 
-static int OpNotEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpNotEqualTo(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    int rc = OpEqualTo(pEval, apAtoms);
+    int rc = OpEqualTo(pEval, apTokens);
     if (RC_SUCCESS(rc))
     {
-        apAtoms[0]->u.Number.uValue = !apAtoms[0]->u.Number.uValue;
-        apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+        apTokens[0]->u.Number.uValue = !apTokens[0]->u.Number.uValue;
+        apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     }
     return RINF_SUCCESS;
 }
 
-static int OpLogicalNot(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalNot(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = !apAtoms[0]->u.Number.dValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = !apTokens[0]->u.Number.dValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpBitwiseAnd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseAnd(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue & apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue & apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpBitwiseXor(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseXor(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue ^ apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue ^ apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpBitwiseOr(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpBitwiseOr(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue | apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = apTokens[0]->u.Number.uValue | apTokens[1]->u.Number.uValue;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpLogicalAnd(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalAnd(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue && apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = (apTokens[0]->u.Number.uValue && apTokens[1]->u.Number.dValue);
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
-static int OpLogicalOr(PEVALUATOR pEval, PATOM apAtoms[])
+static int OpLogicalOr(PEVALUATOR pEval, PTOKEN apTokens[])
 {
-    apAtoms[0]->u.Number.uValue = (apAtoms[0]->u.Number.uValue || apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = apAtoms[0]->u.Number.uValue;
+    apTokens[0]->u.Number.uValue = (apTokens[0]->u.Number.uValue || apTokens[1]->u.Number.dValue);
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 

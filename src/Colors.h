@@ -75,7 +75,6 @@ bakpur='\033[45m'   # Purple
 bakcyn='\033[46m'   # Cyan
 bakwht='\033[47m'   # White
 txtrst='\033[0m'    # Text Reset
-
 */
 
 #endif /* COLORS_H___ */
