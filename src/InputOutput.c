@@ -19,6 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+
+#ifndef _WIN32
+# include <readline/readline.h>
+# include <readline/history.h>
+#endif
+
 #include "InputOutput.h"
 #include "Errors.h"
 #include "Colors.h"
@@ -26,15 +35,6 @@
 #include "Magics.h"
 #include "Assert.h"
 #include "Evaluator.h"
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
-
-#ifndef _WIN32
-#include <readline/readline.h>
-#include <readline/history.h>
-#endif
 
 static bool g_fxTermColors = false;
 
@@ -56,6 +56,7 @@ void ErrorPrintf(int rc, char *pszError, ...)
         fprintf(stderr, "%sError!%s %s rc=%s%s%s (%d)\n\n", TCOLOR_BOLD_RED, TCOLOR_RESET, pszBuf,
                     TCOLOR_RED, pStatusMsg->pszName, TCOLOR_RESET, rc);
 #else
+
         fprintf(stderr, "Error! %s rc=%s (%d)\n\n", pszBuf, pStatusMsg->pszName, rc);
 #endif
     }
@@ -253,6 +254,14 @@ void TextLineInit(PTEXTLINE pLine)
     pLine->u32Magic = RMAG_TEXTLINE;
     pLine->pszRaw = NULL;
     pLine->pszData = NULL;
+
+//    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+//    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
+//    WORD saved_attributes;
+//
+//    /* Save current attributes */
+//    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
+//    saved_attributes = consoleInfo.wAttributes;
 }
 
 

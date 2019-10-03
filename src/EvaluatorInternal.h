@@ -35,13 +35,13 @@
 /** Maximum number of parameters that can be passed to a Function. */
 #define MAX_FUNCTION_PARAMETERS     1024
 /** Open paranthesis Operator Id.   */
-#define OPEN_PAREN_ID               INT_MAX - 1
+#define OPEN_PAREN_ID               INT16_MAX - 1
 /** Close paranthesis Operator Id.   */
-#define CLOSE_PAREN_ID              INT_MAX - 2
+#define CLOSE_PAREN_ID              INT16_MAX - 2
 /** Parameter separator Operator Id.   */
-#define PARAM_SEP_ID                INT_MAX - 3
+#define PARAM_SEP_ID                INT16_MAX - 3
 /** Variable assignment Operator Id. */
-#define VAR_ASSIGN_ID               INT_MAX - 4
+#define VAR_ASSIGN_ID               INT16_MAX - 4
 /** Maximum length of a Variable name. */
 #define MAX_VARIABLE_NAME_LENGTH    128
 
@@ -78,8 +78,8 @@
 /** NUMBER: A number. */
 typedef struct NUMBER
 {
-    UINTEGER    uValue;     /**< Value represented as an unsigned integer. */
-    FLOAT       dValue;     /**< Value represented as floating point. */
+    uint64_t        uValue;     /**< Value represented as an unsigned integer. */
+    long double     dValue;     /**< Value represented as floating point. */
 } NUMBER;
 /** Pointer to an Number object. */
 typedef NUMBER *PNUMBER;
@@ -128,7 +128,6 @@ typedef ATOM *PATOM;
 /** Pointer to a const Atom object. */
 typedef const ATOM *PCATOM;
 
-
 /** An Operator function. */
 typedef int FNOPERATOR(PEVALUATOR pEval, PATOM apAtoms[]);
 /** Pointer to an Operator function. */
@@ -155,7 +154,7 @@ typedef struct OPERATOR
     int             Priority;       /**< Operator priority, value is relative to Operators. */
     OPERATORDIR     Direction;      /**< Operator associativity. */
     uint8_t         cParams;        /**< Number of parameters to the operator, valid values: (0-2). */
-    bool            fUIntParams;    /**< Whether the parameters must all fit into UINTEGER */
+    bool            fUIntParams;    /**< Whether the parameters must all fit into uint64_t */
     const char     *pszOperator;    /**< Name of the Operator as seen in the expression. */
     PFNOPERATOR     pfnOperator;    /**< Pointer to the Operator evaluator function. */
     const char     *pszSyntax;      /**< Short description of the Operator, NULL if already described. */
@@ -181,7 +180,7 @@ typedef struct FUNCTION
 {
     const char     *pszFunction;    /**< Name of the Function as seen in the expression. */
     PFNFUNCTION     pfnFunction;    /**< Pointer to the Function evaluator function. */
-    bool            fUIntParams;    /**< Whether the parameters must all fit into UINTEGER */
+    bool            fUIntParams;    /**< Whether the parameters must all fit into uint64_t */
     uint32_t        cMinParams;     /**< Minimum parameters accepted by @a pfnFunction. */
     uint32_t        cMaxParams;     /**< Maximum paramaters accepted by @a pfnFunction. */
     const char     *pszSyntax;      /**< Short description of the Function, NULL if already described. */

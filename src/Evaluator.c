@@ -131,7 +131,7 @@ PFUNCTION g_paSortedFunctions = NULL;
 /*******************************************************************************
 *   Helper Functions                                                           *
 *******************************************************************************/
-static inline bool CanCastAtom(PCATOM pAtom, FLOAT MinValue, FLOAT MaxValue)
+static inline bool CanCastAtom(PCATOM pAtom, long double MinValue, long double MaxValue)
 {
     return (DefinitelyLessThan(pAtom->u.Number.dValue, MaxValue) && DefinitelyGreaterThan(pAtom->u.Number.dValue, MinValue));
 }
@@ -193,7 +193,7 @@ static inline bool OperatorIsAssignment(PCOPERATOR pOperator)
 
 static inline bool NumberIsNegative(PATOM pAtom)
 {
-    return DefinitelyLessThan(pAtom->u.Number.dValue, (FLOAT)0);
+    return DefinitelyLessThan(pAtom->u.Number.dValue, (long double)0);
 }
 
 static inline bool AtomIsCloseParenthesis(PCATOM pAtom)
@@ -586,7 +586,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
 
     errno = 0;
     DEBUGPRINTF(("Parse Number: szNum=\"%s\"\n", szNum));
-    UINTEGER const uValue = (UINTEGER)strtoull(szNum, &pszEndTmp, iRadix);
+    uint64_t const uValue = (uint64_t)strtoull(szNum, &pszEndTmp, iRadix);
     if (errno)
     {
         DEBUGPRINTF(("Error while string to unsigned conversion of %s\n", szNum));
@@ -596,7 +596,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     /*
      * Covert the number as a float value as well.
      */
-    FLOAT dValue = strtold(szNum, &pszEndTmp);
+    long double dValue = strtold(szNum, &pszEndTmp);
     if (iRadix == 10 || iRadix == 0)
     {
         dValue = strtold(szNum, &pszEndTmp);
@@ -620,7 +620,7 @@ static PATOM EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
     pAtom->u.Number.dValue = dValue;
     *ppszEnd = pszExpr;
 
-    DEBUGPRINTF(("Parse Number: U=%" FMTUINTEGER_NAT " (%" FMTU64INTEGER_HEX ") F=%" FMTFLOAT "\n", uValue, uValue, dValue));
+    DEBUGPRINTF(("Parse Number: U=%" FMT_U64_NAT " (%" FMT_U64_HEX ") F=%" FMT_FLT_NAT "\n", uValue, uValue, dValue));
 
     /*
      * Return the allocated Atom.
@@ -1084,7 +1084,7 @@ int EvaluatorParse(PEVALUATOR pEval, const char *pszExpr)
 
         if (pAtom->Type == enmAtomNumber)
         {
-            DEBUGPRINTF(("Adding number (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ") to queue\n", pAtom->u.Number.uValue,
+            DEBUGPRINTF(("Adding number (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") to queue\n", pAtom->u.Number.uValue,
                          pAtom->u.Number.dValue));
             QueueAdd(pQueue, pAtom);
         }
@@ -1562,7 +1562,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
     {
         if (pAtom->Type == enmAtomNumber)
         {
-            DEBUGPRINTF(("Number: (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ") ", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
+            DEBUGPRINTF(("Number: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ") ", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
             StackPush(&Stack, pAtom);
         }
         else if (pAtom->Type == enmAtomOperator)
@@ -1601,7 +1601,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pOperator->fUIntParams
-                    && !CanCastAtom(apAtoms[i], (FLOAT)MIN_INTEGER, (FLOAT)MAX_UINTEGER))
+                    && !CanCastAtom(apAtoms[i], (long double)INT64_MIN, (long double)UINT64_MAX))
                 {
                     /*
                      * Bleh, operator cannot handle this big a number. Exit, stage whatever.
@@ -1685,7 +1685,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * If not, we cannot proceed because it would invoke undefined behaviour.
                  */
                 if (   pFunction->fUIntParams
-                    && !CanCastAtom(papAtoms[i], (FLOAT)MIN_INTEGER, (FLOAT)MAX_UINTEGER))
+                    && !CanCastAtom(papAtoms[i], (long double)INT64_MIN, (long double)UINT64_MAX))
                 {
                     /*
                      * Bleh, function cannot handle this big a number. 0wT.
@@ -1855,7 +1855,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                     /*
                      * Reuse Variable Atom as a Number Atom & push it to the Stack.
                      */
-                    DEBUGPRINTF(("Variable '%s' is %" FMTFLOAT "\n", pAtom->u.pVariable->szVariable, VarEval.Result.dValue));
+                    DEBUGPRINTF(("Variable '%s' is %" FMT_FLT_NAT "\n", pAtom->u.pVariable->szVariable, VarEval.Result.dValue));
                     pAtom->Type = enmAtomNumber;
                     pAtom->u.Number.uValue = VarEval.Result.uValue;
                     pAtom->u.Number.dValue = VarEval.Result.dValue;
@@ -1912,7 +1912,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
     if (StackSize(&Stack) == 1)
     {
         pAtom = StackPop(&Stack);
-        DEBUGPRINTF(("Result: (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
+        DEBUGPRINTF(("Result: (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
         pEval->Result.ErrorIndex = -1;
         pEval->Result.uValue = pAtom->u.Number.uValue;
         pEval->Result.dValue = pAtom->u.Number.dValue;
@@ -1924,7 +1924,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
 
     while ((pAtom = StackPop(&Stack)) != NULL)
     {
-        DEBUGPRINTF(("PATOM free (U=%" FMTUINTEGER_NAT " F=%" FMTFLOAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
+        DEBUGPRINTF(("PATOM free (U=%" FMT_U64_NAT " F=%" FMT_FLT_NAT ")\n", pAtom->u.Number.uValue, pAtom->u.Number.dValue));
         MemFree(pAtom);
     }
 
@@ -2180,21 +2180,21 @@ static int OpDecrement(PEVALUATOR pEval, PATOM apAtoms[])
 static int OpShiftLeft(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue << apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 static int OpShiftRight(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = apAtoms[0]->u.Number.uValue >> apAtoms[1]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
 static int OpBitNegate(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = ~apAtoms[0]->u.Number.uValue;
-    apAtoms[0]->u.Number.dValue = (UINTEGER)apAtoms[0]->u.Number.uValue;
+    apAtoms[0]->u.Number.dValue = (uint64_t)apAtoms[0]->u.Number.uValue;
     return RINF_SUCCESS;
 }
 
@@ -2208,21 +2208,21 @@ static int OpModulo(PEVALUATOR pEval, PATOM apAtoms[])
 static int OpLessThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue < apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = (long double)DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
 static int OpGreaterThan(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue > apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (FLOAT)DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = (long double)DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
 static int OpEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
 {
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue == apAtoms[1]->u.Number.uValue);
-    apAtoms[0]->u.Number.dValue = (FLOAT)EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
+    apAtoms[0]->u.Number.dValue = (long double)EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     return RINF_SUCCESS;
 }
 
@@ -2231,7 +2231,7 @@ static int OpLessThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue <= apAtoms[1]->u.Number.uValue);
     bool const fLessThan = DefinitelyLessThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     bool const fEqualTo  = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = (FLOAT)(fLessThan || fEqualTo);
+    apAtoms[0]->u.Number.dValue = (long double)(fLessThan || fEqualTo);
     return RINF_SUCCESS;
 }
 
@@ -2240,7 +2240,7 @@ static int OpGreaterThanOrEqualTo(PEVALUATOR pEval, PATOM apAtoms[])
     apAtoms[0]->u.Number.uValue = !!(apAtoms[0]->u.Number.uValue >= apAtoms[1]->u.Number.uValue);
     bool const fGreaterThan = DefinitelyGreaterThan(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
     bool const fEqualTo = EssentiallyEqual(apAtoms[0]->u.Number.dValue, apAtoms[1]->u.Number.dValue);
-    apAtoms[0]->u.Number.dValue = (FLOAT)(fGreaterThan || fEqualTo);
+    apAtoms[0]->u.Number.dValue = (long double)(fGreaterThan || fEqualTo);
     return RINF_SUCCESS;
 }
 

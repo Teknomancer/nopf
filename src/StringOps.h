@@ -63,7 +63,7 @@ char   *StrDup(const char *pszSrc);
 int     StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc);
 char   *StrStrip(char *pszBuf);
 char   *StrStripLF(char *pszBuf, bool *pfStripped);
-char   *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits);
+char   *StrValue32AsBinary(uint64_t uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits);
 
 /*
  * String flags for StrFormat.
@@ -75,7 +75,7 @@ char   *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace,
 #define FSTR_VALUE_SIGNED               0x10
 #define FSTR_VALUE_32_BIT               0x20
 
-int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags);
+int StrFormat(char *pszDst, size_t cbDst, long double dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags);
 
 #endif /* STRING_OPS_H___ */
 

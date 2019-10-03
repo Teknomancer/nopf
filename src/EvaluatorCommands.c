@@ -340,7 +340,7 @@ static int FnCr0(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 
     if (pAtom)
     {
-        UINTEGER const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr0Desc);
     }
     else
@@ -399,7 +399,7 @@ static int FnCr4(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 
     if (pAtom)
     {
-        UINTEGER const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr4Desc);
     }
     else
@@ -458,7 +458,7 @@ static int FnEflags(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 
     if (pAtom)
     {
-        UINTEGER const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EflagsDesc);
     }
     else
@@ -517,7 +517,7 @@ static int FnEfer(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 
     if (pAtom)
     {
-        UINTEGER const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EferDesc);
     }
     else
@@ -597,7 +597,7 @@ static int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 
     if (pAtom)
     {
-        UINTEGER const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pAtom->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &CSAttrDesc);
     }
     else
