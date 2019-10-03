@@ -22,7 +22,7 @@
 #include "Types.h"
 
 /** IEEE 754 - 2008 Epsilon for long double precision. */
-CFLOAT g_MachEpsilon = 9.63e-35;
+long double const g_MachEpsilon = 9.63e-35;
 /* 1.11e-16   --- double */
 
 /*
@@ -30,27 +30,27 @@ CFLOAT g_MachEpsilon = 9.63e-35;
  * "Beware of bugs in the above code; I have only proved it correct, not tried it"
  * -- Donald Knuth
  */
-bool ApproximatelyEqual(FLOAT a, FLOAT b)
+bool ApproximatelyEqual(long double a, long double b)
 {
-    return FABSFLOAT(a - b) <= ((FABSFLOAT(a) < FABSFLOAT(b) ? FABSFLOAT(b) : FABSFLOAT(a)) * g_MachEpsilon);
+    return fabsl(a - b) <= ((fabsl(a) < fabsl(b) ? fabsl(b) : fabsl(a)) * g_MachEpsilon);
 }
 
-bool EssentiallyEqual(FLOAT a, FLOAT b)
+bool EssentiallyEqual(long double a, long double b)
 {
-    return FABSFLOAT(a - b) <= ((FABSFLOAT(a) > FABSFLOAT(b) ? FABSFLOAT(b) : FABSFLOAT(a)) * g_MachEpsilon);
+    return fabsl(a - b) <= ((fabsl(a) > fabsl(b) ? fabsl(b) : fabsl(a)) * g_MachEpsilon);
 }
 
-bool DefinitelyGreaterThan(FLOAT a, FLOAT b)
+bool DefinitelyGreaterThan(long double a, long double b)
 {
-    return (a - b) > ((FABSFLOAT(a) < FABSFLOAT(b) ? FABSFLOAT(b) : FABSFLOAT(a)) * g_MachEpsilon);
+    return (a - b) > ((fabsl(a) < fabsl(b) ? fabsl(b) : fabsl(a)) * g_MachEpsilon);
 }
 
-bool DefinitelyLessThan(FLOAT a, FLOAT b)
+bool DefinitelyLessThan(long double a, long double b)
 {
-    return (b - a) > ((FABSFLOAT(a) < FABSFLOAT(b) ? FABSFLOAT(b) : FABSFLOAT(a)) * g_MachEpsilon);
+    return (b - a) > ((fabsl(a) < fabsl(b) ? fabsl(b) : fabsl(a)) * g_MachEpsilon);
 }
 
-bool CanCastTo(FLOAT dValue, FLOAT dMaxValueForDst)
+bool CanCastTo(long double dValue, long double dMaxValueForDst)
 {
     return !DefinitelyGreaterThan(dValue, dMaxValueForDst);
 }

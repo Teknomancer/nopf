@@ -51,7 +51,7 @@
 #define CMD_VARS                    "vars"
 
 
-static char *GetValueAsBinaryString(UINTEGER uValue, size_t *pcDigits)
+static char *GetValueAsBinaryString(uint64_t uValue, size_t *pcDigits)
 {
     char *pszBuf = StrAlloc(  sizeof("1111111111111111111111111111111111111111111111111111111111111111")
                             + 15 /* 1 space between each 4 bits, so for 64-bits => 16 spaces. */
@@ -114,8 +114,8 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
     int const      cIndent1 = 2;       /* Indent for 2nd column. */
     int const      cIndent2 = 2;       /* Indent for 3rd column. */
 
-    FLOAT const    dResult = pEval->Result.dValue;
-    UINTEGER const uResult = pEval->Result.uValue;
+    long double const    dResult = pEval->Result.dValue;
+    uint64_t const uResult = pEval->Result.uValue;
     if (pSettings->fOutputBaseBool)
     {
         bool const fResult = !!uResult;
@@ -130,13 +130,13 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
     if (pSettings->fOutputBaseDec)
     {
         char szDst32[sizeof("4294967295")];
-        StrNPrintf(szDst32, sizeof(szDst32), "%" FMTU32INTEGER_NAT, (U32INTEGER)uResult);
+        StrNPrintf(szDst32, sizeof(szDst32), "%" FMT_U32_NAT, (uint32_t)uResult);
 
         char szDst64[sizeof("18446744073709551615")];
-        StrNPrintf(szDst64, sizeof(szDst64), "%" FMTU64INTEGER_NAT, uResult);
+        StrNPrintf(szDst64, sizeof(szDst64), "%" FMT_U64_NAT, uResult);
 
         char szDstFloat[128];
-        StrNPrintf(szDstFloat, sizeof(szDstFloat), "%" FMTFLOAT, dResult);
+        StrNPrintf(szDstFloat, sizeof(szDstFloat), "%" FMT_FLT_NAT, dResult);
 
         ColorPrintf(PREFIX_COLOR, "Dec :");
         ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
@@ -148,13 +148,13 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
     if (pSettings->fOutputBaseHex)
     {
         char szDst32[sizeof("ffffffff") + sizeof("0x")];
-        StrNPrintf(szDst32, sizeof(szDst32), "0x%08" FMTU32INTEGER_HEX, (U32INTEGER)uResult);
+        StrNPrintf(szDst32, sizeof(szDst32), "0x%08" FMT_U32_HEX, (uint32_t)uResult);
 
         char szDst64[sizeof("ffffffffffffffff") + sizeof("0x")];
-        StrNPrintf(szDst64, sizeof(szDst64), "0x%016" FMTU64INTEGER_HEX, uResult);
+        StrNPrintf(szDst64, sizeof(szDst64), "0x%016" FMT_U64_HEX, uResult);
 
         char szDstNat[sizeof("ffffffffffffffff") + sizeof("0x")];
-        StrNPrintf(szDstNat, sizeof(szDstNat), "0x%" FMTU64INTEGER_HEX, uResult);
+        StrNPrintf(szDstNat, sizeof(szDstNat), "0x%" FMT_U64_HEX, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Hex :");
         ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
@@ -166,13 +166,13 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
     if (pSettings->fOutputBaseOct)
     {
         char szDst32[sizeof("37777777777") + sizeof("0")];
-        StrNPrintf(szDst32, sizeof(szDst32), "0%08" FMTU32INTEGER_OCT, (U32INTEGER)uResult);
+        StrNPrintf(szDst32, sizeof(szDst32), "0%08" FMT_U32_OCT, (uint32_t)uResult);
 
         char szDst64[sizeof("1777777777777777777777") + sizeof("0")];
-        StrNPrintf(szDst64, sizeof(szDst64), "0%016" FMTU64INTEGER_OCT, uResult);
+        StrNPrintf(szDst64, sizeof(szDst64), "0%016" FMT_U64_OCT, uResult);
 
         char szDstNat[sizeof("1777777777777777777777") + sizeof("0")];
-        StrNPrintf(szDstNat, sizeof(szDstNat), "0%" FMTU64INTEGER_OCT, uResult);
+        StrNPrintf(szDstNat, sizeof(szDstNat), "0%" FMT_U64_OCT, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Oct :");
         ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",

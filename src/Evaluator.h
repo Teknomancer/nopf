@@ -39,15 +39,15 @@
  */
 typedef struct EVALRESULT
 {
-    bool        fVariableAssignment;                           /**< Whether this is a Variable assignment. */
-    bool        fCommandEvaluated;                             /**< Whether this is an evaluated Command. */
-    char        szVariable[MAX_VARIABLE_NAME_LENGTH];          /**< Name of assigned Variable if any. */
-    char        szFunction[MAX_VARIABLE_NAME_LENGTH];          /**< Name of the Function if it's a single function call. */
-    char        szCommand[MAX_COMMAND_NAME_LENGTH];            /**< Name of evaluated Command if any. */
-    char        szCommandResult[MAX_COMMAND_RESULT_LENGTH];    /**< Output of the Command if it's a Command. */
-    UINTEGER    uValue;                                        /**< Integer value of the parse/evaluation phase. */
-    FLOAT       dValue;                                        /**< Float value of the parse/evaluation phase. */
-    int         ErrorIndex;                                    /**< Index into the original expression if case of an error. */
+    bool            fVariableAssignment;                           /**< Whether this is a Variable assignment. */
+    bool            fCommandEvaluated;                             /**< Whether this is an evaluated Command. */
+    char            szVariable[MAX_VARIABLE_NAME_LENGTH];          /**< Name of assigned Variable if any. */
+    char            szFunction[MAX_VARIABLE_NAME_LENGTH];          /**< Name of the Function if it's a single function call. */
+    char            szCommand[MAX_COMMAND_NAME_LENGTH];            /**< Name of evaluated Command if any. */
+    char            szCommandResult[MAX_COMMAND_RESULT_LENGTH];    /**< Output of the Command if it's a Command. */
+    uint64_t        uValue;                                        /**< Integer value of the parse/evaluation phase. */
+    long double     dValue;                                        /**< Float value of the parse/evaluation phase. */
+    int             ErrorIndex;                                    /**< Index into the original expression if case of an error. */
 } EVALRESULT;
 /** Pointer to an evaluation result. */
 typedef EVALRESULT *PEVALRESULT;

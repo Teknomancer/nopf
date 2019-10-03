@@ -29,13 +29,13 @@
 #include <math.h>
 #include <stdint.h>
 
-typedef struct UINTEGER64
+typedef struct uint64_t64
 {
     uint32_t    u32Hi;
     uint32_t    u32Lo;
-} UINTEGER64;
-typedef UINTEGER64 *PUINTEGER64;
-typedef const UINTEGER64 *PCUINTEGER64;
+} uint64_t64;
+typedef uint64_t64 *Puint64_t64;
+typedef const uint64_t64 *PCuint64_t64;
 
 
 /**
@@ -90,7 +90,7 @@ int StrCopy(char *pszDst, uint32_t cbDst, const char *pszSrc)
  * @param   pcDigits        Where to store the number of binary digits (including
  *                          padding if specified in @a fFullLength).
  */
-char *StrValue32AsBinary(U64INTEGER uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits)
+char *StrValue32AsBinary(uint64_t uValue, bool fNegative, bool fDoubleSpace, bool fFullLength, uint32_t *pcDigits)
 {
     char *pszBuf = StrAlloc(65 + 20);    /* UINT64_MAX = 64 chars */
     if (!pszBuf)
@@ -208,7 +208,7 @@ char *StrStripLF(char *pszBuf, bool *pfStripped)
 
 
 /**
- * Convert a FLOAT into string equivalent in the specified radix.
+ * Convert a long double into string equivalent in the specified radix.
  *
  * @return  Appropriate status code, RERR_NOT_SUPPORTED for unsupported radices.
  * @param   pszDst      Pointer to the destination string.
@@ -218,7 +218,7 @@ char *StrStripLF(char *pszBuf, bool *pfStripped)
  * @param   iWidth      What width to format to.
  * @param   fFlags      Formatting flags (see header).
  */
-int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags)
+int StrFormat(char *pszDst, size_t cbDst, long double dValue, unsigned int uiRadix, unsigned int iWidth, unsigned int fFlags)
 {
     AssertReturn(pszDst, RERR_INVALID_PARAMETER);
     AssertReturn(cbDst, RERR_INVALID_PARAMETER);
@@ -247,11 +247,11 @@ int StrFormat(char *pszDst, size_t cbDst, FLOAT dValue, unsigned int uiRadix, un
     if (cbMinWidth > cbDst)
         return RERR_BUFFER_OVERFLOW;
 
-    FLOAT dAbsValue = FABSFLOAT(dValue);
-    bool fNegative = DefinitelyLessThan(dValue, (FLOAT)0);
-    bool fOverflow = DefinitelyGreaterThan(dAbsValue, (FLOAT)UINT64_MAX);
+    long double dAbsValue = fabsl(dValue);
+    bool fNegative = DefinitelyLessThan(dValue, (long double)0);
+    bool fOverflow = DefinitelyGreaterThan(dAbsValue, (long double)UINT64_MAX);
     if (fFlags & FSTR_VALUE_32_BIT)
-        fOverflow = DefinitelyGreaterThan(dAbsValue, (FLOAT)UINT32_MAX);
+        fOverflow = DefinitelyGreaterThan(dAbsValue, (long double)UINT32_MAX);
 
     /*
      * Negative number.
