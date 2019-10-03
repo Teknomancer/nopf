@@ -290,7 +290,7 @@ static const char *StrFormatRegDesc32(PCREGDESC32 pReg)
 }
 
 
-static int FnCr0(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
+static int FnCr0(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -338,9 +338,9 @@ static int FnCr0(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
     StrCopy(Cr0Desc.szDesc, sizeof(Cr0Desc.szDesc), "Control Register 0 (Intel x86)");
     Cr0Desc.paRegBitDesc = aBitDesc;
 
-    if (pAtom)
+    if (pToken)
     {
-        uint64_t const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pToken->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr0Desc);
     }
     else
@@ -349,7 +349,7 @@ static int FnCr0(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 }
 
 
-static int FnCr4(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
+static int FnCr4(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -397,9 +397,9 @@ static int FnCr4(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
     StrCopy(Cr4Desc.szDesc, sizeof(Cr4Desc.szDesc), "Control Register 4 (Intel x86)");
     Cr4Desc.paRegBitDesc = aBitDesc;
 
-    if (pAtom)
+    if (pToken)
     {
-        uint64_t const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pToken->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &Cr4Desc);
     }
     else
@@ -408,7 +408,7 @@ static int FnCr4(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 }
 
 
-static int FnEflags(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
+static int FnEflags(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -456,9 +456,9 @@ static int FnEflags(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
     StrCopy(EflagsDesc.szDesc, sizeof(EflagsDesc.szDesc), "EFLAGS register (Intel x86)");
     EflagsDesc.paRegBitDesc = aBitDesc;
 
-    if (pAtom)
+    if (pToken)
     {
-        uint64_t const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pToken->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EflagsDesc);
     }
     else
@@ -467,7 +467,7 @@ static int FnEflags(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 }
 
 
-static int FnEfer(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
+static int FnEfer(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -515,9 +515,9 @@ static int FnEfer(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
     StrCopy(EferDesc.szDesc, sizeof(EferDesc.szDesc), "Extended Feature Enable register (Intel x86)");
     EferDesc.paRegBitDesc = aBitDesc;
 
-    if (pAtom)
+    if (pToken)
     {
-        uint64_t const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pToken->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &EferDesc);
     }
     else
@@ -526,7 +526,7 @@ static int FnEfer(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
 }
 
 
-static int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
+static int FnCSAttr(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult)
 {
     AssertReturn(ppszResult, RERR_INVALID_PARAMETER);
     *ppszResult = NULL;
@@ -595,9 +595,9 @@ static int FnCSAttr(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult)
             "15       1 1 1 1  Code    Execute/Read, conforming, accessed\n");
     CSAttrDesc.paRegBitDesc = aBitDesc;
 
-    if (pAtom)
+    if (pToken)
     {
-        uint64_t const uValue = pAtom->u.Number.uValue;
+        uint64_t const uValue = pToken->u.Number.uValue;
         *ppszResult = StrFormatReg32(uValue, &CSAttrDesc);
     }
     else

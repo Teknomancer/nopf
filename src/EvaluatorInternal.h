@@ -88,48 +88,48 @@ typedef const NUMBER *PCNUMBER;
 
 
 /**
- * ATOMTYPE: The type of Atom.
+ * TOKENTYPE: The type of Token.
  */
-typedef enum ATOMTYPE
+typedef enum TOKENTYPE
 {
-    enmAtomEmpty = 1,  /**< Empty/invalid. */
-    enmAtomNumber,     /**< Number Atom. */
-    enmAtomOperator,   /**< Operator Atom. */
-    enmAtomFunction,   /**< Function Atom. */
-    enmAtomVariable,   /**< Variable Atom. */
-    enmAtomCommand     /**< Command Atom. */
-} ATOMTYPE;
+    enmTokenEmpty = 1,  /**< Empty/invalid. */
+    enmTokenNumber,     /**< Number Token. */
+    enmTokenOperator,   /**< Operator Token. */
+    enmTokenFunction,   /**< Function Token. */
+    enmTokenVariable,   /**< Variable Token. */
+    enmTokenCommand     /**< Command Token. */
+} TOKENTYPE;
 
 /**
- * ATOM: An Atom.
- * An Atom represents the smallest unit of parsing.
+ * TOKEN: A Token.
+ * A Token represents the smallest unit of parsing.
  */
-typedef struct ATOM
+typedef struct TOKEN
 {
-    ATOMTYPE     Type;                                  /**< The type. */
-    uint32_t     Position;                              /**< Cursor position, an Index used to flag errors. */
-    uint32_t     cFunctionParams;                       /**< Number of parameters to pass to the Function atom. */
-    char         szVariable[MAX_VARIABLE_NAME_LENGTH];  /**< Variable Name if this is a Variable atom. */
-    const char  *pszCommandExpr;                        /**< The expression of a command if this is a command. */
-    void        *pvCommandParamAtom;                    /**< The Number Atom argument for a Command Atom. */
+    TOKENTYPE    Type;                                  /**< The type. */
+    uint32_t     Position;                              /**< Cursor position, an index used to flag errors. */
+    uint32_t     cFunctionParams;                       /**< Number of parameters to pass to the Function Token. */
+    char         szVariable[MAX_VARIABLE_NAME_LENGTH];  /**< Variable Name if this is a Variable Token. */
+    const char  *pszCommandExpr;                        /**< The expression of a command if this is a Command token. */
+    void        *pvCommandParamToken;                   /**< The Number Token parameter for a Command Token. */
 
     /** The data union. */
     union
     {
-        struct NUMBER            Number;        /**< The NUMBER for a Number Atom. */
-        struct OPERATOR const   *pOperator;     /**< Pointer to the OPERATOR for an Operator Atom. */
-        struct FUNCTION const   *pFunction;     /**< Pointer to the FUNCTION for a Function Atom. */
-        struct VARIABLE         *pVariable;     /**< Pointer to the VARIABLE entry for a Variable Atom. */
-        struct COMMAND          *pCommand;      /**< Pointer to the COMMAND entry for the Command Atom. */
+        struct NUMBER            Number;        /**< The NUMBER for a Number Token. */
+        struct OPERATOR const   *pOperator;     /**< Pointer to the OPERATOR for an Operator Token. */
+        struct FUNCTION const   *pFunction;     /**< Pointer to the FUNCTION for a Function Token. */
+        struct VARIABLE         *pVariable;     /**< Pointer to the VARIABLE entry for a Variable Token. */
+        struct COMMAND          *pCommand;      /**< Pointer to the COMMAND entry for the Command Token. */
     } u;
-} ATOM;
-/** Pointer to an Atom object. */
-typedef ATOM *PATOM;
-/** Pointer to a const Atom object. */
-typedef const ATOM *PCATOM;
+} TOKEN;
+/** Pointer to an Token object. */
+typedef TOKEN *PTOKEN;
+/** Pointer to a const Token object. */
+typedef const TOKEN *PCTOKEN;
 
 /** An Operator function. */
-typedef int FNOPERATOR(PEVALUATOR pEval, PATOM apAtoms[]);
+typedef int FNOPERATOR(PEVALUATOR pEval, PTOKEN apTokens[]);
 /** Pointer to an Operator function. */
 typedef FNOPERATOR *PFNOPERATOR;
 
@@ -168,7 +168,7 @@ typedef const OPERATOR *PCOPERATOR;
 
 
 /** A function. */
-typedef int FNFUNCTION(PEVALUATOR pEval, PATOM apAtoms[], uint32_t cAtoms);
+typedef int FNFUNCTION(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens);
 /** Pointer to a Function function. */
 typedef FNFUNCTION *PFNFUNCTION;
 
@@ -209,7 +209,7 @@ typedef const VARIABLE *PCVARIABLE;
 
 
 /** A Command function. */
-typedef int FNCOMMAND(PEVALUATOR pEval, PATOM pAtom, const char **ppszResult);
+typedef int FNCOMMAND(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult);
 /** Pointer to a Command function. */
 typedef FNCOMMAND *PFNCOMMAND;
 
@@ -232,9 +232,9 @@ typedef COMMAND *PCOMMAND;
 typedef const COMMAND *PCCOMMAND;
 
 
-static inline bool AtomIsNumber(PCATOM pAtom)
+static inline bool TokenIsNumber(PCTOKEN pToken)
 {
-    return (pAtom && pAtom->Type == enmAtomNumber);
+    return (pToken && pToken->Type == enmTokenNumber);
 }
 
 #endif /* EVALUATOR_INTERNAL_H___ */

@@ -26,6 +26,8 @@
 #ifndef _WIN32
 # include <readline/readline.h>
 # include <readline/history.h>
+#else
+# include <Windows.h>
 #endif
 
 #include "InputOutput.h"
@@ -84,8 +86,16 @@ void ColorPrintf(char *pszColorCode, char *pszMsg, ...)
             TCOLOR_RESET,
             fNewLine ? "\n" : "");
 #else
-    fprintf(stdout, "%s%s",
-        pszBuf, fNewLine ? "\n" : "");
+    CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);       /* Get the console handle. */
+    GetConsoleScreenBufferInfo(hConsole, &ConsoleInfo);      /* Get the screen buffer info. */
+    WORD wConsoleAttrs = ConsoleInfo.wAttributes;            /* Save the current console attributes. */
+
+    //SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
+
+    fprintf(stdout, "%s%s", pszBuf, fNewLine ? "\n" : "");
+
+    SetConsoleTextAttribute(hConsole, wConsoleAttrs);       /* Restore the console attributes. */
 #endif
 }
 
@@ -254,14 +264,6 @@ void TextLineInit(PTEXTLINE pLine)
     pLine->u32Magic = RMAG_TEXTLINE;
     pLine->pszRaw = NULL;
     pLine->pszData = NULL;
-
-//    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-//    CONSOLE_SCREEN_BUFFER_INFO consoleInfo;
-//    WORD saved_attributes;
-//
-//    /* Save current attributes */
-//    GetConsoleScreenBufferInfo(hConsole, &consoleInfo);
-//    saved_attributes = consoleInfo.wAttributes;
 }
 
 

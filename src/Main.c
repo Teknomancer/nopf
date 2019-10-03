@@ -22,14 +22,14 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include "Evaluator.h"
 #include "StringOps.h"
 #include "Errors.h"
 #include "Colors.h"
 #include "Assert.h"
 #include "Settings.h"
-#include "InputOutput.h"
-#include "Evaluator.h"
 #include "GenericDefs.h"
+#include "InputOutput.h"
 
 #include <math.h>
 
