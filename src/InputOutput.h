@@ -24,9 +24,21 @@
 
 #include <stdint.h>
 
+typedef enum TEXTCOLOR
+{
+    enmTextColorNone = 0,
+    enmTextColorRed,
+    enmTextColorGreen,
+    enmTextColorBlue,
+    enmTextColorWhite,
+    enmTextColorCyan,
+    enmTextColorYellow,
+    enmTextColorBold,
+} TEXTCOLOR;
+
 #define Printf      printf
 void    ErrorPrintf(int rc, char *pszError, ...);
-void    ColorPrintf(char *pszColorCode, char *pszMsg, ...);
+void    ColorPrintf(TEXTCOLOR enmTextColor, char *pszMsg, ...);
 void    DebugPrintf(char *pszMsg, ...);
 
 #ifdef _DEBUG

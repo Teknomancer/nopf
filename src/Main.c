@@ -39,9 +39,11 @@
 #define APP_EXECNAME                "nopf"
 #define STR_OVERFLOW                "overflow"  /* must be 8 */
 
-#define PREFIX_COLOR                TCOLOR_CYAN
-#define PARAM_COLOR                 TCOLOR_YELLOW
-#define FUNC_COLOR                  TCOLOR_BLUE
+#define PREFIX_COLOR                enmTextColorCyan
+#define OUTPUT_COLOR                enmTextColorNone
+#define PARAM_COLOR                 enmTextColorNone
+#define VARS_COLOR                  enmTextColorYellow
+#define APP_COPYRIGHT_COLOR         enmTextColorWhite
 
 #define CMD_HELP                    "help"
 #define CMD_QUIT                    "quit"
@@ -124,7 +126,7 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
         StrNPrintf(szDstBool, sizeof(szDstBool), "%s", fResult ? "true" : "false");
 
         ColorPrintf(PREFIX_COLOR, "Bool:");
-        ColorPrintf(PARAM_COLOR,  "%*s%12s (N)\n", cIndent0, "", szDstBool);
+        ColorPrintf(OUTPUT_COLOR, "%*s%12s (N)\n", cIndent0, "", szDstBool);
     }
 
     if (pSettings->fOutputBaseDec)
@@ -139,7 +141,7 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
         StrNPrintf(szDstFloat, sizeof(szDstFloat), "%" FMT_FLT_NAT, dResult);
 
         ColorPrintf(PREFIX_COLOR, "Dec :");
-        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+        ColorPrintf(OUTPUT_COLOR, "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
                     cIndent0, "", szDst32,
                     cIndent1, "", szDst64,
                     cIndent2, "", szDstFloat);
@@ -157,7 +159,7 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
         StrNPrintf(szDstNat, sizeof(szDstNat), "0x%" FMT_U64_HEX, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Hex :");
-        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+        ColorPrintf(OUTPUT_COLOR, "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
                     cIndent0, "", szDst32,
                     cIndent1, "", szDst64,
                     cIndent2, "", szDstNat);
@@ -175,7 +177,7 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
         StrNPrintf(szDstNat, sizeof(szDstNat), "0%" FMT_U64_OCT, uResult);
 
         ColorPrintf(PREFIX_COLOR, "Oct :");
-        ColorPrintf(PARAM_COLOR,  "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
+        ColorPrintf(OUTPUT_COLOR, "%*s%12s (U32)%*s%23s (U64)%*s%s (N)\n",
                     cIndent0, "", szDst32,
                     cIndent1, "", szDst64,
                     cIndent2, "", szDstNat);
@@ -186,7 +188,7 @@ static void PrintResult(PCSETTINGS pSettings, PCEVALUATOR pEval)
         size_t cDigits = 1;
         char *pszBin = GetValueAsBinaryString(uResult, &cDigits);
         ColorPrintf(PREFIX_COLOR, "Bin :");
-        ColorPrintf(PARAM_COLOR, "%*s%s (%u)\n", cIndent0, "", pszBin ? pszBin : " N/A", (unsigned)cDigits);
+        ColorPrintf(OUTPUT_COLOR, "%*s%s (%u)\n", cIndent0, "", pszBin ? pszBin : " N/A", (unsigned)cDigits);
         if (pszBin)
             StrFree(pszBin);
     }
@@ -201,7 +203,7 @@ static void PrintHelp(PSETTINGS pSettings)
 
 #define INDENT_SPACES   ""
 
-    ColorPrintf(TCOLOR_BOLD_GREEN, "%s (c) 2012 Ramshankar (aka Teknomancer)\n", APP_EXECNAME);
+    ColorPrintf(APP_COPYRIGHT_COLOR, "%s (c) 2012 Ramshankar (aka Teknomancer)\n", APP_EXECNAME);
     Printf("Compiled: %s\n", __TIMESTAMP__);
     Printf("  %s is a command-line expression evaluator that started as sunny day project.\n", APP_EXECNAME);
     Printf("  %s is free software, published under the GNU Public License (GPLv3).\n", APP_EXECNAME);
@@ -325,9 +327,9 @@ static void PrintVars(PSETTINGS pSettings)
         {
             char *pszExprTrimmed = StrStrip(pszExpr);
 
-            ColorPrintf(PREFIX_COLOR, "%24s", pszVar);
+            ColorPrintf(VARS_COLOR, "%24s", pszVar);
             Printf(" = ");
-            ColorPrintf(PARAM_COLOR, "%s\n", pszExprTrimmed);
+            ColorPrintf(OUTPUT_COLOR, "%s\n", pszExprTrimmed);
 
             StrFree(pszVar);
             StrFree(pszExpr);
@@ -346,13 +348,15 @@ static void PrintVars(PSETTINGS pSettings)
 
 static void PrintVarAssigned(PSETTINGS pSettings, PCEVALUATOR pEval)
 {
-    ColorPrintf(PARAM_COLOR, "  Stored variable '%s'\n", pEval->Result.szVariable);
+    ColorPrintf(PREFIX_COLOR, "Stored variable:");
+    ColorPrintf(OUTPUT_COLOR, " '%s'\n", pEval->Result.szVariable);
+    Printf("\n");
 }
 
 static void PrintCommandEvaluated(PSETTINGS pSettings, PCEVALUATOR pEval)
 {
     ColorPrintf(PREFIX_COLOR, "%s:\n", pEval->Result.szCommand);
-    ColorPrintf(PARAM_COLOR, "%s\n",   pEval->Result.szCommandResult);
+    ColorPrintf(OUTPUT_COLOR, "%s\n",  pEval->Result.szCommandResult);
 }
 
 
