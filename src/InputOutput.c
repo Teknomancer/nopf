@@ -37,8 +37,41 @@
 #include "Magics.h"
 #include "Assert.h"
 #include "Evaluator.h"
+#include "GenericDefs.h"
 
+#ifdef _WIN32
+static bool g_fxTermColors = true;
+#else
 static bool g_fxTermColors = false;
+#endif
+
+#ifdef _WIN32
+static inline WORD GetOutConsoleAttrs(HANDLE *phConsole)
+{
+    Assert(phConsole);
+    CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
+
+    *phConsole = GetStdHandle(STD_OUTPUT_HANDLE);           /* Get and copy console output handle to caller. */
+    GetConsoleScreenBufferInfo(*phConsole, &ConsoleInfo);   /* Get the screen buffer info. */
+    return ConsoleInfo.wAttributes;                         /* Return attributes to caller. */
+}
+
+static inline WORD GetErrConsoleAttrs(HANDLE *phConsole)
+{
+    Assert(phConsole);
+    CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
+
+    *phConsole = GetStdHandle(STD_ERROR_HANDLE);            /* Get and copy console error handle to caller. */
+    GetConsoleScreenBufferInfo(*phConsole, &ConsoleInfo);   /* Get the screen buffer info. */
+    return ConsoleInfo.wAttributes;                         /* Return attributes to caller. */
+}
+
+
+static inline void SetConsoleAttrs(HANDLE hConsole, WORD wAttrs)
+{
+    SetConsoleTextAttribute(hConsole, wAttrs);              /* Restore the console attributes. */
+}
+#endif
 
 void ErrorPrintf(int rc, char *pszError, ...)
 {
@@ -54,20 +87,28 @@ void ErrorPrintf(int rc, char *pszError, ...)
     PCRCSTATUSMSG pStatusMsg = StatusMsgForRC(rc);
     if (pStatusMsg)
     {
-#ifndef _WIN32
-        fprintf(stderr, "%sError!%s %s rc=%s%s%s (%d)\n\n", TCOLOR_BOLD_RED, TCOLOR_RESET, pszBuf,
-                    TCOLOR_RED, pStatusMsg->pszName, TCOLOR_RESET, rc);
+        if (g_fxTermColors)
+        {
+#ifdef _WIN32
+            HANDLE     hStdError;
+            WORD const wStdErrAttrs = GetErrConsoleAttrs(&hStdError);
+            SetConsoleTextAttribute(hStdError, FOREGROUND_RED | FOREGROUND_INTENSITY);
+            fprintf(stderr, "Error! %s rc=%s (%d)\n\n", pszBuf, pStatusMsg->pszName, rc);
+            SetConsoleAttrs(hStdError,  wStdErrAttrs);
 #else
-
-        fprintf(stderr, "Error! %s rc=%s (%d)\n\n", pszBuf, pStatusMsg->pszName, rc);
+            fprintf(stderr, "%sError!%s %s rc=%s%s%s (%d)\n\n", TCOLOR_BOLD_RED, TCOLOR_RESET, pszBuf,
+                        TCOLOR_RED, pStatusMsg->pszName, TCOLOR_RESET, rc);
 #endif
+        }
+        else
+            fprintf(stderr, "Error! %s rc=%s (%d)\n\n", pszBuf, pStatusMsg->pszName, rc);
     }
     else
         fprintf(stderr, "Extreme error! Missing pStatusMsg!\n");
 }
 
 
-void ColorPrintf(char *pszColorCode, char *pszMsg, ...)
+void ColorPrintf(TEXTCOLOR enmTextColor, char *pszMsg, ...)
 {
     va_list FmtArgs;
     char szBuf[2048];
@@ -79,24 +120,48 @@ void ColorPrintf(char *pszColorCode, char *pszMsg, ...)
     bool fNewLine;
     char *pszBuf = StrStripLF(szBuf, &fNewLine);
 
-#ifndef _WIN32
-    fprintf(stdout, "%s%s%s%s",
-            g_fxTermColors ? pszColorCode : "",
-            pszBuf,
-            TCOLOR_RESET,
-            fNewLine ? "\n" : "");
+    if (g_fxTermColors)
+    {
+#ifdef _WIN32
+        static WORD s_wColorCodes[] = { 0,                                                                           /* None */
+                                        FOREGROUND_RED                                       | FOREGROUND_INTENSITY, /* Red */
+                                        FOREGROUND_GREEN                                     | FOREGROUND_INTENSITY, /* Green */
+                                        FOREGROUND_BLUE                                      | FOREGROUND_INTENSITY, /* Blue */
+                                        FOREGROUND_RED  | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY, /* White */
+                                        FOREGROUND_BLUE | FOREGROUND_GREEN                   | FOREGROUND_INTENSITY, /* Cyan */
+                                        FOREGROUND_RED  | FOREGROUND_GREEN                   | FOREGROUND_INTENSITY  /* Yellow */
+                                        };
+        AssertReturnVoid(enmTextColor < R_ARRAY_ELEMENTS(s_wColorCodes));
+        DWORD const wColorCode = s_wColorCodes[enmTextColor];
+
+        HANDLE     hStdError;
+        WORD const wStdErrAttrs = GetErrConsoleAttrs(&hStdError);
+        if (enmTextColor != enmTextColorNone)
+            SetConsoleTextAttribute(hStdError, wColorCode);
+        fprintf(stdout, "%s%s", pszBuf, fNewLine ? "\n" : "");
+        if (enmTextColor != enmTextColorNone)
+            SetConsoleAttrs(hStdError,  wStdErrAttrs);
 #else
-    CONSOLE_SCREEN_BUFFER_INFO ConsoleInfo;
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);       /* Get the console handle. */
-    GetConsoleScreenBufferInfo(hConsole, &ConsoleInfo);      /* Get the screen buffer info. */
-    WORD wConsoleAttrs = ConsoleInfo.wAttributes;            /* Save the current console attributes. */
+        static const char char * const s_apszColorCodes[] = { TCOLOR_RESET,
+                                                              TCOLOR_RED,
+                                                              TCOLOR_GREEN,
+                                                              TCOLOR_BLUE,
+                                                              TCOLOR_WHITE,
+                                                              TCOLOR_CYAN,
+                                                              TCOLOR_YELLOW
+                                                              };
+        AssertReturn(enmTextColor < R_ARRAY_ELEMENTS(s_apszColorCodes));
+        const char *pszColorCode = s_apszColorCodes[enmTextColor];
 
-    //SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY);
-
-    fprintf(stdout, "%s%s", pszBuf, fNewLine ? "\n" : "");
-
-    SetConsoleTextAttribute(hConsole, wConsoleAttrs);       /* Restore the console attributes. */
+        fprintf(stdout, "%s%s%s%s",
+                g_fxTermColors ? pszColorCode : "",
+                pszBuf,
+                TCOLOR_RESET,
+                fNewLine ? "\n" : "");
 #endif
+    }
+    else
+        fprintf(stdout, "%s%s", pszBuf, fNewLine ? "\n" : "");
 }
 
 

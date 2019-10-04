@@ -269,17 +269,13 @@ static const char *StrFormatRegDesc32(PCREGDESC32 pReg)
             }
         }
 
-
         /*
          * Add the extra description if any.
          */
         int cAddDesc = StrLen(pReg->szAddDesc) + 2;
         if (   cAddDesc > 0
             && cWritten + cAddDesc < cbBuf)
-        {
-            StrCat(pszBuf, "\n" /* 2 */);
             StrNCat(pszBuf, pReg->szAddDesc, sizeof(pReg->szAddDesc));
-        }
         else
             DEBUGPRINTF(("Insufficient space for formatting register. szName=%s\n", pReg->szName));
     }
