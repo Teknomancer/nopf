@@ -30,10 +30,17 @@
 #include "StringOps.h"
 #include "InputOutput.h"
 
-#define R_VERTCHAR      '|'
-#define R_HORZCHAR      '-'
-#define R_BENDCHAR      '+'
-#define R_SPACECHAR     ' '
+#ifdef _WIN32
+# define R_VERTCHAR      0xb3
+# define R_HORZCHAR      0xc4
+# define R_BENDCHAR      0xc0
+# define R_SPACECHAR     ' '
+#else
+# define R_VERTCHAR      '|'
+# define R_HORZCHAR      '-'
+# define R_BENDCHAR      '+'
+# define R_SPACECHAR     ' '
+#endif
 
 /** Minimum width of 'long name' field while formatting registers. */
 #define R_LONG_NAME_FIELD_MIN       23UL
