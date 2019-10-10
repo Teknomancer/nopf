@@ -286,7 +286,7 @@ static void PrintHelp(PSETTINGS pSettings)
         Printf("%s%*sAny Function/Operator taking <intX> will compute integer and cast to float.\n", pszIndent, cIndent, "");
 
         ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<cond>");
-        Printf("A condition or truth value.\n", pszIndent, cIndent, "");
+        Printf("A condition or truth value.\n");
         Printf("%s%*sA logical condition, with \"true\" being 0 and \"false\" being non-zero.\n", pszIndent, cIndent, "");
 
         ColorPrintf(PREFIX_COLOR, "%s%*s", pszIndent, cIndent, "<expr>");

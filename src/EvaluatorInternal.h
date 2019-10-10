@@ -209,7 +209,7 @@ typedef const VARIABLE *PCVARIABLE;
 
 
 /** A Command function. */
-typedef int FNCOMMAND(PEVALUATOR pEval, PTOKEN pToken, const char **ppszResult);
+typedef int FNCOMMAND(PEVALUATOR pEval, PTOKEN pToken, char **ppszResult);
 /** Pointer to a Command function. */
 typedef FNCOMMAND *PFNCOMMAND;
 
