@@ -5,9 +5,10 @@ nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line
 ## Features:
 * Performs separate integer and floating-point math for every operation.
 * Interactive mode with colored output.
+* Auto-completion on \*nix platforms that support `libreadline` in interactive mode.
 * Support for user-defined constants.
 * Support for input and output in hex, oct, decimal and binary.
-* Bit shifts, alignment and other bit operations.
+* Bit shifts, alignment and other bitwise operations.
 * Pretty printing of some x86/amd64 registers with description of bits.
 * Unit of measure conversions for common units like pages to bytes, gigabits to bits etc.
 * Basic statistics like sum, avg, lcd, gcd.
