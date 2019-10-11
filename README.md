@@ -2,7 +2,47 @@
 
 nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line expression evaluator/calculator.
 
-It has some handy x86/amd64 register dumping, bit-shifting, page-to-byte conversions and other programmer centric features.
+## Features:
+* Interactive mode with colored output.
+* Support for user-defined constants.
+* Support for input and output in hex, oct, decimal and binary.
+* Floating-point support.
+* Bit shifts, alignment and other bit operations.
+* Pretty printing of some x86/amd64 registers with description of bits.
+* Unit of measure conversions for common units like pages to bytes, gigabits to bits etc.
+* Basic statistics like sum, avg, lcd, gcd.
+
+## Examples:
+```
+> efer 0xd01
+efer:
+  0000 0000 0000 0000 0000 1101 0000 0001
+                       │││ ││ │         │
+                       │││ ││ │         └─── SCE ( 0) *
+                       │││ ││ └───────────── LME ( 8) *
+                       │││ │└─────────────── LMA (10) *
+                       │││ └──────────────── NXE (11) *
+                       ││└────────────────── SVME (12)
+                       │└─────────────────── LMSLE (13)
+                       └──────────────────── FFXSR (14)
+
+> avg(10, 12, 14, 0x18 + 0x120)
+Bool:         true (N)
+Dec :           87 (U32)                       87 (U64)  87 (N)
+Hex :   0x00000057 (U32)       0x0000000000000057 (U64)  0x57 (N)
+Oct :    000000127 (U32)        00000000000000127 (U64)  0127 (N)
+Bin : 101 0111 (7)
+
+> myvar = 32
+Stored variable: 'myvar'
+
+> min2sec(myvar)
+Bool:         true (N)
+Dec :         1920 (U32)                     1920 (U64)  1920 (N)
+Hex :   0x00000780 (U32)       0x0000000000000780 (U64)  0x780 (N)
+Oct :    000003600 (U32)        00000000000003600 (U64)  03600 (N)
+Bin : 111 1000 0000 (11)
+```
 
 ## Compiling on GNU/Linux, Solaris, MacOS
 Execute `make` on the directory with Makefile.
