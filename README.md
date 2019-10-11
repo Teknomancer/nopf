@@ -43,6 +43,10 @@ Hex :   0x00000e10 (U32)       0x0000000000000e10 (U64)  0xe10 (N)
 Oct :    000007020 (U32)        00000000000007020 (U64)  07020 (N)
 Bin : 1110 0001 0000 (12)
 ```
+## Downloads
+Download the Windows binary from [here](https://sites.google.com/site/appnopf/downloads).
+
+For all other platforms, you will need to compile the sources.
 
 ## Compiling on GNU/Linux, Solaris, MacOS
 Execute `make` on the directory with Makefile.
@@ -68,9 +72,6 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 
 #### Build configurations
 * Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line.
-
-## Binaries
-Download Windows binary [here](https://sites.google.com/site/appnopf/downloads).
 
 ## More information
 Visit the nopf homepage at https://sites.google.com/site/appnopf/
