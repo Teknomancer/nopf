@@ -3,10 +3,10 @@
 nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line expression evaluator/calculator.
 
 ## Features:
+* Performs separate integer and floating-point math for every operation.
 * Interactive mode with colored output.
 * Support for user-defined constants.
 * Support for input and output in hex, oct, decimal and binary.
-* Floating-point support.
 * Bit shifts, alignment and other bit operations.
 * Pretty printing of some x86/amd64 registers with description of bits.
 * Unit of measure conversions for common units like pages to bytes, gigabits to bits etc.
