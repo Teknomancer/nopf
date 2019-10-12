@@ -15,6 +15,13 @@ nopf (**N**umbers, **Op**erators, **F**unctions) is an interactive, command-line
 
 ## Examples:
 ```
+> 1 + 2 * (10 - 4)
+Bool:         true (N)
+Dec :           13 (U32)                       13 (U64)  13 (N)
+Hex :   0x0000000d (U32)       0x000000000000000d (U64)  0xd (N)
+Oct :    000000015 (U32)        00000000000000015 (U64)  015 (N)
+Bin : 1101 (4)
+
 > efer 0xd01
 efer:
   0000 0000 0000 0000 0000 1101 0000 0001
