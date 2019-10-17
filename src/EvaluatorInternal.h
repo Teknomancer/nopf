@@ -159,7 +159,6 @@ typedef struct OPERATOR
     PFNOPERATOR     pfnOperator;    /**< Pointer to the Operator evaluator function. */
     const char     *pszSyntax;      /**< Short description of the Operator, NULL if already described. */
     const char     *pszDesc;        /**< Long description of the Operator, NULL if already described. */
-
 } OPERATOR;
 /** Pointer to an Operator object. */
 typedef OPERATOR *POPERATOR;
