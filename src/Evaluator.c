@@ -552,6 +552,12 @@ static PTOKEN EvaluatorParseNumber(const char *pszExpr, const char **ppszEnd)
             return NULL;
         }
     }
+    else if (szNum[iNum - 1] == '.')
+    {
+        /* A decimal number ending with a '.' is invalid (e.g.: "5."). */
+        pszExpr = pszStart;
+        return NULL;
+    }
 
     /*
      * Handle suffixes, order of array is important (longest to shortest).
