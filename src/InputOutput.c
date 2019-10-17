@@ -142,15 +142,15 @@ void ColorPrintf(TEXTCOLOR enmTextColor, char *pszMsg, ...)
         if (enmTextColor != enmTextColorNone)
             SetConsoleAttrs(hStdError,  wStdErrAttrs);
 #else
-        static const char char * const s_apszColorCodes[] = { TCOLOR_RESET,
-                                                              TCOLOR_RED,
-                                                              TCOLOR_GREEN,
-                                                              TCOLOR_BLUE,
-                                                              TCOLOR_WHITE,
-                                                              TCOLOR_CYAN,
-                                                              TCOLOR_YELLOW
-                                                              };
-        AssertReturn(enmTextColor < R_ARRAY_ELEMENTS(s_apszColorCodes));
+        static const char * const s_apszColorCodes[] = { TCOLOR_RESET,
+                                                         TCOLOR_RED,
+                                                         TCOLOR_GREEN,
+                                                         TCOLOR_BLUE,
+                                                         TCOLOR_WHITE,
+                                                         TCOLOR_CYAN,
+                                                         TCOLOR_YELLOW
+                                                         };
+        AssertReturnVoid(enmTextColor < R_ARRAY_ELEMENTS(s_apszColorCodes));
         const char *pszColorCode = s_apszColorCodes[enmTextColor];
 
         fprintf(stdout, "%s%s%s%s",
