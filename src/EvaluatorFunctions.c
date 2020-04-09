@@ -705,6 +705,42 @@ static int FnSetBit64(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens)
         return RERR_INVALID_COMMAND_PARAMETER;
 }
 
+static int FnSetBitRange32(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens)
+{
+    if (   apTokens[0]->u.Number.uValue > 31
+        || apTokens[1]->u.Number.uValue > 31)
+        return RERR_INVALID_COMMAND_PARAMETER;
+
+    uint8_t const uFirstBit = R_MIN(apTokens[0]->u.Number.uValue, apTokens[1]->u.Number.uValue);
+    uint8_t const uLastBit  = R_MAX(apTokens[0]->u.Number.uValue, apTokens[1]->u.Number.uValue);
+
+    uint32_t u32Val = 0;
+    for (unsigned i = uFirstBit; i <= uLastBit; i++)
+        u32Val |= ((uint64_t)1U << i);
+
+    apTokens[0]->u.Number.uValue = u32Val;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
+    return RINF_SUCCESS;
+}
+
+static int FnSetBitRange64(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens)
+{
+    if (   apTokens[0]->u.Number.uValue > 63
+        || apTokens[1]->u.Number.uValue > 63)
+        return RERR_INVALID_COMMAND_PARAMETER;
+
+    uint8_t const uFirstBit = R_MIN(apTokens[0]->u.Number.uValue, apTokens[1]->u.Number.uValue);
+    uint8_t const uLastBit  = R_MAX(apTokens[0]->u.Number.uValue, apTokens[1]->u.Number.uValue);
+
+    uint64_t u64Val = 0;
+    for (unsigned i = uFirstBit; i <= uLastBit; i++)
+        u64Val |= ((uint64_t)1U << i);
+
+    apTokens[0]->u.Number.uValue = u64Val;
+    apTokens[0]->u.Number.dValue = apTokens[0]->u.Number.uValue;
+    return RINF_SUCCESS;
+}
+
 static int FnMax(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens)
 {
     return RERR_NOT_IMPLEMENTED;
@@ -855,6 +891,9 @@ FUNCTION g_aFunctions[] =
     { "RT_BIT",         FnSetBit32,            true,     1,  1, "<bit>", "Sets the specified bit (0-31)." },
     { "RT_BIT_32",      FnSetBit32,            true,     1,  1, "<bit>", "Sets specified bit (0-31). Same as RT_BIT." },
     { "RT_BIT_64",      FnSetBit64,            true,     1,  1, "<bit>", "Sets specified bit (0-63)." },
+    { "RT_BITS",        FnSetBitRange32,       true,     1,  2, "<bit_f>,<bit_l>", "Sets the specified bits (0-31) from <bit_f> to <bit_l> both inclusive." },
+    { "RT_BITS_32",     FnSetBitRange32,       true,     1,  2, "<bit_f>,<bit_l>", "Sets the specified bits (0-31) from <bit_f> to <bit_l> both inclusive." },
+    { "RT_BITS_64",     FnSetBitRange64,       true,     1,  2, "<bit_f>,<bit_l>", "Sets the specified bits (0-63) from <bit_f> to <bit_l> both inclusive." },
     { "RT_ALIGN",       FnAlign32,             true,     2,  2, "<val>, <align>", "Aligns 32-bit <val> to <align>. <align> must be a power of 2." },
     { "RT_ALIGN_32",    FnAlign32,             true,     2,  2, "<val>, <align>", "Aligns 32-bit <val> to <align>. <align> must be a power of 2. Same as RT_ALIGN." },
     { "RT_ALIGN_64",    FnAlign64,             true,     2,  2, "<val>, <align>", "Aligns 64-bit <val> to <align>. <align> must be a power of 2." }
