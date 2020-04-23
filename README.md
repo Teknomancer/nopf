@@ -82,4 +82,4 @@ Note: The `all` switch in the above commands does a full-rebuild everytime (clea
 * Debug and release builds can be built by adding `BUILD_TYPE=debug` or `BUILD_TYPE=release` to `nmake.exe` on the command line.
 
 ## More information
-Visit the nopf homepage at https://sites.google.com/site/appnopf/
+Visit the nopf's official website at https://ramshankar.org/software/nopf/
