@@ -1677,6 +1677,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
             PTOKEN *papTokens = MemAlloc(cParams * sizeof(TOKEN));
             if (!papTokens)
             {
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_NO_MEMORY;
             }
@@ -1794,8 +1795,8 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                 {
                     StrCopy(pEval->Result.szVariable, sizeof(pEval->Result.szVariable), pToken->szVariable);
                     EvaluatorCleanVariables();
-                    EvaluatorCleanUp(pEval, &Stack);
                     MemFree(pToken);
+                    EvaluatorCleanUp(pEval, &Stack);
                     return RERR_VARIABLE_UNDEFINED;
                 }
 
@@ -1810,6 +1811,7 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                  * Delete them and bail.
                  */
                 EvaluatorCleanVariables();
+                MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
                 return RERR_EXPRESSION_INVALID;
             }
