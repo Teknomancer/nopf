@@ -97,6 +97,7 @@ static int FnGCD(PEVALUATOR pEval, PTOKEN apTokens[], uint32_t cTokens)
             {
                 apTokens[0]->u.Number.uValue = u;
                 apTokens[0]->u.Number.dValue = u;
+                fSet = true;
                 break;
             }
         }
