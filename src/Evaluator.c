@@ -1633,20 +1633,19 @@ int EvaluatorEvaluate(PEVALUATOR pEval)
                     pResultantToken = apTokens[0];
             }
 
-            if (RC_SUCCESS(rc))
+            if (   RC_SUCCESS(rc)
+                && pResultantToken)
             {
-                Assert(pResultantToken);
                 for (int i = 1; i < pOperator->cParams; i++)
                     MemFree(apTokens[i]);
                 StackPush(&Stack, pResultantToken);
             }
             else
             {
-                Assert(RC_FAILURE(rc));
                 DEBUGPRINTF(("Operator '%s' on given operands failed. rc=%d\n", pOperator->pszOperator, rc));
                 MemFree(pToken);
                 EvaluatorCleanUp(pEval, &Stack);
-                return rc;
+                return RERR_BASIC_OPERATOR_MISSING;
             }
         }
         else if (pToken->Type == enmTokenFunction)
