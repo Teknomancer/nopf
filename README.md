@@ -52,7 +52,7 @@ efer:
                        └──────────────────── FFXSR (14)
 ```
 ## Downloads
-Download the Windows binary from [here](https://sites.google.com/site/appnopf/downloads).
+Download the Windows binary from [here](https://ramshankar.org/software/nopf/downloads/).
 
 For all other platforms, you will need to compile the sources.
 
