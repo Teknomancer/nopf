@@ -203,9 +203,9 @@ static char *StrFormatReg32(uint32_t uReg, PCREGDESC32 pReg)
         if (fFoundBit)
         {
             char szBitDesc[sizeof("-- ")+ sizeof(pReg->paRegBitDesc->szName)+ sizeof(" (  )")+ sizeof(" *")+ 2];
-            StrNPrintf(szBitDesc, sizeof(szBitDesc), "%c%c %s (%2d) %c", R_HORZCHAR, R_HORZCHAR, pReg->paRegBitDesc[iFoundBit].szName,
-                iFoundBit, (uReg & R_BIT(iFoundBit)) ? '*' : ' ');
-            StrNCat(szLine, szBitDesc, StrLen(szBitDesc));
+            StrNPrintf(szBitDesc, sizeof(szBitDesc), "%c%c %s (%2d) %c", R_HORZCHAR, R_HORZCHAR,
+                       pReg->paRegBitDesc[iFoundBit].szName, iFoundBit, (uReg & R_BIT(iFoundBit)) ? '*' : ' ');
+            StrNCat(szLine, szBitDesc, sizeof(szLine) - 1);
         }
 
         /*
@@ -282,7 +282,7 @@ static char *StrFormatRegDesc32(PCREGDESC32 pReg)
         int cAddDesc = StrLen(pReg->szAddDesc) + 2;
         if (   cAddDesc > 0
             && cWritten + cAddDesc < cbBuf)
-            StrNCat(pszBuf, pReg->szAddDesc, sizeof(pReg->szAddDesc));
+            StrNCat(pszBuf, pReg->szAddDesc, cbBuf - 1);
         else
             DEBUGPRINTF(("Insufficient space for formatting register. szName=%s\n", pReg->szName));
     }
