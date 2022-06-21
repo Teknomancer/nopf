@@ -7,10 +7,10 @@ OUT_DIR_PREFIX=_
 OUT_DIR_SUFFIX=
 
 # Output folders
-OUT_DIR_DEPS_DEBUG=$(OUT_DIR_PREFIX)deps.debug$(OUT_DIR_SUFFIX)
-OUT_DIR_DEPS_RELEASE=$(OUT_DIR_PREFIX)deps.release$(OUT_DIR_SUFFIX)
-OUT_DIR_OBJS_DEBUG=$(OUT_DIR_PREFIX)objs.debug$(OUT_DIR_SUFFIX)
-OUT_DIR_OBJS_RELEASE=$(OUT_DIR_PREFIX)objs.release$(OUT_DIR_SUFFIX)
+OUT_DIR_DEP_DEBUG=$(OUT_DIR_PREFIX)dep.debug$(OUT_DIR_SUFFIX)
+OUT_DIR_DEP_RELEASE=$(OUT_DIR_PREFIX)dep.release$(OUT_DIR_SUFFIX)
+OUT_DIR_OBJ_DEBUG=$(OUT_DIR_PREFIX)obj.debug$(OUT_DIR_SUFFIX)
+OUT_DIR_OBJ_RELEASE=$(OUT_DIR_PREFIX)obj.release$(OUT_DIR_SUFFIX)
 OUT_DIR_BIN_DEBUG=$(OUT_DIR_PREFIX)bin.debug$(OUT_DIR_SUFFIX)
 OUT_DIR_BIN_RELEASE=$(OUT_DIR_PREFIX)bin.release$(OUT_DIR_SUFFIX)
 OUT_DIR_GEN_DEBUG=$(OUT_DIR_PREFIX)gen.debug$(OUT_DIR_SUFFIX)
@@ -22,13 +22,13 @@ BUILD_TYPE=release
 endif
 
 ifeq ($(BUILD_TYPE),debug)
-OUT_DIR_DEPS=$(OUT_DIR_DEPS_DEBUG)
-OUT_DIR_OBJS=$(OUT_DIR_OBJS_DEBUG)
+OUT_DIR_DEP=$(OUT_DIR_DEP_DEBUG)
+OUT_DIR_OBJ=$(OUT_DIR_OBJ_DEBUG)
 OUT_DIR_BIN=$(OUT_DIR_BIN_DEBUG)
 OUT_DIR_GEN=$(OUT_DIR_GEN_DEBUG)
 else
-OUT_DIR_DEPS=$(OUT_DIR_DEPS_RELEASE)
-OUT_DIR_OBJS=$(OUT_DIR_OBJS_RELEASE)
+OUT_DIR_DEP=$(OUT_DIR_DEP_RELEASE)
+OUT_DIR_OBJ=$(OUT_DIR_OBJ_RELEASE)
 OUT_DIR_BIN=$(OUT_DIR_BIN_RELEASE)
 OUT_DIR_GEN=$(OUT_DIR_GEN_RELEASE)
 endif
@@ -51,8 +51,8 @@ Group0_SRC = \
 
 # Build a Dependency list and an Object list, by replacing the .c
 # extension to .d for dependency files, and .o for object files.
-Group0_DEP = $(patsubst %.c, $(OUT_DIR_DEPS)/Group0_%.d, ${Group0_SRC})
-Group0_OBJ = $(patsubst %.c, $(OUT_DIR_OBJS)/Group0_%.o, ${Group0_SRC})
+Group0_DEP = $(patsubst %.c, $(OUT_DIR_DEP)/Group0_%.d, ${Group0_SRC})
+Group0_OBJ = $(patsubst %.c, $(OUT_DIR_OBJ)/Group0_%.o, ${Group0_SRC})
 
 
 # The final binary
@@ -107,21 +107,21 @@ $(OUT_DIR_BIN)/${TARGET}: ${Group0_OBJ} | begin
 	@mkdir -p $(dir $@)
 	$(CC) -g -o $@ $^ ${LD_FLAGS}
 
-$(OUT_DIR_OBJS)/Group0_%.o: %.c
+$(OUT_DIR_OBJ)/Group0_%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) -c $(C_FLAGS) -o $@ $<
 
-$(OUT_DIR_DEPS)/Group0_%.d: %.c
+$(OUT_DIR_DEP)/Group0_%.d: %.c
 	@mkdir -p $(dir $@)
 	@echo Generating $(BUILD_TYPE) dependencies for $<
 	@set -e ; $(CCDEP) -MM -MP $(INC_FLAGS) $< > $@.$$$$; \
-	sed 's,\($*\)\.o[ :]*,$(OUT_DIR_OBJS)\/Group0_\1.o $@ : ,g' < $@.$$$$ > $@; \
+	sed 's,\($*\)\.o[ :]*,$(OUT_DIR_OBJ)\/Group0_\1.o $@ : ,g' < $@.$$$$ > $@; \
 	rm -f $@.$$$$
 
 clean:
 	@rm -rf \
-	$(OUT_DIR_DEPS_DEBUG) $(OUT_DIR_OBJS_DEBUG) $(OUT_DIR_BIN_DEBUG) $(OUT_DIR_GEN_DEBUG) \
-	$(OUT_DIR_DEPS_RELEASE) $(OUT_DIR_OBJS_RELEASE) $(OUT_DIR_BIN_RELEASE) $(OUT_DIR_GEN_RELEASE)
+	$(OUT_DIR_DEP_DEBUG) $(OUT_DIR_OBJ_DEBUG) $(OUT_DIR_BIN_DEBUG) $(OUT_DIR_GEN_DEBUG) \
+	$(OUT_DIR_DEP_RELEASE) $(OUT_DIR_OBJ_RELEASE) $(OUT_DIR_BIN_RELEASE) $(OUT_DIR_GEN_RELEASE)
 
 # Unless "make clean" is called, include the dependency files
 # which are auto-generated. Don't fail if they are missing
